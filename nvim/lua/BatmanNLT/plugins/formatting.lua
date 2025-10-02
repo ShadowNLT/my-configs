@@ -19,9 +19,14 @@ return {
 				liquid = { "prettier" },
 				lua = { "stylua" },
 				python = { "isort", "black" },
-				go = { "goimports_reviser", "goimports", "gofumpt", "golines" },
+				go = { "goimports_reviser", "goimports", "golines", "gofumpt" },
 			},
 			formatters = {
+				golines = {
+					prepend_args = {
+						"--base-formatter=gofumpt",
+					},
+				},
 				goimports_reviser = {
 					command = "goimports-reviser",
 					stdin = false,

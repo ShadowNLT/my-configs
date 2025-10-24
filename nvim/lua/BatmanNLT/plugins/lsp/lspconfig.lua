@@ -100,6 +100,9 @@ return {
 				},
 				-- linehl = { [vim.diagnostic.severity.ERROR] = "ErrorMsg" },
 			},
+			-- virtual_text = true,
+			virtual_lines = true,
+			underline = true,
 		})
 
 		-- ⬇️ Per-server config using the native API (Neovim 0.11+)

@@ -13,6 +13,7 @@ return {
 				-- width = 35,
 				adaptive_size = true,
 				relativenumber = true,
+				side = "right", -- Move NvimTree to the right
 			},
 			-- change folder arrow icons
 			renderer = {

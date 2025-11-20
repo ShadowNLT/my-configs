@@ -36,23 +36,87 @@
 --   end
 -- }
 
+-- return {
+-- 	"catppuccin/nvim",
+-- 	name = "catppuccin",
+-- 	priority = 1000,
+-- 	config = function()
+-- 		require("catppuccin").setup({
+-- 			flavour = "macchiato", -- latte, frappe, macchiato, mocha
+-- 			integrations = {
+-- 				treesitter = true,
+-- 				native_lsp = { enabled = true },
+-- 				telescope = true,
+-- 				gitsigns = true,
+-- 				cmp = true,
+-- 				nvimtree = true,
+-- 				notify = true,
+-- 			},
+-- 		})
+-- 		vim.cmd.colorscheme("catppuccin") -- uses the flavour above
+-- 	end,
+-- }
+
 return {
-	"catppuccin/nvim",
-	name = "catppuccin",
-	priority = 1000,
-	config = function()
-		require("catppuccin").setup({
-			flavour = "mocha", -- latte, frappe, macchiato, mocha
-			integrations = {
-				treesitter = true,
-				native_lsp = { enabled = true },
-				telescope = true,
-				gitsigns = true,
-				cmp = true,
-				nvimtree = true,
-				notify = true,
-			},
-		})
-		vim.cmd.colorscheme("catppuccin") -- uses the flavour above
+	"folke/tokyonight.nvim",
+	lazy = false, -- load during startup
+	priority = 1000, -- load before all other UI plugins
+	opts = {
+		-- core style
+		style = "moon", -- explicit, even though it's the default
+		light_style = "day",
+		transparent = false, -- set true if you want terminal background to show
+		terminal_colors = true,
+
+		-- syntax styles
+		styles = {
+			comments = { italic = true },
+			keywords = { italic = true },
+			functions = {},
+			variables = {},
+			-- background style for sidebars / floats
+			sidebars = "dark", -- "dark", "transparent" or "normal"
+			floats = "dark",
+		},
+
+		-- dim inactive windows? (good with LSP + splits)
+		dim_inactive = false,
+
+		-- lualine section headers bold or not
+		lualine_bold = false,
+
+		-- plugin integrations
+		plugins = {
+			-- we are using lazy.nvim, so:
+			all = false, -- don't blindly enable everything
+			auto = true, -- auto-detect and enable support for installed plugins
+			-- with auto = true, it will handle:
+			-- treesitter, lsp, telescope, gitsigns, nvim-cmp, nvim-tree,
+			-- nvim-notify, noice, lspsaga, trouble, which-key, etc.
+		},
+
+		-- hooks if you ever want to tweak colors manually
+		on_colors = function(colors)
+			-- example: you can tweak palette here later if you feel like it
+			-- colors.bg = "#000000"
+		end,
+
+		on_highlights = function(hl, colors)
+			-- example: borderless telescope (from the README), customize later if desired
+			-- local prompt = "#2d3149"
+			-- hl.TelescopeNormal = { bg = colors.bg_dark, fg = colors.fg_dark }
+			-- ...
+		end,
+	},
+
+	config = function(_, opts)
+		-- make sure truecolor is on
+		vim.o.termguicolors = true
+
+		-- apply Tokyonight configuration
+		require("tokyonight").setup(opts)
+
+		-- and actually use the Moon variant
+		vim.cmd.colorscheme("tokyonight-moon")
 	end,
 }

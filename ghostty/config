@@ -1,1 +1,12 @@
 macos-option-as-alt = false
+
+# Normal and Bold fonts use FiraCode (your main programming font)
+font-family = FiraCode Nerd Font
+font-family-bold = FiraCode Nerd Font
+
+# Italic fonts use the iScript variant
+font-family-italic = FiraCode iScript
+font-family-bold-italic = FiraCode iScript
+
+font-size = 14
+font-style = Regular

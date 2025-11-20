@@ -1,0 +1,52 @@
+
+#compdef tmux
+
+_tmux() {
+  local -a commands target_session target_window target_pane
+
+  commands=(
+    'attach-session:Attach to a session'
+    'has-session:Check if session exists'
+    'kill-session:Kill a session'
+    'list-sessions:List all sessions'
+    'new-session:Create a new session'
+    'rename-session:Rename a session'
+    'source-file:Source configuration file'
+    'start-server:Start the server'
+    'list-windows:List windows in a session'
+    'new-window:Create a new window'
+    'next-window:Select the next window'
+    'previous-window:Select the previous window'
+    'rename-window:Rename a window'
+    'kill-window:Kill a window'
+    'list-panes:List panes in a window'
+    'split-window:Split window into panes'
+    'kill-pane:Kill a pane'
+    'select-pane:Select a pane'
+    'display-message:Display a message'
+    'copy-mode:Enter copy mode'
+  )
+
+  case "$words[1]" in
+    attach-session)
+      _arguments \
+        '(-t --target-session)'{ -t,--target-session }'[session]:session:->sessions'
+      case "$state" in
+        sessions)
+          _tmux_sessions
+        ;;
+      esac
+      ;;
+    *)
+      _describe 'command' commands
+      ;;
+  esac
+}
+
+_tmux_sessions() {
+  local -a sessions
+  sessions=(${(f)"$(tmux list-sessions -F '#S')"})
+  _describe -t sessions 'tmux sessions' sessions
+}
+
+_tmux "$@"

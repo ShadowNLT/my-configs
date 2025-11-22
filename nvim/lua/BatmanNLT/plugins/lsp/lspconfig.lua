@@ -116,41 +116,14 @@ return {
 			},
 		}
 
-		vim.lsp.config.graphql = {
-			capabilities = capabilities,
-			filetypes = { "graphql", "gql" },
-		}
-
-		vim.lsp.config.emmet_ls = {
-			capabilities = capabilities,
-			filetypes = { "html", "css", "sass", "scss", "less" },
-		}
-
-		vim.lsp.config.gopls = {
-			capabilities = capabilities, -- e.g. from cmp_nvim_lsp.default_capabilities()
-			settings = {
-				gopls = {
-					analyses = {
-						unusedparams = true,
-						unreachable = true,
-						shadow = true,
-					},
-					staticcheck = true,
-					-- gofumpt = true, -- stricter formatting rules
-					hints = {
-						parameterNames = true, -- show parameter name hints in calls
-						assignVariableTypes = true, -- show types in `x, y := ...`
-						rangeVariableTypes = true, -- show types for `for k, v := range ...`
-						compositeLiteralTypes = true, -- show types in composite literals
-						compositeLiteralFieldNames = true, -- show field names in literals
-						constantValues = true, -- show computed constant values
-						functionTypeParameters = true, -- show generic parameter lists
-					},
-				},
-			},
-		}
-
 		vim.lsp.config.ts_ls = {
+			capabilities = capabilities,
+			filetypes = {
+				"javascript",
+				"javascriptreact",
+				"typescript",
+				"typescriptreact",
+			},
 			settings = {
 				typescript = {
 					inlayHints = {
@@ -174,6 +147,45 @@ return {
 						includeInlayPropertyDeclarationTypeHints = true,
 						includeInlayFunctionLikeReturnTypeHints = true,
 						includeInlayEnumMemberValueHints = true,
+					},
+				},
+			},
+		}
+
+		vim.lsp.config.graphql = {
+			capabilities = capabilities,
+			filetypes = { "graphql", "gql" },
+		}
+
+		vim.lsp.config.angularls = {
+			capabilities = capabilities,
+			filetypes = { "html", "typescript" },
+		}
+
+		vim.lsp.config.emmet_ls = {
+			capabilities = capabilities,
+			filetypes = { "html", "css", "sass", "scss", "less", "javascriptreact", "typescriptreact" },
+		}
+
+		vim.lsp.config.gopls = {
+			capabilities = capabilities, -- e.g. from cmp_nvim_lsp.default_capabilities()
+			settings = {
+				gopls = {
+					analyses = {
+						unusedparams = true,
+						unreachable = true,
+						shadow = true,
+					},
+					staticcheck = true,
+					-- gofumpt = true, -- stricter formatting rules
+					hints = {
+						parameterNames = true, -- show parameter name hints in calls
+						assignVariableTypes = true, -- show types in `x, y := ...`
+						rangeVariableTypes = true, -- show types for `for k, v := range ...`
+						compositeLiteralTypes = true, -- show types in composite literals
+						compositeLiteralFieldNames = true, -- show field names in literals
+						constantValues = true, -- show computed constant values
+						functionTypeParameters = true, -- show generic parameter lists
 					},
 				},
 			},

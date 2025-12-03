@@ -57,66 +57,111 @@
 -- 	end,
 -- }
 
+-- return {
+-- 	"folke/tokyonight.nvim",
+-- 	lazy = false, -- load during startup
+-- 	priority = 1000, -- load before all other UI plugins
+-- 	opts = {
+-- 		-- core style
+-- 		style = "moon", -- explicit, even though it's the default
+-- 		light_style = "day",
+-- 		transparent = false, -- set true if you want terminal background to show
+-- 		terminal_colors = true,
+--
+-- 		-- syntax styles
+-- 		styles = {
+-- 			comments = { italic = true },
+-- 			keywords = { italic = true },
+-- 			functions = {},
+-- 			variables = {},
+-- 			-- background style for sidebars / floats
+-- 			sidebars = "dark", -- "dark", "transparent" or "normal"
+-- 			floats = "dark",
+-- 		},
+--
+-- 		-- dim inactive windows? (good with LSP + splits)
+-- 		dim_inactive = false,
+--
+-- 		-- lualine section headers bold or not
+-- 		lualine_bold = false,
+--
+-- 		-- plugin integrations
+-- 		plugins = {
+-- 			-- we are using lazy.nvim, so:
+-- 			all = false, -- don't blindly enable everything
+-- 			auto = true, -- auto-detect and enable support for installed plugins
+-- 			-- with auto = true, it will handle:
+-- 			-- treesitter, lsp, telescope, gitsigns, nvim-cmp, nvim-tree,
+-- 			-- nvim-notify, noice, lspsaga, trouble, which-key, etc.
+-- 		},
+--
+-- 		-- hooks if you ever want to tweak colors manually
+-- 		on_colors = function(colors)
+-- 			-- example: you can tweak palette here later if you feel like it
+-- 			-- colors.bg = "#000000"
+-- 		end,
+--
+-- 		on_highlights = function(hl, colors)
+-- 			-- example: borderless telescope (from the README), customize later if desired
+-- 			-- local prompt = "#2d3149"
+-- 			-- hl.TelescopeNormal = { bg = colors.bg_dark, fg = colors.fg_dark }
+-- 			-- ...
+-- 		end,
+-- 	},
+--
+-- 	config = function(_, opts)
+-- 		-- make sure truecolor is on
+-- 		vim.o.termguicolors = true
+--
+-- 		-- apply Tokyonight configuration
+-- 		require("tokyonight").setup(opts)
+--
+-- 		-- and actually use the Moon variant
+-- 		vim.cmd.colorscheme("tokyonight-moon")
+-- 	end,
+-- }
+
 return {
-	"folke/tokyonight.nvim",
-	lazy = false, -- load during startup
-	priority = 1000, -- load before all other UI plugins
-	opts = {
-		-- core style
-		style = "moon", -- explicit, even though it's the default
-		light_style = "day",
-		transparent = false, -- set true if you want terminal background to show
-		terminal_colors = true,
-
-		-- syntax styles
-		styles = {
-			comments = { italic = true },
-			keywords = { italic = true },
-			functions = {},
-			variables = {},
-			-- background style for sidebars / floats
-			sidebars = "dark", -- "dark", "transparent" or "normal"
-			floats = "dark",
-		},
-
-		-- dim inactive windows? (good with LSP + splits)
-		dim_inactive = false,
-
-		-- lualine section headers bold or not
-		lualine_bold = false,
-
-		-- plugin integrations
-		plugins = {
-			-- we are using lazy.nvim, so:
-			all = false, -- don't blindly enable everything
-			auto = true, -- auto-detect and enable support for installed plugins
-			-- with auto = true, it will handle:
-			-- treesitter, lsp, telescope, gitsigns, nvim-cmp, nvim-tree,
-			-- nvim-notify, noice, lspsaga, trouble, which-key, etc.
-		},
-
-		-- hooks if you ever want to tweak colors manually
-		on_colors = function(colors)
-			-- example: you can tweak palette here later if you feel like it
-			-- colors.bg = "#000000"
-		end,
-
-		on_highlights = function(hl, colors)
-			-- example: borderless telescope (from the README), customize later if desired
-			-- local prompt = "#2d3149"
-			-- hl.TelescopeNormal = { bg = colors.bg_dark, fg = colors.fg_dark }
-			-- ...
-		end,
-	},
-
-	config = function(_, opts)
-		-- make sure truecolor is on
+	"navarasu/onedark.nvim",
+	name = "onedark",
+	lazy = false,
+	priority = 1000,
+	config = function()
+		-- Enable true color support
 		vim.o.termguicolors = true
 
-		-- apply Tokyonight configuration
-		require("tokyonight").setup(opts)
+		-- Configure onedark
+		require("onedark").setup({
+			style = "dark", -- choose from 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'
+			transparent = false, -- set true if you prefer no background
+			term_colors = true, -- update terminal colors
+			ending_tildes = false, -- hide ~ lines after buffer end
+			cmp_itemkind_reverse = false,
 
-		-- and actually use the Moon variant
-		vim.cmd.colorscheme("tokyonight-moon")
+			code_style = {
+				comments = "italic",
+				keywords = "none",
+				functions = "none",
+				strings = "none",
+				variables = "none",
+			},
+
+			lualine = {
+				transparent = false,
+			},
+
+			-- optional: override particular colors or highlight-groups
+			colors = {},
+			highlights = {},
+
+			diagnostics = {
+				darker = true, -- darker colors for diagnostics (LSP / lint)
+				undercurl = true, -- use undercurl instead of underline
+				background = true, -- use background color for virtual text
+			},
+		})
+
+		-- Apply the theme
+		require("onedark").load()
 	end,
 }

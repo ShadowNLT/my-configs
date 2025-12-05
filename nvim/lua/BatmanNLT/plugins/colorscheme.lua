@@ -121,47 +121,94 @@
 -- 	end,
 -- }
 
+-- return {
+-- 	"navarasu/onedark.nvim",
+-- 	name = "onedark",
+-- 	lazy = false,
+-- 	priority = 1000,
+-- 	config = function()
+-- 		-- Enable true color support
+-- 		vim.o.termguicolors = true
+--
+-- 		-- Configure onedark
+-- 		require("onedark").setup({
+-- 			style = "dark", -- choose from 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'
+-- 			transparent = false, -- set true if you prefer no background
+-- 			term_colors = true, -- update terminal colors
+-- 			ending_tildes = false, -- hide ~ lines after buffer end
+-- 			cmp_itemkind_reverse = false,
+--
+-- 			code_style = {
+-- 				comments = "italic",
+-- 				keywords = "none",
+-- 				functions = "none",
+-- 				strings = "none",
+-- 				variables = "none",
+-- 			},
+--
+-- 			lualine = {
+-- 				transparent = false,
+-- 			},
+--
+-- 			-- optional: override particular colors or highlight-groups
+-- 			colors = {},
+-- 			highlights = {},
+--
+-- 			diagnostics = {
+-- 				darker = true, -- darker colors for diagnostics (LSP / lint)
+-- 				undercurl = true, -- use undercurl instead of underline
+-- 				background = true, -- use background color for virtual text
+-- 			},
+-- 		})
+--
+-- 		-- Apply the theme
+-- 		require("onedark").load()
+-- 	end,
+-- }
+--
+
 return {
-	"navarasu/onedark.nvim",
-	name = "onedark",
+	"rebelot/kanagawa.nvim",
+	name = "kanagawa",
 	lazy = false,
 	priority = 1000,
 	config = function()
-		-- Enable true color support
+		-- enable full true-color support
 		vim.o.termguicolors = true
 
-		-- Configure onedark
-		require("onedark").setup({
-			style = "dark", -- choose from 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'
-			transparent = false, -- set true if you prefer no background
-			term_colors = true, -- update terminal colors
-			ending_tildes = false, -- hide ~ lines after buffer end
-			cmp_itemkind_reverse = false,
-
-			code_style = {
-				comments = "italic",
-				keywords = "none",
-				functions = "none",
-				strings = "none",
-				variables = "none",
+		require("kanagawa").setup({
+			compile = false, -- set to true if you want compiled theme (optional)
+			undercurl = true, -- enable undercurls for diagnostics
+			commentStyle = { italic = true },
+			functionStyle = {},
+			keywordStyle = { italic = true },
+			statementStyle = { bold = true },
+			typeStyle = {},
+			transparent = false, -- do not make background transparent
+			dimInactive = false, -- do not dim inactive windows by default
+			terminalColors = true, -- set terminal colors
+			colors = {
+				-- optional overrides: leave empty for defaults
+				palette = {},
+				theme = { wave = {}, dragon = {}, lotus = {}, all = {} },
 			},
-
-			lualine = {
-				transparent = false,
-			},
-
-			-- optional: override particular colors or highlight-groups
-			colors = {},
-			highlights = {},
-
-			diagnostics = {
-				darker = true, -- darker colors for diagnostics (LSP / lint)
-				undercurl = true, -- use undercurl instead of underline
-				background = true, -- use background color for virtual text
+			overrides = function(colors)
+				return {
+					-- example: make floating windows transparent
+					-- NormalFloat = { bg = "none" },
+					-- FloatBorder = { bg = "none" },
+					-- you can add more per-plugin highlight tweaks here
+				}
+			end,
+			-- choose the default theme variant: "wave", "dragon", or "lotus"
+			theme = "wave",
+			background = {
+				dark = "wave",
+				light = "lotus",
 			},
 		})
 
-		-- Apply the theme
-		require("onedark").load()
+		-- finally apply the colorscheme
+		vim.cmd("colorscheme kanagawa")
 	end,
 }

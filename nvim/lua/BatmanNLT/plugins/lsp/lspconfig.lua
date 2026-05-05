@@ -85,7 +85,7 @@ return {
 						vim.api.nvim_create_autocmd("BufWritePre", {
 							buffer = ev.buf,
 							callback = function()
-								local params = vim.lsp.util.make_range_params()
+								local params = vim.lsp.util.make_range_params(nil, client.offset_encoding)
 								params.context = { diagnostics = {}, only = { "source.removeUnusedImports" } }
 								local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
 								for cid, res in pairs(result or {}) do

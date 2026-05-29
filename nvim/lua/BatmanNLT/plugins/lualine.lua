@@ -72,18 +72,14 @@
 
 return {
 	"nvim-lualine/lualine.nvim",
-	dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim", "folke/lazy.nvim" },
+	dependencies = { "nvim-tree/nvim-web-devicons", "folke/lazy.nvim" },
 	config = function()
 		local lualine = require("lualine")
 		local lazy_status = require("lazy.status")
 
-		-- Use a Catppuccin Mocha accent for the updates counter (fallback if palette not ready)
-		local ok, cat = pcall(require, "catppuccin.palettes")
-		local fg_accent = (ok and cat.get_palette("mocha").peach) or "#FAB387" -- readable on Mocha bg
-
 		lualine.setup({
 			options = {
-				theme = "auto", -- auto-follow current colorscheme (Catppuccin Mocha)
+				theme = "auto",
 				globalstatus = true,
 			},
 			sections = {
@@ -95,7 +91,7 @@ return {
 					{
 						lazy_status.updates,
 						cond = lazy_status.has_updates,
-						color = { fg = fg_accent },
+						color = { fg = "#A7C080" }, -- everforest green accent
 					},
 					"encoding",
 					"fileformat",

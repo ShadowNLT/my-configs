@@ -168,47 +168,16 @@
 --
 
 return {
-	"rebelot/kanagawa.nvim",
-	name = "kanagawa",
+	"neanias/everforest-nvim",
+	name = "everforest",
 	lazy = false,
 	priority = 1000,
 	config = function()
-		-- enable full true-color support
 		vim.o.termguicolors = true
-
-		require("kanagawa").setup({
-			compile = false, -- set to true if you want compiled theme (optional)
-			undercurl = true, -- enable undercurls for diagnostics
-			commentStyle = { italic = true },
-			functionStyle = {},
-			keywordStyle = { italic = true },
-			statementStyle = { bold = true },
-			typeStyle = {},
-			transparent = false, -- do not make background transparent
-			dimInactive = false, -- do not dim inactive windows by default
-			terminalColors = true, -- set terminal colors
-			colors = {
-				-- optional overrides: leave empty for defaults
-				palette = {},
-				theme = { wave = {}, dragon = {}, lotus = {}, all = {} },
-			},
-			overrides = function(colors)
-				return {
-					-- example: make floating windows transparent
-					-- NormalFloat = { bg = "none" },
-					-- FloatBorder = { bg = "none" },
-					-- you can add more per-plugin highlight tweaks here
-				}
-			end,
-			-- choose the default theme variant: "wave", "dragon", or "lotus"
-			theme = "wave",
-			background = {
-				dark = "wave",
-				light = "lotus",
-			},
+		require("everforest").setup({
+			background = "medium", -- "hard", "medium", "soft"
+			italics = true,
 		})
-
-		-- finally apply the colorscheme
-		vim.cmd("colorscheme kanagawa")
+		vim.cmd.colorscheme("everforest")
 	end,
 }

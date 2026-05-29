@@ -41,6 +41,7 @@ return {
 				"docker_compose_language_service",
 				"pyright",
 				"gopls",
+				"eslint",
 			},
 		})
 
@@ -49,7 +50,7 @@ return {
 				"prettier", -- prettier formatter
 				"stylua", -- lua formatter
 				"isort", -- python formatter
-				"black", -- python formatter
+				-- black managed via pipx (PEP 668 blocks Mason's pypi installer on Homebrew Python)
 				"goimports", -- golang formatter
 				"goimports-reviser", -- golang formatter
 				"gofumpt", -- golang formatter

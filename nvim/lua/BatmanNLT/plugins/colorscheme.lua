@@ -175,7 +175,7 @@ return {
 	config = function()
 		vim.o.termguicolors = true
 		require("everforest").setup({
-			background = "medium", -- "hard", "medium", "soft"
+			background = "hard", -- "hard", "medium", "soft"
 			italics = true,
 		})
 		vim.cmd.colorscheme("everforest")

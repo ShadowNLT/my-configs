@@ -60,6 +60,15 @@ return {
 			},
 		})
 
+		-- nvim-ts-autotag (deprecated via treesitter.configs, needs explicit setup)
+		require("nvim-ts-autotag").setup({
+			opts = {
+				enable_close = true,
+				enable_rename = true,
+				enable_close_on_slash = true,
+			},
+		})
+
 		-- Tree-sitter based folding
 		vim.opt.foldmethod = "expr"
 		vim.opt.foldexpr = "nvim_treesitter#foldexpr()"

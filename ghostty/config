@@ -7,26 +7,26 @@ cursor-style = bar
 window-padding-x = 5
 window-padding-y = 5
 
-# --- Everforest Hard Dark ---
-background = #1e2326
-foreground = #d3c6aa
-cursor-color = #d3c6aa
-selection-background = #2e383c
-selection-foreground = #d3c6aa
+# --- Cyberdream ---
+background = #1e2030
+foreground = #ffffff
+cursor-color = #ffffff
+selection-background = #3c4048
+selection-foreground = #ffffff
 
-palette = 0=#1e2326
-palette = 1=#e67e80
-palette = 2=#a7c080
-palette = 3=#dbbc7f
-palette = 4=#7fbbb3
-palette = 5=#d699b6
-palette = 6=#83c092
-palette = 7=#d3c6aa
-palette = 8=#475258
-palette = 9=#e67e80
-palette = 10=#a7c080
-palette = 11=#dbbc7f
-palette = 12=#7fbbb3
-palette = 13=#d699b6
-palette = 14=#83c092
-palette = 15=#d3c6aa
+palette = 0=#1e2030
+palette = 1=#ff6e5e
+palette = 2=#5eff6c
+palette = 3=#f1ff5e
+palette = 4=#5ea1ff
+palette = 5=#bd5eff
+palette = 6=#5ef1ff
+palette = 7=#ffffff
+palette = 8=#3c4048
+palette = 9=#ff6e5e
+palette = 10=#5eff6c
+palette = 11=#f1ff5e
+palette = 12=#5ea1ff
+palette = 13=#bd5eff
+palette = 14=#5ef1ff
+palette = 15=#ffffff

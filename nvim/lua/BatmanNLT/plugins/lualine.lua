@@ -91,7 +91,7 @@ return {
 					{
 						lazy_status.updates,
 						cond = lazy_status.has_updates,
-						color = { fg = "#A7C080" }, -- everforest green accent
+						color = { fg = "#5ef1ff" }, -- cyberdream cyan accent
 					},
 					"encoding",
 					"fileformat",

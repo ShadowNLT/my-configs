@@ -168,16 +168,26 @@
 --
 
 return {
-	"neanias/everforest-nvim",
-	name = "everforest",
+	"scottmckendry/cyberdream.nvim",
+	name = "cyberdream",
 	lazy = false,
 	priority = 1000,
 	config = function()
 		vim.o.termguicolors = true
-		require("everforest").setup({
-			background = "hard", -- "hard", "medium", "soft"
-			italics = true,
+		require("cyberdream").setup({
+			transparent = false,
+			italic_comments = true,
+			terminal_colors = true,
+			overrides = function(colors)
+				return {
+					Normal      = { bg = "#1e2030" }, -- navy-dark, visible against black
+					NormalNC    = { bg = "#191b28" }, -- dimmed inactive panes = depth
+					NormalFloat = { bg = "#232538" }, -- floats sit one layer above
+					SignColumn  = { bg = "#1e2030" },
+					LineNr      = { bg = "#1e2030" },
+				}
+			end,
 		})
-		vim.cmd.colorscheme("everforest")
+		vim.cmd.colorscheme("cyberdream")
 	end,
 }

@@ -75,6 +75,18 @@ return {
 				-- opts.desc = "Show documentation for what is under cursor"
 				-- keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
+				opts.desc = "Toggle symbol outline"
+				keymap.set("n", "<leader>co", "<cmd>Lspsaga outline<CR>", opts)
+
+				opts.desc = "Finder — definitions + references"
+				keymap.set("n", "<leader>cf", "<cmd>Lspsaga finder<CR>", opts)
+
+				opts.desc = "Incoming calls (call hierarchy)"
+				keymap.set("n", "<leader>ci", "<cmd>Lspsaga incoming_calls<CR>", opts)
+
+				opts.desc = "Outgoing calls (call hierarchy)"
+				keymap.set("n", "<leader>cO", "<cmd>Lspsaga outgoing_calls<CR>", opts)
+
 				opts.desc = "Restart LSP"
 				keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
 

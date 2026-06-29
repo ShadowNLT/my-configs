@@ -63,6 +63,20 @@ return {
 					filter = { event = "notify" },
 					view = "notify",
 				},
+				-- Mute null-ls/none-ls progress toasts (e.g. "code_action null-ls"),
+				-- which fire on nearly every cursor move as code actions are queried.
+				-- Real LSP server progress (gopls indexing, etc.) still shows.
+				{
+					filter = {
+						event = "lsp",
+						kind = "progress",
+						cond = function(message)
+							local client = vim.tbl_get(message.opts, "progress", "client")
+							return client == "null-ls"
+						end,
+					},
+					opts = { skip = true },
+				},
 			},
 
 			-- Safe presets (don’t conflict with LSPSaga)

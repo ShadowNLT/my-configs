@@ -56,6 +56,7 @@ return {
 				"gofumpt", -- golang formatter
 				"golines", -- golang formatter
 				"pylint",
+				"cspell", -- spell checker for code comments & prose
 			},
 		})
 	end,

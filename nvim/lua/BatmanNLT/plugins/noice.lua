@@ -27,7 +27,7 @@ return {
 			lsp = {
 				progress = { enabled = true },
 				hover = { enabled = false },
-				signature = { enabled = false },
+				signature = { enabled = true }, -- live param hints while typing inside a call
 				message = { enabled = false },
 				documentation = { enabled = false },
 				override = {},

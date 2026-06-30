@@ -118,6 +118,13 @@ return {
 		-- used to enable autocompletion (assign to every lsp server config)
 		local capabilities = cmp_nvim_lsp.default_capabilities()
 
+		-- Apply cmp's snippet-capable capabilities to EVERY server (current and any
+		-- added later, including ones auto-enabled by mason-lspconfig), so function-
+		-- argument placeholders work everywhere the server supports them. Servers that
+		-- need an extra opt-in beyond snippet support set it in their own block below
+		-- (gopls: usePlaceholders, lua_ls: callSnippet).
+		vim.lsp.config("*", { capabilities = capabilities })
+
 		vim.diagnostic.config({
 			signs = {
 				text = {
@@ -212,6 +219,7 @@ return {
 						shadow = true,
 					},
 					staticcheck = true,
+					usePlaceholders = true, -- fill function args as ${1:..} placeholders on completion (Go equivalent of lua_ls callSnippet)
 					-- gofumpt = true, -- stricter formatting rules
 					hints = {
 						parameterNames = true, -- show parameter name hints in calls

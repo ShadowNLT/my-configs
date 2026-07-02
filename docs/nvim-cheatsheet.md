@@ -8,6 +8,7 @@
 
 *Sections are sorted alphabetically.*
 
+- Buffers
 - Comments
 - Completion
 - Debugging
@@ -35,6 +36,18 @@
 - TreeSitter
 - Trouble
 - Window Management
+- Yank / Paste
+
+---
+
+## 🔄 Buffers
+
+| Command | Description |
+|---------|-------------|
+| `:e` | Reload current buffer from disk (errors if unsaved changes) |
+| `:e!` | Force-reload, discarding unsaved changes |
+| `:checktime` | Reload only if changed on disk with no local edits (non-destructive) |
+| `:bufdo e` | Reload all open buffers |
 
 ---
 
@@ -484,3 +497,16 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 ### Navigation between splits (vim-tmux-navigator)
 Use `Ctrl` + vim direction: `h` left · `j` down · `k` up · `l` right  
 Works across Neovim splits **and** tmux panes seamlessly.
+
+---
+
+## ✂️ Yank / Paste
+
+| Key | Description |
+|-----|-------------|
+| `yy` | Yank (copy) current line |
+| `Y` | Yank to end of line (Neovim default = `y$`) |
+| `3yy` | Yank 3 lines from cursor down |
+| `p` / `P` | Paste after / before cursor |
+| `dd` | Delete (cut) current line |
+| `"+yy` | Yank current line to the system clipboard |

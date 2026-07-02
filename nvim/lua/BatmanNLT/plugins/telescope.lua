@@ -1,6 +1,10 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	branch = "0.1.x",
+	-- `master`, not the frozen `0.1.x`: 0.1.x calls nvim-treesitter's removed
+	-- `ft_to_lang` in its previewer, which crashes now that we're on the
+	-- nvim-treesitter `main` branch (Neovim 0.12). master rewrote the previewer
+	-- to use native vim.treesitter and requires Neovim 0.11+.
+	branch = "master",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },

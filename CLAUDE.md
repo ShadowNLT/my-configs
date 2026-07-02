@@ -27,7 +27,7 @@ bash setup.sh
 > **Before running:** if `~/.zshrc` already exists on this machine, `setup.sh` will move it to `~/.zshrc.bak` (not delete it) before symlinking the repo version. After the script finishes, check whether `.zshrc.bak` exists and diff it against `zsh/zshrc` — merge any machine-specific lines (custom PATH entries, work aliases, secrets sourcing, etc.) into the repo file before removing the backup. Never delete `.zshrc.bak` without inspecting it first.
 
 This handles automatically (no interaction needed):
-- Homebrew + all formulae and casks (neovim, tmux, fzf, ripgrep, fd, zoxide, nvm, yazi, lazygit, gh, git, go, python, ghostty, MesloLGS Nerd Font)
+- Homebrew + all formulae and casks (neovim, tree-sitter-cli, tmux, fzf, ripgrep, fd, zoxide, nvm, yazi, lazygit, gh, git, go, python, ghostty, MesloLGS Nerd Font)
 - Go formatters (goimports, golines, gofumpt, goimports-reviser)
 - Node LTS via nvm + prettier
 - Python formatters via pipx (isort, black, pylint)

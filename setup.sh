@@ -50,6 +50,7 @@ phase2_tools() {
   # CLI formulae
   local formulae=(
     neovim
+    tree-sitter-cli   # required by nvim-treesitter `main` branch to compile parsers (Neovim 0.12+)
     tmux
     bat
     fzf

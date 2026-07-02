@@ -51,6 +51,7 @@ phase2_tools() {
   local formulae=(
     neovim
     tmux
+    bat
     fzf
     ripgrep   # required by Telescope live_grep / grep_string
     fd        # faster file finding for Telescope

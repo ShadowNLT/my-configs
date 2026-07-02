@@ -203,13 +203,14 @@ phase3_clone() {
   fi
 }
 
-# ─── Phase 4: ~/.config symlinks ─────────────────────────────────────────────
+# ─── Phase 4: symlinks ───────────────────────────────────────────────────────
 phase4_symlinks() {
-  info "Phase 4 — Create ~/.config symlinks"
+  info "Phase 4 — Create symlinks"
 
   mkdir -p "$HOME/.config"
 
-  local -A symlinks=(
+  # ~/.config/<name> → $DOTFILES_DIR/<name>
+  local -A config_symlinks=(
     [nvim]="$DOTFILES_DIR/nvim"
     [ghostty]="$DOTFILES_DIR/ghostty"
     [tmux]="$DOTFILES_DIR/tmux"
@@ -217,21 +218,29 @@ phase4_symlinks() {
     [zsh]="$DOTFILES_DIR/zsh"
   )
 
-  for name in "${!symlinks[@]}"; do
-    local target="${symlinks[$name]}"
+  for name in "${!config_symlinks[@]}"; do
+    local target="${config_symlinks[$name]}"
     local link="$HOME/.config/$name"
-
-    if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
-      success "Symlink already correct: $link → $target"
-    else
-      if [ -e "$link" ]; then
-        warn "$link exists but is not the expected symlink — backing up to ${link}.bak"
-        mv "$link" "${link}.bak"
-      fi
-      ln -sf "$target" "$link"
-      success "Linked: $link → $target"
-    fi
+    _symlink "$link" "$target"
   done
+
+  # $HOME dotfiles
+  _symlink "$HOME/.zshrc"   "$DOTFILES_DIR/zsh/zshrc"
+  _symlink "$HOME/.p10k.zsh" "$DOTFILES_DIR/zsh/p10k.zsh"
+}
+
+_symlink() {
+  local link="$1" target="$2"
+  if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
+    success "Symlink already correct: $link → $target"
+  else
+    if [ -e "$link" ]; then
+      warn "$link exists but is not the expected symlink — backing up to ${link}.bak"
+      mv "$link" "${link}.bak"
+    fi
+    ln -sf "$target" "$link"
+    success "Linked: $link → $target"
+  fi
 }
 
 # ─── Phase 5: TPM ────────────────────────────────────────────────────────────

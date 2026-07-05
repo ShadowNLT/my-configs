@@ -102,6 +102,7 @@ Function-argument placeholders come from the LSP (gopls `usePlaceholders`, lua_l
 
 ## 📁 File Explorer (nvim-tree)
 
+### Global keymaps
 | Key | Description |
 |-----|-------------|
 | `<leader>ee` | Toggle file explorer |
@@ -109,7 +110,55 @@ Function-argument placeholders come from the LSP (gopls `usePlaceholders`, lua_l
 | `<leader>ec` | Collapse file explorer |
 | `<leader>er` | Refresh file explorer |
 
-Inside the tree: `a` create · `d` delete · `r` rename · `Enter`/`o` open · `W` collapse all
+### Inside the tree — navigation
+| Key | Description |
+|-----|-------------|
+| `Enter` / `o` | Open file / expand directory |
+| `<Tab>` | Preview file (open without moving cursor) |
+| `<C-v>` | Open in vertical split |
+| `<C-x>` | Open in horizontal split |
+| `<C-t>` | Open in new tab |
+| `P` | Jump to parent directory |
+| `<BS>` | Close current directory |
+| `W` | Collapse all |
+| `E` | Expand all |
+| `-` | Go up to parent root |
+| `<C-]>` | CD into directory (change tree root) |
+| `q` | Close tree |
+| `g?` | Toggle help |
+
+### Inside the tree — file operations
+| Key | Description |
+|-----|-------------|
+| `a` | Create file or directory (end name with `/` for dir) |
+| `r` | Rename |
+| `e` | Rename — basename only |
+| `<C-r>` | Rename — omit filename (edit dir path only) |
+| `d` | Delete |
+| `x` | Cut |
+| `c` | Copy |
+| `p` | Paste (into the directory under cursor) |
+| `gp` | Move — prompts for destination path |
+| `y` | Copy filename |
+| `Y` | Copy relative path |
+| `gy` | Copy absolute path |
+
+### Inside the tree — bulk operations (bookmarks)
+| Key | Description |
+|-----|-------------|
+| `m` | Toggle bookmark on file/dir |
+| `bmv` | Move all bookmarked to a destination |
+| `bd` | Delete all bookmarked |
+| `bt` | Trash all bookmarked |
+
+### Inside the tree — filter & search
+| Key | Description |
+|-----|-------------|
+| `f` | Live filter (narrow tree by name) |
+| `F` | Clear live filter |
+| `H` | Toggle dotfiles |
+| `I` | Toggle git-ignored files |
+| `S` | Search / jump to node by name |
 
 ---
 

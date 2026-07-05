@@ -11,6 +11,11 @@ return {
 		"windwp/nvim-ts-autotag",
 	},
 	config = function()
+		-- The `main` branch stores bundled queries under runtime/queries/ rather than
+		-- queries/ directly. Prepend runtime/ so Neovim's treesitter finds them without
+		-- needing a separate TSInstall step.
+		vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/runtime")
+
 		local parsers = {
 			"json",
 			"javascript",

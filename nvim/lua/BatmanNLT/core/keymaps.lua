@@ -7,16 +7,29 @@ local keymap = vim.keymap -- for conciseness
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
 -- Revive a buffer that opened "dead" (no auto-pairs / no LSP completion) without
--- quitting nvim: re-run filetype detection and re-fire the FileType event so
--- treesitter, ftplugins and the LSP re-attach, then restart any language servers.
--- Global (unlike <leader>rs, which only exists after an LSP has attached).
+-- quitting nvim. Stop every client on the buffer — including none-ls's "null-ls",
+-- which :LspRestart rejects as an invalid server name — then re-run filetype
+-- detection and re-fire FileType so treesitter, ftplugins, the LSP servers and
+-- none-ls all re-attach fresh. Global (unlike <leader>rs, which only exists after
+-- an LSP has already attached).
 keymap.set("n", "<leader>rr", function()
-	vim.cmd("filetype detect")
-	if vim.bo.filetype ~= "" then
-		vim.api.nvim_exec_autocmds("FileType", { buffer = 0, modeline = false })
+	local bufnr = vim.api.nvim_get_current_buf()
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+		vim.lsp.stop_client(client.id, true) -- force so the restart is clean
 	end
-	pcall(vim.cmd, "LspRestart")
-end, { desc = "Revive buffer: re-detect filetype + restart LSP" })
+	-- Deferred so the stopped clients have exited before the new ones start.
+	vim.defer_fn(function()
+		if not vim.api.nvim_buf_is_valid(bufnr) then
+			return
+		end
+		vim.api.nvim_buf_call(bufnr, function()
+			vim.cmd("filetype detect")
+		end)
+		if vim.bo[bufnr].filetype ~= "" then
+			vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
+		end
+	end, 100)
+end, { desc = "Revive buffer: restart LSP + re-detect filetype" })
 
 -- Increment/Decrement Numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })

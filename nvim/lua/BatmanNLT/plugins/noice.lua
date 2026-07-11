@@ -59,6 +59,15 @@ return {
 
 			-- Route all notifications to our notify view
 			routes = {
+				-- Mute the "No information available" hover toast. On TSX/JSX several
+				-- servers answer K: ts_ls returns the real doc, but emmet_ls/tailwindcss
+				-- return nothing for a plain variable, and the empty ones fire this
+				-- message even though the popup already shows. Must precede the catch-all
+				-- notify route below — noice applies the first matching route.
+				{
+					filter = { find = "No information available" },
+					opts = { skip = true },
+				},
 				{
 					filter = { event = "notify" },
 					view = "notify",

@@ -233,5 +233,20 @@ return {
 				},
 			},
 		}
+
+		-- Attach to buffers that were already open before this plugin loaded — e.g.
+		-- files restored by auto-session at startup. Those buffers already fired
+		-- their FileType event, so they miss the autocmd vim.lsp.enable() uses to
+		-- start a server (which is why the *first* file often opens "dead" until a
+		-- restart). Re-fire FileType for each loaded buffer that has a filetype;
+		-- vim.lsp.start reuses an existing client, so this never duplicates one.
+		-- Deferred so server enabling and the configs above are fully registered.
+		vim.schedule(function()
+			for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+				if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype ~= "" then
+					vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
+				end
+			end
+		end)
 	end,
 }

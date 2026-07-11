@@ -6,6 +6,18 @@ local keymap = vim.keymap -- for conciseness
 
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
+-- Revive a buffer that opened "dead" (no auto-pairs / no LSP completion) without
+-- quitting nvim: re-run filetype detection and re-fire the FileType event so
+-- treesitter, ftplugins and the LSP re-attach, then restart any language servers.
+-- Global (unlike <leader>rs, which only exists after an LSP has attached).
+keymap.set("n", "<leader>rr", function()
+	vim.cmd("filetype detect")
+	if vim.bo.filetype ~= "" then
+		vim.api.nvim_exec_autocmds("FileType", { buffer = 0, modeline = false })
+	end
+	pcall(vim.cmd, "LspRestart")
+end, { desc = "Revive buffer: re-detect filetype + restart LSP" })
+
 -- Increment/Decrement Numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })
 keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })

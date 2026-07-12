@@ -297,8 +297,13 @@ Active linters: `pylint` (Python)
 | `<leader>ci` | Incoming calls — who calls this? (Lspsaga) |
 | `<leader>cO` | Outgoing calls — what does this call? (Lspsaga) |
 | `<leader>rs` | Restart LSP |
+| `<leader>rr` | Revive a "dead" buffer: restart LSP + re-detect filetype (see note) |
 
 > Auto-removes unused imports on save for TS/JS/TSX/JSX.
+>
+> `<leader>rr` is **global** — unlike the rest of this section it works even when no
+> LSP is attached. Reach for it when a file opens with no auto-pairs or completion
+> instead of quitting nvim.
 
 ---
 

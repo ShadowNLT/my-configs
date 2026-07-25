@@ -22,9 +22,16 @@ return {
 				local opts = { buffer = ev.buf, silent = true }
 				local bufnr = ev.buf
 				local client = vim.lsp.get_client_by_id(ev.data.client_id)
-				-- check if this server supports inlay hints
-				if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-					-- Enable inlay hints for this buffer
+				-- Inlay hints are DISABLED on Neovim 0.12.3. Its inlay-hint renderer
+				-- (runtime/lua/vim/lsp/inlay_hint.lua:362) calls nvim_buf_set_extmark with
+				-- a column past end-of-line and throws "Invalid 'col': out of range". The
+				-- decoration provider is global, so any inlay-enabled buffer arms it, and
+				-- every nvim-notify popup forces a redraw that re-fires it — one bad hint
+				-- then spams errors (error -> notify -> redraw -> error). Not enabling the
+				-- hints at all keeps that provider unregistered. Flip the flag back to true
+				-- once on a Neovim build where this is fixed.
+				local ENABLE_INLAY_HINTS = false
+				if ENABLE_INLAY_HINTS and client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
 					vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 				end
 				-- set keybinds
@@ -91,7 +98,7 @@ return {
 				keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
 
 				-- Remove unused imports on save for TS/JS via tsserver code action
-				if client and client.name == "ts_ls" then
+				if client and client.name == "vtsls" then
 					local ts_fts = { typescript = true, typescriptreact = true, javascript = true, javascriptreact = true }
 					if ts_fts[vim.bo[ev.buf].filetype] then
 						vim.api.nvim_create_autocmd("BufWritePre", {
@@ -158,7 +165,7 @@ return {
 			},
 		}
 
-		vim.lsp.config.ts_ls = {
+		vim.lsp.config.vtsls = {
 			capabilities = capabilities,
 			filetypes = {
 				"javascript",
@@ -168,6 +175,12 @@ return {
 			},
 			settings = {
 				typescript = {
+					-- Auto-insert () + tab-navigable arg placeholders on function/method
+					-- completion — VS Code's typescript.suggest.completeFunctionCalls, the
+					-- Go `usePlaceholders` equivalent. vtsls emits the snippet on resolve
+					-- and nvim-cmp applies it. (ts_ls never emitted this, which is why we
+					-- switched servers.)
+					suggest = { completeFunctionCalls = true },
 					inlayHints = {
 						includeInlayParameterNameHints = "all",
 						includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -180,6 +193,7 @@ return {
 					},
 				},
 				javascript = {
+					suggest = { completeFunctionCalls = true },
 					inlayHints = {
 						includeInlayParameterNameHints = "all",
 						includeInlayParameterNameHintsWhenArgumentMatchesName = false,

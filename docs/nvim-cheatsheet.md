@@ -27,6 +27,7 @@
 - Numbers
 - Quick Motions
 - Refactoring
+- Restart
 - Search
 - Sessions
 - Spelling
@@ -376,6 +377,18 @@ cursor is on, rendered everywhere else.
 | `<leader>R` | Open refactor menu (normal & visual) |
 
 Actions include: extract function, extract variable, inline variable, etc.
+
+---
+
+## ♻️ Restart
+
+| Key | Description |
+|-----|-------------|
+| `<leader>qr` | Restart all of Neovim in place (`:restart`) — reloads the full config without leaving the terminal. Save first with `:wa`; it refuses on unsaved changes. |
+
+> Lighter restarts live in **LSP Keymaps**: `<leader>rs` bounces just the language
+> server (config stays as-is) and `<leader>rr` revives a dead buffer. Reach for
+> `<leader>qr` after editing config files — only a full restart reloads them.
 
 ---
 

@@ -31,6 +31,13 @@ keymap.set("n", "<leader>rr", function()
 	end, 100)
 end, { desc = "Revive buffer: restart LSP + re-detect filetype" })
 
+-- Restart all of Neovim in place (nvim 0.11+ `:restart`) — reloads the entire
+-- config without leaving the terminal. Use after editing config files, since
+-- <leader>rs (:LspRestart) only bounces the language server with the *already
+-- loaded* config. `:restart` (no bang) refuses if a buffer has unsaved changes,
+-- so save with :wa first — it will never discard your edits silently.
+keymap.set("n", "<leader>qr", "<cmd>restart<CR>", { desc = "Restart Neovim (reload full config)" })
+
 -- Increment/Decrement Numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })
 keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })

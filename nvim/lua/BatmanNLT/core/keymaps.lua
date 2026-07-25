@@ -34,9 +34,23 @@ end, { desc = "Revive buffer: restart LSP + re-detect filetype" })
 -- Restart all of Neovim in place (nvim 0.11+ `:restart`) — reloads the entire
 -- config without leaving the terminal. Use after editing config files, since
 -- <leader>rs (:LspRestart) only bounces the language server with the *already
--- loaded* config. `:restart` (no bang) refuses if a buffer has unsaved changes,
--- so save with :wa first — it will never discard your edits silently.
-keymap.set("n", "<leader>qr", "<cmd>restart<CR>", { desc = "Restart Neovim (reload full config)" })
+-- loaded* config.
+--
+-- Two guards: (1) :restart (no bang) refuses on unsaved changes — we check first
+-- and bail with a hint instead of half-acting. (2) noice.nvim (2025-11) crashes
+-- on Neovim 0.12's `restart` UI event: its get_handler assumes every event name
+-- has an underscore, and `restart` has none, so it concatenates nil. Detaching
+-- noice's UI handler before :restart sidesteps that and lets the reload complete.
+keymap.set("n", "<leader>qr", function()
+	if vim.fn.getbufinfo({ bufmodified = 1 })[1] then
+		vim.notify("Unsaved changes — :w or :wa before restarting", vim.log.levels.WARN)
+		return
+	end
+	pcall(function()
+		require("noice").disable()
+	end)
+	vim.cmd("restart")
+end, { desc = "Restart Neovim (reload full config)" })
 
 -- Increment/Decrement Numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })

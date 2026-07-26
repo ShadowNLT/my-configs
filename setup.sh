@@ -81,6 +81,7 @@ phase2_tools() {
   local casks=(
     ghostty
     font-meslo-lg-nerd-font
+    font-fira-code-nerd-font
   )
 
   info "Installing Homebrew casks..."

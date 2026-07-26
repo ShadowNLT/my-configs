@@ -95,7 +95,20 @@ return {
 				keymap.set("n", "<leader>cO", "<cmd>Lspsaga outgoing_calls<CR>", opts)
 
 				opts.desc = "Restart LSP"
-				keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+				-- nvim-lspconfig removed the :Lsp* user commands, so :LspRestart now
+				-- errors (E492). Restart via the native API: stop this buffer's clients
+				-- and re-fire FileType so vim.lsp.enable reattaches them fresh.
+				keymap.set("n", "<leader>rs", function()
+					local bufnr = vim.api.nvim_get_current_buf()
+					for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+						client:stop(true)
+					end
+					vim.defer_fn(function()
+						if vim.api.nvim_buf_is_valid(bufnr) then
+							vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
+						end
+					end, 100)
+				end, opts)
 
 				-- Remove unused imports on save for TS/JS via tsserver code action
 				if client and client.name == "vtsls" then

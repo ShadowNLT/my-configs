@@ -15,7 +15,7 @@ keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 keymap.set("n", "<leader>rr", function()
 	local bufnr = vim.api.nvim_get_current_buf()
 	for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-		vim.lsp.stop_client(client.id, true) -- force so the restart is clean
+		client:stop(true) -- force so the restart is clean (vim.lsp.stop_client deprecated in 0.12)
 	end
 	-- Deferred so the stopped clients have exited before the new ones start.
 	vim.defer_fn(function()
@@ -33,8 +33,7 @@ end, { desc = "Revive buffer: restart LSP + re-detect filetype" })
 
 -- Restart all of Neovim in place (nvim 0.11+ `:restart`) — reloads the entire
 -- config without leaving the terminal. Use after editing config files, since
--- <leader>rs (:LspRestart) only bounces the language server with the *already
--- loaded* config.
+-- <leader>rs only bounces the language server with the *already loaded* config.
 --
 -- Two guards: (1) :restart (no bang) refuses on unsaved changes — we check first
 -- and bail with a hint instead of half-acting. (2) noice.nvim (2025-11) crashes

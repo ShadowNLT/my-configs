@@ -16,7 +16,10 @@ return {
 			end,
 		})
 
-		vim.keymap.set("n", "<leader>l", function()
+		-- <leader>ll, not <leader>l: a bare <leader>l would be both a complete
+		-- mapping and the prefix of <leader>lg (LazyGit), forcing nvim to wait out
+		-- timeoutlen on every press to disambiguate. A distinct leaf key fires now.
+		vim.keymap.set("n", "<leader>ll", function()
 			lint.try_lint()
 		end, { desc = "Trigger linting for current file" })
 	end,

@@ -270,7 +270,7 @@ normal Vim editing; changes **save when you close the window**.
 
 | Key | Description |
 |-----|-------------|
-| `<leader>l` | Trigger linter for current file |
+| `<leader>ll` | Trigger linter for current file |
 
 Active linters: `pylint` (Python)
 

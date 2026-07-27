@@ -195,7 +195,11 @@ Function-argument placeholders come from the LSP (gopls `usePlaceholders`, lua_l
 |-----|-------------|
 | `<leader>mp` | Format file (or selected range in visual mode) |
 
-Formatters by filetype: `prettier` (JS/TS/CSS/HTML) · `stylua` (Lua) · `isort` + `black` (Python) · `goimports` + `gofumpt` (Go)
+Formatters by filetype:
+
+- **JS/TS/JSX/TSX/JSON/CSS** → `prettier` when the project is set up for prettier (a `.prettierrc*`/`prettier.config.*`, a local `node_modules/.bin/prettier`, or a `"prettier"` key in `package.json`), otherwise `biome` (the default for own projects)
+- **SCSS/LESS/HTML/YAML/Markdown/GraphQL/Liquid** → `prettier` (biome doesn't format these)
+- `stylua` (Lua) · `isort` + `black` (Python) · `goimports` + `gofumpt` (Go)
 
 ---
 

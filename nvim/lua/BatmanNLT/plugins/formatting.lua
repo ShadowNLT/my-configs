@@ -4,17 +4,77 @@ return {
 	config = function()
 		local conform = require("conform")
 
+		-- Formatter routing for JS/TS/JSON/CSS: use the project's prettier when the
+		-- project is actually set up for prettier, otherwise fall back to biome (our
+		-- default). Biome can't format scss/less/yaml/markdown/html/graphql/liquid,
+		-- so those stay on prettier unconditionally below.
+		local prettier_markers = {
+			".prettierrc",
+			".prettierrc.json",
+			".prettierrc.yml",
+			".prettierrc.yaml",
+			".prettierrc.json5",
+			".prettierrc.js",
+			".prettierrc.cjs",
+			".prettierrc.mjs",
+			".prettierrc.ts",
+			".prettierrc.cts",
+			".prettierrc.mts",
+			".prettierrc.toml",
+			"prettier.config.js",
+			"prettier.config.cjs",
+			"prettier.config.mjs",
+			"prettier.config.ts",
+			"prettier.config.cts",
+			"prettier.config.mts",
+		}
+		local uv = vim.uv or vim.loop
+		local function project_uses_prettier(bufnr)
+			local fname = vim.api.nvim_buf_get_name(bufnr)
+			if fname == "" then
+				return false
+			end
+			local dir = vim.fs.dirname(fname)
+			-- 1. a prettier config file anywhere up the tree
+			if vim.fs.root(dir, prettier_markers) then
+				return true
+			end
+			-- 2. a project-local prettier binary (installed as a dependency)
+			local nm_root = vim.fs.root(dir, "node_modules")
+			if nm_root and uv.fs_stat(nm_root .. "/node_modules/.bin/prettier") then
+				return true
+			end
+			-- 3. a "prettier" key (config or dependency) in package.json
+			local pkg_root = vim.fs.root(dir, "package.json")
+			if pkg_root then
+				local f = io.open(pkg_root .. "/package.json", "r")
+				if f then
+					local content = f:read("*a")
+					f:close()
+					if content and content:match('"prettier"%s*:') then
+						return true
+					end
+				end
+			end
+			return false
+		end
+		local function prettier_or_biome(bufnr)
+			return project_uses_prettier(bufnr) and { "prettier" } or { "biome" }
+		end
+
 		conform.setup({
 			formatters_by_ft = {
-				javascript = { "prettier" },
-				javascriptreact = { "prettier" },
-				typescript = { "prettier" },
-				typescriptreact = { "prettier" },
-				css = { "prettier" },
+				-- prettier if the project is set up for it, otherwise biome
+				javascript = prettier_or_biome,
+				javascriptreact = prettier_or_biome,
+				typescript = prettier_or_biome,
+				typescriptreact = prettier_or_biome,
+				json = prettier_or_biome,
+				css = prettier_or_biome,
+				-- prettier-only (biome does not format these)
 				scss = { "prettier" },
 				less = { "prettier" },
 				html = { "prettier" },
-				json = { "prettier" },
 				yaml = { "prettier" },
 				markdown = { "prettier" },
 				graphql = { "prettier" },

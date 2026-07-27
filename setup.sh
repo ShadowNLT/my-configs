@@ -65,6 +65,7 @@ phase2_tools() {
     go
     python
     pipx      # used below to install Python formatters (PEP 668-safe)
+    biome     # default JS/TS/JSON/CSS formatter (prettier used only when a project configures it)
   )
 
   info "Installing Homebrew formulae..."

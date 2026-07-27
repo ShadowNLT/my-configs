@@ -115,7 +115,12 @@ return {
 				},
 			},
 			format_on_save = {
-				lsp_fallback = true,
+				-- Use ONLY the configured formatters (prettier for JS/TS, etc.).
+				-- prettier already does the right thing: honor a repo's config when
+				-- present, fall back to its own defaults when not. "never" stops
+				-- conform from handing off to the LSP (vtsls), whose default style
+				-- ignores .prettierrc and was the source of the mystery formatting.
+				lsp_format = "never",
 				async = false,
 				timeout_ms = 5000,
 			},
@@ -123,7 +128,7 @@ return {
 
 		vim.keymap.set({ "n", "v" }, "<leader>mp", function()
 			conform.format({
-				lsp_fallback = true,
+				lsp_format = "never",
 				async = false,
 				timeout_ms = 5000,
 			})

@@ -452,9 +452,12 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 | `ysiw}` | `wo*rd` | `{word}` |
 | `ysiwt` → `em<CR>` | `wo*rd` | `<em>word</em>` |
 | `ysiwf` → `fn<CR>` | `wo*rd` | `fn(word)` |
+| `ysf>i` → `Array<`<CR> `>`<CR> | `*Array<number>` | `Array<Array<number>>` |
 | `yss)` | whole line | `(line contents)` |
 | `ys$"` | from cursor → EOL | `"...rest of line"` |
 | `yS` (instead of `ys`) | — | puts surround **on its own lines** (great for JSX/blocks) |
+
+> 🧩 `i` = **interactive**: prompts *"Enter the left delimiter"* then *"Enter the right delimiter"*, so you can wrap with any custom pair the built-ins don't cover — e.g. generics `Array<…>`. Works in visual mode too: select, then `S` `i`. (Don't use `f` for generics — it always uses `()`.)
 
 ### 🔁 Change surround — `cs{old}{new}`
 | Command | Before | After |

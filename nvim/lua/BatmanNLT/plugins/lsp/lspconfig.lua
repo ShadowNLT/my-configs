@@ -121,10 +121,20 @@ return {
 								params.context = { diagnostics = {}, only = { "source.removeUnusedImports" } }
 								local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
 								for cid, res in pairs(result or {}) do
-									for _, r in pairs(res.result or {}) do
-										if r.edit then
-											local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
-											vim.lsp.util.apply_workspace_edit(r.edit, enc)
+									local c = vim.lsp.get_client_by_id(cid)
+									local enc = (c or {}).offset_encoding or "utf-16"
+									for _, action in pairs(res.result or {}) do
+										local edit = action.edit
+										-- vtsls returns source.removeUnusedImports WITHOUT an inline
+										-- edit (only a `data` handle), so it has to be fetched via
+										-- codeAction/resolve first — otherwise there is nothing to
+										-- apply and the unused imports silently survive.
+										if not edit and action.data and c then
+											local resolved = c:request_sync("codeAction/resolve", action, 3000, 0)
+											edit = resolved and resolved.result and resolved.result.edit
+										end
+										if edit then
+											vim.lsp.util.apply_workspace_edit(edit, enc)
 										end
 									end
 								end
@@ -187,6 +197,13 @@ return {
 				"typescriptreact",
 			},
 			settings = {
+				vtsls = {
+					-- Favor the repo's own TypeScript (node_modules/typescript) when a
+					-- project ships one, falling back to vtsls's bundled version only when
+					-- it doesn't. Default is false, which pins every project to the bundled
+					-- version and makes editor diagnostics disagree with the repo's tsc.
+					autoUseWorkspaceTsdk = true,
+				},
 				typescript = {
 					-- Auto-insert () + tab-navigable arg placeholders on function/method
 					-- completion — VS Code's typescript.suggest.completeFunctionCalls, the

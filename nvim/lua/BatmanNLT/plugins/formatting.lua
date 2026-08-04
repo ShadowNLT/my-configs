@@ -3,74 +3,45 @@ return {
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		local conform = require("conform")
+		local util = require("conform.util")
 
-		-- Formatter routing for JS/TS/JSON/CSS: use the project's prettier when the
-		-- project is actually set up for prettier, otherwise fall back to biome (our
-		-- default). Biome can't format scss/less/yaml/markdown/html/graphql/liquid,
-		-- so those stay on prettier unconditionally below.
-		local prettier_markers = {
-			".prettierrc",
-			".prettierrc.json",
-			".prettierrc.yml",
-			".prettierrc.yaml",
-			".prettierrc.json5",
-			".prettierrc.js",
-			".prettierrc.cjs",
-			".prettierrc.mjs",
-			".prettierrc.ts",
-			".prettierrc.cts",
-			".prettierrc.mts",
-			".prettierrc.toml",
-			"prettier.config.js",
-			"prettier.config.cjs",
-			"prettier.config.mjs",
-			"prettier.config.ts",
-			"prettier.config.cts",
-			"prettier.config.mts",
-		}
-		local uv = vim.uv or vim.loop
-		local function project_uses_prettier(bufnr)
+		-- Formatter routing for JS/TS/JSON/CSS. The repo's own tool wins by explicit
+		-- opt-in marker, checked most-specific first:
+		--   1. oxfmt  — if .oxfmtrc.json / .oxfmtrc is found up the tree. Some repos
+		--      (e.g. vivenu-core) format with oxfmt, NOT prettier, and have no
+		--      .prettierrc at all. Falling back to prettier there rewrote the whole
+		--      file to prettier's defaults (semicolons + bracket spaces), fighting
+		--      oxfmt's semi:false / bracketSpacing:false style on every save.
+		--   2. biome  — if biome.json / biome.jsonc is found up the tree.
+		--   3. prettier — the default. It honors a repo's .prettierrc when present
+		--      and falls back to its own defaults when not, so an unconfigured (or
+		--      ambiguous) buffer still gets a sane, standard style.
+		-- Ordering matters: the unknown case stays SAFE (prettier), and a repo that
+		-- opts into oxfmt/biome never gets prettier's conflicting style imposed.
+		-- oxfmt/biome can't format scss/less/yaml/markdown/html/graphql/liquid, so
+		-- those stay on prettier unconditionally below.
+		local oxfmt_markers = { ".oxfmtrc.json", ".oxfmtrc" }
+		local biome_markers = { "biome.json", "biome.jsonc" }
+		local function js_formatter(bufnr)
 			local fname = vim.api.nvim_buf_get_name(bufnr)
-			if fname == "" then
-				return false
+			local dir = fname ~= "" and vim.fs.dirname(fname) or vim.fn.getcwd()
+			if vim.fs.root(dir, oxfmt_markers) then
+				return { "oxfmt" }
+			elseif vim.fs.root(dir, biome_markers) then
+				return { "biome" }
 			end
-			local dir = vim.fs.dirname(fname)
-			-- 1. a prettier config file anywhere up the tree
-			if vim.fs.root(dir, prettier_markers) then
-				return true
-			end
-			-- 2. a project-local prettier binary (installed as a dependency)
-			local nm_root = vim.fs.root(dir, "node_modules")
-			if nm_root and uv.fs_stat(nm_root .. "/node_modules/.bin/prettier") then
-				return true
-			end
-			-- 3. a "prettier" key (config or dependency) in package.json
-			local pkg_root = vim.fs.root(dir, "package.json")
-			if pkg_root then
-				local f = io.open(pkg_root .. "/package.json", "r")
-				if f then
-					local content = f:read("*a")
-					f:close()
-					if content and content:match('"prettier"%s*:') then
-						return true
-					end
-				end
-			end
-			return false
-		end
-		local function prettier_or_biome(bufnr)
-			return project_uses_prettier(bufnr) and { "prettier" } or { "biome" }
+			return { "prettier" }
 		end
 
 		conform.setup({
 			formatters_by_ft = {
-				-- prettier if the project is set up for it, otherwise biome
-				javascript = prettier_or_biome,
-				javascriptreact = prettier_or_biome,
-				typescript = prettier_or_biome,
-				typescriptreact = prettier_or_biome,
-				json = prettier_or_biome,
-				css = prettier_or_biome,
+				-- prettier by default; oxfmt/biome only when the repo opts in (see above)
+				javascript = js_formatter,
+				javascriptreact = js_formatter,
+				typescript = js_formatter,
+				typescriptreact = js_formatter,
+				json = js_formatter,
+				css = js_formatter,
 				-- prettier-only (biome does not format these)
 				scss = { "prettier" },
 				less = { "prettier" },
@@ -84,6 +55,16 @@ return {
 				go = { "goimports_reviser", "goimports", "golines", "gofumpt" },
 			},
 			formatters = {
+				-- oxfmt (oxc formatter). Not a conform builtin, so define it here.
+				-- Resolve the repo-local node_modules/.bin/oxfmt (it's rarely on PATH)
+				-- and fall back to PATH. Runs via stdin; oxfmt infers the parser from
+				-- --stdin-filepath and discovers .oxfmtrc.json upward from cwd.
+				oxfmt = {
+					command = util.from_node_modules("oxfmt"),
+					args = { "--stdin-filepath", "$FILENAME" },
+					stdin = true,
+					cwd = util.root_file(oxfmt_markers),
+				},
 				golines = {
 					prepend_args = {
 						"--base-formatter=gofumpt",

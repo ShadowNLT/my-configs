@@ -14,6 +14,40 @@ return {
 
 		local keymap = vim.keymap -- for conciseness
 
+		-- Make the LSP inlay-hint renderer crash-proof so hints never have to be
+		-- disabled again. Neovim 0.12.3's decoration provider
+		-- (runtime/lua/vim/lsp/inlay_hint.lua:362) renders each hint with
+		-- nvim_buf_set_extmark(bufnr, ns, lnum, hint_col, ...). The store path
+		-- clamps hint_col to the line length for the buffer version it was computed
+		-- against (:81), but client_hints is keyed per client: when a second
+		-- client's response advances bufstate.version, the first client's stale,
+		-- already-clamped columns get re-rendered against a now-shorter line and
+		-- nvim_buf_set_extmark throws "Invalid 'col': out of range". That error
+		-- re-fires on every redraw (error -> notify -> redraw -> error), which is
+		-- why hints used to be turned off entirely. We guard only the inlay-hint
+		-- namespace: on that one error, re-clamp the column to the current line's
+		-- byte length and retry, then drop the hint if it still fails — so a single
+		-- bad hint can never spam or force the feature off. Every other extmark
+		-- call is passed straight through (one integer comparison of overhead).
+		if not vim.g._inlay_hint_extmark_guard then
+			vim.g._inlay_hint_extmark_guard = true
+			local inlay_ns = vim.api.nvim_create_namespace("nvim.lsp.inlayhint")
+			local set_extmark = vim.api.nvim_buf_set_extmark
+			vim.api.nvim_buf_set_extmark = function(bufnr, ns, lnum, col, opts)
+				if ns ~= inlay_ns then
+					return set_extmark(bufnr, ns, lnum, col, opts)
+				end
+				local ok, res = pcall(set_extmark, bufnr, ns, lnum, col, opts)
+				if ok then
+					return res
+				end
+				local line = vim.api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, false)[1]
+				local clamped = math.min(col, line and #line or 0)
+				local ok2, res2 = pcall(set_extmark, bufnr, ns, lnum, clamped, opts)
+				return ok2 and res2 or nil
+			end
+		end
+
 		vim.api.nvim_create_autocmd("LspAttach", {
 			group = vim.api.nvim_create_augroup("UserLspConfig", {}),
 			callback = function(ev)
@@ -22,15 +56,12 @@ return {
 				local opts = { buffer = ev.buf, silent = true }
 				local bufnr = ev.buf
 				local client = vim.lsp.get_client_by_id(ev.data.client_id)
-				-- Inlay hints are DISABLED on Neovim 0.12.3. Its inlay-hint renderer
-				-- (runtime/lua/vim/lsp/inlay_hint.lua:362) calls nvim_buf_set_extmark with
-				-- a column past end-of-line and throws "Invalid 'col': out of range". The
-				-- decoration provider is global, so any inlay-enabled buffer arms it, and
-				-- every nvim-notify popup forces a redraw that re-fires it — one bad hint
-				-- then spams errors (error -> notify -> redraw -> error). Not enabling the
-				-- hints at all keeps that provider unregistered. Flip the flag back to true
-				-- once on a Neovim build where this is fixed.
-				local ENABLE_INLAY_HINTS = false
+				-- Inlay hints are ENABLED. The "Invalid 'col': out of range" crash-loop
+				-- that once forced these off (renderer at
+				-- runtime/lua/vim/lsp/inlay_hint.lua:362 rendering a stale hint column
+				-- past end-of-line) is now neutralized by the nvim_buf_set_extmark guard
+				-- installed above, so a bad hint drops silently instead of spamming.
+				local ENABLE_INLAY_HINTS = true
 				if ENABLE_INLAY_HINTS and client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
 					vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 				end
@@ -211,28 +242,40 @@ return {
 					-- and nvim-cmp applies it. (ts_ls never emitted this, which is why we
 					-- switched servers.)
 					suggest = { completeFunctionCalls = true },
+					-- vtsls consumes VS Code-style settings (same reason
+					-- suggest.completeFunctionCalls works above), so inlay hints must use
+					-- the VS Code nested schema — parameterNames.enabled, parameterTypes,
+					-- etc. The ts_ls-style "includeInlay*" preference keys are NOT in
+					-- vtsls's configuration.schema.json and are silently dropped, which is
+					-- why hints rendered in Go but never in TS/TSX. Note the inverted
+					-- booleans: includeInlay…WhenArgumentMatchesName = false becomes
+					-- suppressWhenArgumentMatchesName = true.
 					inlayHints = {
-						includeInlayParameterNameHints = "all",
-						includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-						includeInlayFunctionParameterTypeHints = true,
-						includeInlayVariableTypeHints = true,
-						includeInlayVariableTypeHintsWhenTypeMatchesName = false,
-						includeInlayPropertyDeclarationTypeHints = true,
-						includeInlayFunctionLikeReturnTypeHints = true,
-						includeInlayEnumMemberValueHints = true,
+						parameterNames = { enabled = "all", suppressWhenArgumentMatchesName = true },
+						parameterTypes = { enabled = true },
+						variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
+						propertyDeclarationTypes = { enabled = true },
+						functionLikeReturnTypes = { enabled = true },
+						enumMemberValues = { enabled = true },
 					},
 				},
 				javascript = {
 					suggest = { completeFunctionCalls = true },
+					-- vtsls consumes VS Code-style settings (same reason
+					-- suggest.completeFunctionCalls works above), so inlay hints must use
+					-- the VS Code nested schema — parameterNames.enabled, parameterTypes,
+					-- etc. The ts_ls-style "includeInlay*" preference keys are NOT in
+					-- vtsls's configuration.schema.json and are silently dropped, which is
+					-- why hints rendered in Go but never in TS/TSX. Note the inverted
+					-- booleans: includeInlay…WhenArgumentMatchesName = false becomes
+					-- suppressWhenArgumentMatchesName = true.
 					inlayHints = {
-						includeInlayParameterNameHints = "all",
-						includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-						includeInlayFunctionParameterTypeHints = true,
-						includeInlayVariableTypeHints = true,
-						includeInlayVariableTypeHintsWhenTypeMatchesName = false,
-						includeInlayPropertyDeclarationTypeHints = true,
-						includeInlayFunctionLikeReturnTypeHints = true,
-						includeInlayEnumMemberValueHints = true,
+						parameterNames = { enabled = "all", suppressWhenArgumentMatchesName = true },
+						parameterTypes = { enabled = true },
+						variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
+						propertyDeclarationTypes = { enabled = true },
+						functionLikeReturnTypes = { enabled = true },
+						enumMemberValues = { enabled = true },
 					},
 				},
 			},

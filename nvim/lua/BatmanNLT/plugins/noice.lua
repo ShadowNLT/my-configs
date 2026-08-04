@@ -68,6 +68,21 @@ return {
 					filter = { find = "No information available" },
 					opts = { skip = true },
 				},
+				-- Mute the tsserver "configFileSpecs" crash toast. Enabling inlay hints
+				-- makes vtsls fire textDocument/inlayHint; on repos pinned to a
+				-- TypeScript whose project-reload path hits this upstream bug (e.g.
+				-- vivenu-seatmap on TS 5.7.3) the request intermittently fails with
+				-- "-32603 … Cannot read properties of undefined (reading
+				-- 'configFileSpecs')". It's a server-side TS bug we can't fix from the
+				-- editor, and hints still render whenever the project isn't mid-reload,
+				-- so we drop only the noisy error toast (matched on the unique
+				-- "configFileSpecs" substring, so other inlay errors still surface).
+				-- Remove once the repo's TypeScript is upgraded past the bug. Must
+				-- precede the catch-all notify route below.
+				{
+					filter = { find = "configFileSpecs" },
+					opts = { skip = true },
+				},
 				{
 					filter = { event = "notify" },
 					view = "notify",

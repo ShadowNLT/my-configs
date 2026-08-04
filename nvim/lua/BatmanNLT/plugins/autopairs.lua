@@ -11,6 +11,7 @@ return {
     -- configure autopairs
     autopairs.setup({
       check_ts = true, -- enable treesitter
+      enable_check_bracket_line = false, -- always add a pair, even if a close bracket exists later on the line
       ts_config = {
         lua = { "string" }, -- don't add pairs in lua string treesitter nodes
         javascript = { "template_string" }, -- don't add pairs in javscript template_string treesitter nodes

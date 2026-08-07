@@ -169,6 +169,17 @@ return {
 										end
 									end
 								end
+
+								-- vtsls builds the removeUnusedImports edit in ITS OWN style
+								-- (semicolons + bracket spaces), so apply_workspace_edit above
+								-- re-mangles the imports conform's format_on_save just normalized.
+								-- This BufWritePre runs AFTER conform's, so re-run conform LAST to
+								-- give the repo's real formatter (oxfmt/biome/prettier) the final
+								-- say on every save. Direct buffer edits here don't retrigger
+								-- BufWritePre, so there's no recursion.
+								pcall(function()
+									require("conform").format({ async = false, lsp_format = "never", timeout_ms = 5000 })
+								end)
 							end,
 						})
 					end

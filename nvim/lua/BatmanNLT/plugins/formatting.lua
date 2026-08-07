@@ -3,7 +3,6 @@ return {
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		local conform = require("conform")
-		local util = require("conform.util")
 
 		-- Formatter routing for JS/TS/JSON/CSS. The repo's own tool wins by explicit
 		-- opt-in marker, checked most-specific first:
@@ -55,16 +54,9 @@ return {
 				go = { "goimports_reviser", "goimports", "golines", "gofumpt" },
 			},
 			formatters = {
-				-- oxfmt (oxc formatter). Not a conform builtin, so define it here.
-				-- Resolve the repo-local node_modules/.bin/oxfmt (it's rarely on PATH)
-				-- and fall back to PATH. Runs via stdin; oxfmt infers the parser from
-				-- --stdin-filepath and discovers .oxfmtrc.json upward from cwd.
-				oxfmt = {
-					command = util.from_node_modules("oxfmt"),
-					args = { "--stdin-filepath", "$FILENAME" },
-					stdin = true,
-					cwd = util.root_file(oxfmt_markers),
-				},
+				-- oxfmt uses conform's builtin definition (command from node_modules,
+				-- stdin via --stdin-filepath, cwd resolved to the nearest .oxfmtrc). No
+				-- override needed here; js_formatter above just routes to it by name.
 				golines = {
 					prepend_args = {
 						"--base-formatter=gofumpt",

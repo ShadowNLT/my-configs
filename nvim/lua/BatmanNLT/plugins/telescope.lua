@@ -42,5 +42,6 @@ return {
 		keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
 		keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos comments" })
 		keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep_args<cr>", { desc = "Start live grep args" })
+		keymap.set("n", "<leader>fj", "<cmd>Telescope jumplist<cr>", { desc = "Browse the jumplist" })
 	end,
 }

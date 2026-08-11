@@ -18,6 +18,7 @@
 - Formatting
 - Git — Gitsigns
 - Harpoon
+- Jumps
 - LazyGit
 - Linting
 - LSP Keymaps
@@ -262,6 +263,26 @@ normal Vim editing; changes **save when you close the window**.
 
 ---
 
+## 🦘 Jumps (jumplist)
+
+Neovim records a **jumplist** — the cursor positions you were at before each "big" move (searches, `gg`/`G`, `{`/`}`, `%`, tag and LSP jumps, etc.). Walk it to get back where you were, even across files.
+
+| Key | Description |
+|-----|-------------|
+| `<leader>fj` | Browse the jumplist in Telescope — jump to any entry with `<CR>` |
+| `C-o` | Jump **backwards** — to the previous position |
+| `C-i` / `<Tab>` | Jump **forwards** again |
+| <code>``</code> | Jump to the **exact position** before the last jump |
+| `''` | Jump to the **line** before the last jump |
+| `:jumps` | Print the raw jumplist |
+
+> LSP jumps (`gd`, `gR`, `<leader>cf`, …) and Telescope pickers record your start spot, so
+> `C-o` brings you back after following a reference. Related: `C-t` pops the tag stack
+> (definition jumps), and the **changelist** — `g;` / `g,` — steps through your recent
+> *edits* instead of jumps.
+
+---
+
 ## 😸 LazyGit
 
 | Key | Description |
@@ -309,6 +330,23 @@ Active linters: `pylint` (Python)
 > `<leader>rr` is **global** — unlike the rest of this section it works even when no
 > LSP is attached. Reach for it when a file opens with no auto-pairs or completion
 > instead of quitting nvim.
+
+### Inside the Lspsaga finder (`<leader>cf`)
+
+`<leader>cf` opens a floating panel — definitions + references on the left, a live preview on the right. Move with `j` / `k`, then:
+
+| Key | Description |
+|-----|-------------|
+| `o` / `<CR>` | Open / jump to the highlighted entry |
+| `s` | Open it in a **vertical** split |
+| `i` | Open it in a **horizontal** split |
+| `t` | Open it in a new **tab** |
+| `[w` | "Shuttle" between the list pane and the preview pane |
+| `q` | Quit the finder |
+| `<C-c>k` | Close |
+
+> After you jump, `C-o` returns you to where you started (see **Jumps**). Opening in a
+> split or tab (`s` / `i` / `t`) keeps your original window in place.
 
 ---
 
@@ -533,6 +571,7 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 | `<leader>fg` | Live grep with args |
 | `<leader>ft` | Find TODO comments |
 | `<leader>fb` | File browser |
+| `<leader>fj` | Browse the jumplist (jump to any entry — see **Jumps**) |
 
 ---
 

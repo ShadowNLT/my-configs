@@ -577,11 +577,33 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 
 ## 🌳 TreeSitter
 
+### Incremental selection
+
 | Key | Description |
 |-----|-------------|
-| `<C-space>` | Init / expand selection (incremental) |
-| `<BS>` | Shrink selection |
+| `<C-space>` | Init / expand selection (grows to parent node) |
+| `<BS>` | Shrink selection (back to previous node) |
 | `:InspectTree` | View the syntax tree (AST) |
+
+### Jump to block / function boundaries (nvim-treesitter-textobjects)
+
+Language-agnostic — works wherever a TreeSitter parser is installed. `<leader>j` = "jump", lowercase = start, uppercase = end. Jumplist-aware, so `C-o` returns you.
+
+| Key | Description |
+|-----|-------------|
+| `<leader>jf` | Jump to **f**unction start (of the function you're inside) |
+| `<leader>jF` | Jump to function end |
+| `<leader>jb` | Jump to **b**lock start (if / for / while body, closure…) |
+| `<leader>jB` | Jump to block end |
+
+### Select text objects
+
+Combine with any operator or visual mode: `v`, `d`, `y`, `c`, … (e.g. `vaf`, `dif`, `yab`, `cib`).
+
+| Key | Description |
+|-----|-------------|
+| `af` / `if` | a / inner **function** |
+| `ab` / `ib` | a / inner **block** (overrides builtin `()` object — use `a(` / `i(` for parens) |
 
 ---
 

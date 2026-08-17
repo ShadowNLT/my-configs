@@ -4,7 +4,11 @@ return {
   event = "VeryLazy", 
   config = function()
     require("nvim-surround").setup({
-      -- Configuration here, or leave empty to use defaults
+      keymaps = {
+        -- Leave `s`/`S` to flash.nvim (jump / treesitter); surround uses `gs`/`gS` in visual mode.
+        visual = "gs",       -- wrap selection
+        visual_line = "gS",  -- wrap selection on new lines
+      },
     })
   end
 }

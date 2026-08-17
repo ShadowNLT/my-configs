@@ -495,7 +495,7 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 | `ys$"` | from cursor → EOL | `"...rest of line"` |
 | `yS` (instead of `ys`) | — | puts surround **on its own lines** (great for JSX/blocks) |
 
-> 🧩 `i` = **interactive**: prompts *"Enter the left delimiter"* then *"Enter the right delimiter"*, so you can wrap with any custom pair the built-ins don't cover — e.g. generics `Array<…>`. Works in visual mode too: select, then `S` `i`. (Don't use `f` for generics — it always uses `()`.)
+> 🧩 `i` = **interactive**: prompts *"Enter the left delimiter"* then *"Enter the right delimiter"*, so you can wrap with any custom pair the built-ins don't cover — e.g. generics `Array<…>`. Works in visual mode too: select, then `gs` `i`. (Don't use `f` for generics — it always uses `()`.)
 
 ### 🔁 Change surround — `cs{old}{new}`
 | Command | Before | After |
@@ -534,8 +534,29 @@ Checked filetypes: lua · python · js/ts (+react) · go · graphql · html/css/
 > 💡 At the name prompt you can include attributes: `div class="wrapper"` + `<CR>` → opens `<div class="wrapper">`, closes plain `</div>`.
 
 ### 🎯 Visual mode
-1. Select text (`v`, `V`, or `<C-v>`)
-2. Press **`S`** + char → wraps the selection
+
+First select text (`v`, `V`, or `<C-v>`), then:
+
+| Key | Meaning | Shape |
+|-----|---------|-------|
+| `gs` | **wrap** the selection | `gs` + *char* |
+| `gS` | **wrap on its own lines** (block-style, great for JSX/blocks) | `gS` + *char* |
+
+> ⚠️ **Why `gs`/`gS`, not `S`?** [Flash](#-flash-navigation) owns `s` (jump) and `S` (treesitter) in visual mode, so surround's visual maps are remapped to `gs`/`gS` in `surround.lua`. The `<leader>` is **not** involved.
+
+> 💡 Unlike `ys`, visual mode has **no motion** — the selection *is* the target. So it's just `gs{char}`, not `gs{motion}{char}`.
+
+| Command | Selection (`[...]`) | After |
+|---------|--------------------|-------|
+| `gs)` | `[word]` | `(word)` |
+| `gs"` | `[word]` | `"word"` |
+| `gs}` | `[word]` | `{word}` |
+| `gst` → `em<CR>` | `[word]` | `<em>word</em>` |
+| `gsf` → `fn<CR>` | `[word]` | `fn(word)` |
+| `gsi` → `Array<`<CR> `>`<CR> | `[number]` | `Array<number>` |
+| `gS{`  | `[a, b]` (multi-line select) | `{`<br>`  a, b`<br>`}` |
+
+> 🧩 The same delimiter keys and prompts (`t` tag, `f` function, `i` interactive pair) work here exactly as in `ys` — the only difference is you've pre-selected the target instead of giving a motion.
    - e.g. select a word → `S)` → `(word)`
    - select lines → `S}` → wraps in `{ }`
 

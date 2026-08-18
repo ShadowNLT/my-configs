@@ -348,6 +348,21 @@ Active linters: `pylint` (Python)
 > After you jump, `C-o` returns you to where you started (see **Jumps**). Opening in a
 > split or tab (`s` / `i` / `t`) keeps your original window in place.
 
+### Inside the symbol outline (`<leader>co`)
+
+`<leader>co` opens the outline panel on the right. Move with `j` / `k` — with cursor
+movement it live-previews the symbol's code in a floating window. Only three keys are bound:
+
+| Key | Description |
+|-----|-------------|
+| `o` | **Toggle or jump** — on a parent symbol, expand / collapse its children; on a leaf, jump to it in the source |
+| `e` | **Jump** to the symbol under the cursor (never toggles) and flash a beacon at the target |
+| `q` | Quit the outline |
+
+> The panel stays open after you jump (`close_after_jump` is off) — it only auto-closes
+> when the source buffer itself closes. Everything else is normal Vim (`/`, `n`, `gg`, `G`);
+> the buffer is non-modifiable.
+
 ---
 
 ## 📝 Markdown (render-markdown.nvim)

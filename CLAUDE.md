@@ -2,44 +2,22 @@
 
 Personal macOS dev environment for BatmanNLT (lekanetamba@gmail.com).
 
-## Repo layout
+## Shared instructions
+
+**Read `instructions/README.md` first.** It covers repo layout, bootstrap steps, and conventions that apply to all agents.
+
+The sections below are Claude-specific additions on top of those shared instructions.
+
+## Repo layout (Claude additions)
 
 ```
-nvim/          Neovim config (lazy.nvim, LSP, treesitter, …)
-tmux/          tmux config + TPM plugins
-ghostty/       Ghostty terminal config
-zsh/           zshrc + p10k.zsh (symlinked to ~/.zshrc and ~/.p10k.zsh)
-yazi/          yazi file manager config
-docs/          Cheat sheets (nvim-cheatsheet.md, tmux-cheatsheet.md)
-claude-memory/ Persistent Claude memory (symlinked from ~/.claude/projects/…/memory)
-setup.sh       Full bootstrap script for a fresh Mac
+claude-memory/ Persistent Claude memory (symlinked from ~/.claude/projects/.../memory)
 ```
 
-## New machine bootstrap
+## New machine bootstrap (Claude-specific step)
 
-When the user checks out this repo on a fresh Mac and asks Claude to set it up, follow these steps in order:
+After running Step 1 from `instructions/README.md`, wire up the persistent Claude memory so it survives future checkouts:
 
-### Step 1 — Run the bootstrap script
-```bash
-bash setup.sh
-```
-
-> **Before running:** if `~/.zshrc` already exists on this machine, `setup.sh` will move it to `~/.zshrc.bak` (not delete it) before symlinking the repo version. After the script finishes, check whether `.zshrc.bak` exists and diff it against `zsh/zshrc` — merge any machine-specific lines (custom PATH entries, work aliases, secrets sourcing, etc.) into the repo file before removing the backup. Never delete `.zshrc.bak` without inspecting it first.
-
-This handles automatically (no interaction needed):
-- Homebrew + all formulae and casks (neovim, tree-sitter-cli, tmux, fzf, ripgrep, fd, zoxide, nvm, yazi, lazygit, gh, git, go, python, ghostty, MesloLGS Nerd Font)
-- Go formatters (goimports, golines, gofumpt, goimports-reviser)
-- Node LTS via nvm + prettier
-- Python formatters via pipx (isort, black, pylint)
-- oh-my-zsh + zsh-autosuggestions, zsh-syntax-highlighting, zsh-npm-scripts-autocomplete
-- Powerlevel10k theme
-- All ~/.config symlinks (nvim, ghostty, tmux, yazi, zsh) + ~/.zshrc + ~/.p10k.zsh
-- TPM clone (run `<prefix>+I` inside tmux to install plugins)
-- Neovim headless lazy.nvim sync
-- fzf shell key-bindings + completion
-
-### Step 2 — Claude memory symlink
-Wire up the persistent Claude memory so it survives future checkouts:
 ```bash
 REPO="$(pwd)"
 SLUG=$(echo "$REPO" | sed 's|/|-|g' | sed 's|^-||')
@@ -48,32 +26,9 @@ mkdir -p "$(dirname "$MEMORY_DIR")"
 ln -sf "$REPO/claude-memory" "$MEMORY_DIR"
 ```
 
-### Step 3 — SSH key for GitHub
-```bash
-ssh-keygen -t ed25519 -C "lekanetamba@gmail.com"
-cat ~/.ssh/id_ed25519.pub
-```
-Then add the public key to GitHub → Settings → SSH keys.
-Test with: `ssh -T git@github.com`
+Then continue with Steps 2-5 from `instructions/README.md`.
 
-### Step 4 — GitHub CLI auth
-```bash
-gh auth login
-```
-Follow the interactive prompts (browser OAuth).
+## Conventions (Claude-specific)
 
-### Step 5 — Restart the terminal
-Open a new terminal window. Powerlevel10k and oh-my-zsh will be active immediately (p10k config is already symlinked — no `p10k configure` needed).
-
-### Step 6 — Inside tmux: install TPM plugins
-```
-<prefix> + I
-```
-
----
-
-## Conventions
-
-- Cheat sheets live in `docs/` (repo) AND in Obsidian at `6- Zettelkasten/`. Keep both in sync when keymaps change.
 - Never add `Co-Authored-By: Claude` trailers to commits.
 - LSP arg placeholders must stay on for every server (current and future). See `claude-memory/feedback_lsp_arg_placeholders.md`.

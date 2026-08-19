@@ -1,0 +1,1 @@
+Read `instructions/README.md` for repo layout, bootstrap steps, and conventions. This is a personal macOS dotfiles repo for BatmanNLT. Follow the conventions documented there, especially: keep cheat sheets in sync, no co-author trailers, keep LSP arg placeholders on for every server.

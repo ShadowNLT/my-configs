@@ -100,6 +100,17 @@ actor palette `--s0`…`--s6`. Read them with `css('--token')`.
 Keep annotations **live**: brackets that grow, counters that tick, highlights that appear when the
 thing they describe happens. A static caption is a legend, not an annotation.
 
+**Size the viewBox for legibility, not for your monitor.** The shell scales the SVG to any width,
+so the diagram is responsive for free — but text scales with it, and **width is what governs
+whether labels stay readable**: at a viewBox around 900–1200 units, ~11px label text is still
+legible in a window that is not maximised. Go much wider and it is not.
+
+Height is a separate concern — keep it under about 600 units so the diagram, its notes and the
+controls fit without scrolling. Aspect ratio itself does not matter: a tree is naturally wide and
+short, a call stack tall and narrow. If a diagram truly needs more width, split it across scenes
+rather than widening it, and never assume a maximised window.
+
+
 ## Three traps the eye will not catch
 
 - **Aggregates that quietly exclude the unfinished.** A completion figure averaged over only the

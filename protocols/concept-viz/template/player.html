@@ -84,8 +84,46 @@ button:disabled{opacity:.3;cursor:not-allowed}
 .presets button.on{background:#20303a;border-color:#2b4652;color:var(--req)}
 .keys{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.02em}
 .keys b{color:var(--faint);font-weight:500}
+
+/* ---------- responsive + accessibility ---------- */
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden}
+.panel{flex-wrap:wrap}
+#stage{flex:1 1 420px;min-width:0;overflow-x:auto}
+.stats{flex-wrap:wrap}
+.stat{flex:1 1 auto}
+.bar .r1{flex-wrap:wrap;justify-content:center;max-width:100%}
+#scrub{width:auto;flex:1 1 180px;min-width:120px;max-width:280px}
+#spd{width:auto;flex:1 1 160px;min-width:120px;max-width:220px}
+:is(button,input,[role=button]):focus-visible{outline:2px solid var(--req);outline-offset:2px}
+.dot{border:0;padding:0}
+
+/* legend drops under the diagram before it can squeeze it */
+@media (max-width:860px){
+  .legend{flex:1 1 100%;flex-direction:row;flex-wrap:wrap;gap:8px 18px;
+    border-left:0;border-top:1px solid var(--line);padding:12px 0 0}
+  .legend h4{flex:1 1 100%;margin:0}
+  header{flex-wrap:wrap;gap:10px}
+}
+@media (max-width:640px){
+  body{padding:16px 12px 148px}
+  h1{font-size:20px} .sub{font-size:13px}
+  .stat{min-width:0;padding:8px 12px} .stat b{font-size:19px}
+  .note{font-size:13.5px}
+  .keys{line-height:1.7}
+}
+/* touch targets meet the 44px minimum */
+@media (pointer:coarse){
+  button{min-height:44px} .dot{height:6px}
+  input[type=range]{height:32px}
+}
+/* the diagram's motion is the content; incidental motion is not */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 </style></head><body>
-<div class="app">
+<main class="app">
   <header>
     <div>
       <div class="chip" id="chip"></div>
@@ -102,7 +140,7 @@ button:disabled{opacity:.3;cursor:not-allowed}
   </div>
   <div class="notes" id="notes"></div>
   <div class="foot" id="foot"></div>
-</div>
+</main>
 <div class="bar">
   <div class="r1">
     <button id="rall" title="restart the whole thing from scene 1 (shift+R)">⏮</button>
@@ -110,11 +148,13 @@ button:disabled{opacity:.3;cursor:not-allowed}
     <button id="prev" title="previous scene">◀</button>
     <button id="play">pause</button>
     <button id="next" title="next scene">▶</button>
-    <input type="range" id="scrub" min="0" max="100" value="0" title="scrub this scene">
+    <input type="range" id="scrub" min="0" max="100" value="0"
+      aria-label="Scrub through this scene" title="scrub this scene">
   </div>
   <div class="r1">
     <span class="slab">speed</span>
-    <input type="range" id="spd" min="-432" max="300" step="4" value="-200">
+    <input type="range" id="spd" min="-432" max="300" step="4" value="-200"
+      aria-label="Playback speed">
     <span id="spdv"></span>
     <span class="presets" id="presets"></span>
   </div>
@@ -162,8 +202,11 @@ function setSpeed(v, fromSlider){
 }
 
 $('tot').textContent = S.length;
-$('dots').innerHTML = S.map(()=>'<div class="dot"><i></i></div>').join('');
-[...$('dots').children].forEach((d,i)=> d.onclick = ()=> go(i));
+$('dots').innerHTML = S.map((s,i)=>
+  `<div class="dot" role="button" tabindex="0" aria-label="Go to scene ${i+1}: ${esc(s.tag||'')}">`
+  + '<i></i></div>').join('');
+[...$('dots').children].forEach((d,i)=>{ d.onclick = ()=> go(i);
+  d.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(i); } }; });
 
 function mount(){
   const sc = S[si];

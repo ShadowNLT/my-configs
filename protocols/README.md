@@ -1,22 +1,35 @@
 # Protocols
 
-Agent-agnostic procedures and workflows. Each `.md` file is a self-contained
-protocol: a repeatable procedure the user wants any agent to be able to run,
-on any machine, in any harness.
+Agent-agnostic procedures and workflows. Each protocol is a folder named after
+what it does, shipping **both** artifact forms so any harness can install
+whichever fits:
 
-The file itself is plain markdown, not tied to any harness's format. When the
-user asks to install a protocol globally, read the file and infer the most
-appropriate artifact form for each harness:
+```
+protocols/<name>/
+  command.md   command form: YAML frontmatter (description, argument-hint) + a body that takes
+               $ARGUMENTS / $1..$9. Installed into the harness's command directory.
+  SKILL.md     skill form: name + description with discovery/trigger cues + a self-contained
+               procedure that infers its target from context instead of parsing arguments.
+               Installed into the harness's skill directory.
+  <assets>     supporting files (a denylist, scripts, templates) that both forms reference.
+```
 
-- If it is a reusable prompt with arguments, it fits a slash command (`.md`
-  with YAML frontmatter) in the harness's command directory.
-- If it is a procedure with discovery cues and progressive instructions, it
-  fits a skill (`SKILL.md` in a named folder).
-- If it is a standing rule or convention, it fits project instructions
-  (`CLAUDE.md`, `AGENTS.md`, rules, etc.) rather than a command.
+The two forms share one procedure written once and adapted per form: the command
+form parses arguments, the skill form infers its target from the conversation.
+Supporting assets live beside both so a folder installed anywhere stays whole.
 
-Choose per harness; the same protocol may land as a command in one and a
-skill in another. Only install when the user asks.
+When the user asks to install a protocol globally, pick the form that fits each
+harness and install it:
+
+- **Command** — the user will invoke it explicitly (`/name <input>`). Copy
+  `command.md` into the harness's command directory.
+- **Skill** — the agent should apply it on its own when a request matches.
+  Copy the folder (or `SKILL.md` plus its assets) into the harness's skill
+  directory.
+- **Standing rule or convention** — neither form; it belongs in project
+  instructions (`CLAUDE.md`, `AGENTS.md`, rules) rather than a command or skill.
+
+Only install when the user asks.
 
 ## Global install locations
 
@@ -29,13 +42,14 @@ skill in another. Only install when the user asks.
 
 ## Writing protocols
 
-- One file per procedure, named after what it does (no spaces). A protocol
-  that bundles supporting assets (a denylist, scripts, references) lives in a
-  folder named after the protocol, e.g. `layman-terms/SKILL.md` +
-  `layman-terms/denylist.md` — install the folder as a unit.
-- Write the full procedure in plain markdown: when to use it, steps,
-  constraints, examples.
-- Use `$ARGUMENTS` / `$1..$9` where the protocol takes input; most harnesses
-  expand these inside command templates.
+- One folder per procedure, named after what it does (no spaces), containing
+  both `command.md` and `SKILL.md`.
+- `command.md`: frontmatter with `description` (what the command does) and
+  `argument-hint` (the expected input), then the procedure written to read
+  `$ARGUMENTS` where the target goes.
+- `SKILL.md`: frontmatter with `name` and a `description` that leads with what
+  the skill does and ends with `Trigger on: ...` cues, then the same procedure
+  written to infer its target from context.
 - Keep the file consumable as-is by an agent reading it in-context. The
   installed form is a wrapping concern, handled at install time.
+- Update both forms when a procedure changes; they must not drift.

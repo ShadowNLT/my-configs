@@ -1,13 +1,12 @@
 ---
-name: concept-viz
-description: Build an animated, self-contained HTML explainer of a concept and open it in the browser. You write a renderer that draws whatever shape fits the mechanism — timeline, graph, tree, grid, state machine — and a shared shell supplies the controls, in-frame legend, live annotations, notes and stats. Iterative: the first render is a draft refined with the user. Trigger on: "visualise/animate this", "show me how X works", "make this concept visual", "I want to see it happen", "diagram this over time", or when an explanation would land better as something the user can play and step through than as prose.
+description: Build an animated explainer of a concept and open it in the browser — you write the diagram that fits the mechanism, the shell supplies controls, legend, live annotations and notes. Iterative: the first render is a draft.
+argument-hint: [concept to visualise]
 ---
 
 # Concept Viz
 
-Infer the concept from the conversation — the thing being explained, debugged or taught. If
-several are in play, or the target is vague, ask which one and what specifically about it should
-be shown, then let the user correct you before building.
+Target: $ARGUMENTS. If empty or too vague to build from, ask what concept to visualise, and let
+the user correct the mechanism before you build anything.
 
 The `template/` folder ships beside this file. Resolve it relative to wherever this folder was
 seeded; never hardcode an absolute path.

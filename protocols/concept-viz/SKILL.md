@@ -1,6 +1,6 @@
 ---
 name: concept-viz
-description: Build an animated, self-contained HTML explainer of a concept and open it in the browser. You write a renderer that draws whatever shape fits the mechanism — timeline, graph, tree, grid, state machine — and a shared shell supplies the controls, in-frame legend, live annotations, notes and stats. Iterative: the first render is a draft refined with the user. Trigger on: "visualise/animate this", "show me how X works", "make this concept visual", "I want to see it happen", "diagram this over time", or when an explanation would land better as something the user can play and step through than as prose.
+description: Build an animated, self-contained HTML explainer of a concept and open it in the browser. Choose the shape that makes the mechanism clearest for a learner — graph, tree, grid, state machine, flow, lanes over time — write its renderer, and a shared shell supplies the controls, in-frame legend, live annotations, notes and stats. Iterative: the first render is a draft refined with the user. Trigger on: "visualise/animate this", "show me how X works", "make this concept visual", "I want to see it happen", "help me picture this", or when an explanation would land better as something the learner can play and step through than as prose.
 ---
 
 # Concept Viz
@@ -12,31 +12,56 @@ be shown, then let the user correct you before building.
 The `template/` folder ships beside this file. Resolve it relative to wherever this folder was
 seeded; never hardcode an absolute path.
 
-Turn a concept into an animated page the user can play, pause, step through and scrub.
+Turn a concept into an animated page the learner can play, pause, step through and scrub.
 
 ## What is fixed, and what is yours
 
 **Fixed — `template/player.html`, the shell.** Every explainer gets the same chrome, and you do
-not redesign it: play/pause · tick-stepping that auto-pauses · continuous speed from 0.05× ·
+not redesign it: play/pause · step-by-step that auto-pauses · continuous speed from 0.05× ·
 replay-scene and restart-all · a hard start nothing can scrub behind · scene navigation and
-progress · legend in-frame beside the diagram · notes that reveal as time passes · live stat
-readouts · a footnote line · keybindings · the palette, typography and dark theme.
+progress · legend in-frame beside the diagram · notes that reveal as the animation advances ·
+live stat readouts · a footnote line · keybindings · the palette, typography and dark theme.
 
-**Yours — the diagram and the model.** The shell draws no diagram of its own. You write a
-`RENDER` object that draws whatever actually shows the mechanism.
+**Yours — the shape, the diagram and the model.** The shell draws nothing of its own.
 
-**Pick the diagram from the mechanism, not from habit.** A queue over time wants lanes on a time
-axis; a deadlock wants a wait-for graph; a B-tree split wants a tree; cache lines want a grid; a
-handshake wants a state machine; a request path wants a flow. No renderer ships with this
-protocol, deliberately — a shipped example gets copied, and then every topic looks the same
-whether or not that shape fits.
+## Choose the shape — this is the decision that matters
+
+**The learner should grasp the mechanism from the picture before reading a word.** The shape is
+chosen for comprehension, not for convenience, not for what you drew last time.
+
+Before writing any code: name **two** shapes that could carry this mechanism, say which you are
+choosing and why it makes the idea land faster. Tell the user, and let them correct you — the
+same way you let them correct the mechanism. Then declare it in the model so the choice is on the
+record:
+
+```js
+const SHAPE = 'graph — the cycle IS the concept; on a timeline it would be invisible';
+```
+
+| When the mechanism is about…            | the picture is usually…            |
+| --------------------------------------- | ---------------------------------- |
+| who waits on whom, cycles, relationships | a graph — nodes and edges          |
+| nesting, splitting, descent              | a tree                             |
+| position, locality, adjacency            | a grid or memory map               |
+| discrete modes and the moves between     | a state machine                    |
+| a value travelling through stages        | a flow or pipeline                 |
+| several actors contending over time      | lanes on a shared time axis        |
+| proportion, growth, relative magnitude   | bars or an area                    |
+| a rule producing structure from a seed   | successive generations in place    |
+
+None of these is the default. A timeline is one row of that table, not the shape everything falls
+back to. Note too that `t` is an **animation step**, not necessarily time — a tree can reveal one
+level per step, a graph one edge, a grid one cell.
+
+No renderer or worked example ships with this protocol, deliberately: a shipped example gets
+copied, and then every explainer looks alike whether or not that shape helps anyone learn.
 
 ## Build it
 
 1. **Agree the mechanism.** Not "HTTP/1.1" — "why a slow response blocks what is queued behind
    it." State what you will show and let the user correct it before building.
 2. **Name the tension** — what goes wrong, and what fixing it costs.
-3. **Decide the shape.** What picture makes the mechanism obvious? Say it out loud before coding.
+3. **Choose and declare the shape** (above). Say it to the user before you write code.
 4. **Model it, run it, read the numbers — then design scenes.** One model, different inputs per
    scene. Never hand-write per-scene numbers.
 5. **Write the renderer**, copy `template/player.html`, replace the single line `/*__MODEL__*/`
@@ -49,20 +74,21 @@ whether or not that shape fits.
 Your model defines these; the shell consumes them.
 
 ```js
-const TICK_MS = 20;     // wall-clock ms per animation tick
+const TICK_MS = 20;     // wall-clock ms per animation step
+const SHAPE   = '...';  // the shape you chose, and why
 const S = [ scene ];    // scenes, played in order
 const RENDER = {
   size(scene)       -> [w, h]      // SVG viewBox
   mount(scene)      -> svg string  // static layer, built once when the scene opens
-  frame(scene, t)   -> svg string  // dynamic layer, rebuilt every tick
+  frame(scene, t)   -> svg string  // dynamic layer, rebuilt every step
 };
 const LEGEND  = [[colourToken, label], ...];   // optional; or per-scene scene.legend
 const PALETTE = ['--s0', ...];                 // optional; seven actor colours by default
 
 scene = {
   tag, title, sub,        // header; title may contain <em>
-  fin,                    // last tick of this scene
-  notes: [[tick, text, isKey?]],
+  fin,                    // last step of this scene
+  notes: [[step, text, isKey?]],
   stats: [{ label, tone: 'bad'|'good', value: t => string }],
   legend?, foot?          // foot: the model's assumptions and parameter values
 }
@@ -81,7 +107,7 @@ thing they describe happens. A static caption is a legend, not an annotation.
   items that completed gets *better* as load rises. Assert everything finished, or the headline
   number lies.
 - **Unmatched comparisons.** Vary one parameter; name it in the label.
-- **Differences below your own resolution.** If two configurations land within one tick, the model
+- **Differences below your own resolution.** If two configurations land within one step, the model
   cannot see the effect — change the resolution or drop the comparison. Never report "they tie"
   about something real; say the model cannot resolve it.
 

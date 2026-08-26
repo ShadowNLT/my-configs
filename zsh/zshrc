@@ -141,10 +141,10 @@ alias cd="z"
 alias cdi="zi"
 
 # Cursor profiles — corporate vs personal (isolated --user-data-dir)
-# Corporate Cursor is the existing ~/.cursor (22 corporate commands, no symlink)
-# Personal Cursor uses Safari for open and a separate data dir
-alias cursor-work='cursor --user-data-dir="$HOME/.cursor" --extensions-dir="$HOME/.cursor/extensions"'
-alias cursor-personal='PATH="$HOME/.claude-safari-shim:$PATH" cursor --user-data-dir="$HOME/.cursor-personal" --extensions-dir="$HOME/.cursor-personal/extensions"'
+# Corporate uses the default data dir (~/Library/Application Support/Cursor), personal is isolated
+# ~/.cursor and ~/.cursor-personal hold commands/extensions only, not the data dir
+alias cursor-work='cursor --user-data-dir="$HOME/Library/Application Support/Cursor" --extensions-dir="$HOME/.cursor/extensions"'
+alias cursor-personal='PATH="$HOME/.claude-safari-shim:$PATH" cursor --user-data-dir="$HOME/Library/Application Support/Cursor-Personal" --extensions-dir="$HOME/.cursor-personal/extensions"'
 alias cursor='cursor-work'
 
 # User configuration

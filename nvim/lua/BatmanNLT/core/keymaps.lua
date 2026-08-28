@@ -41,8 +41,38 @@ end, { desc = "Revive buffer: restart LSP + re-detect filetype" })
 -- has an underscore, and `restart` has none, so it concatenates nil. Detaching
 -- noice's UI handler before :restart sidesteps that and lets the reload complete.
 keymap.set("n", "<leader>qr", function()
-	if vim.fn.getbufinfo({ bufmodified = 1 })[1] then
-		vim.notify("Unsaved changes — :w or :wa before restarting", vim.log.levels.WARN)
+	-- Only block on *real* file buffers that would make `:restart` (= :qall) fail.
+	-- The old check `getbufinfo({bufmodified=1})` matched *any* modified buffer,
+	-- including scratch/nofile/terminal buffers that never block :qall, which
+	-- caused the false "Unsaved changes" warning even with no edits.
+	local modified = {}
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].modified then
+			local bt = vim.bo[buf].buftype
+			if bt == "" or bt == "acwrite" then
+				-- `buflisted` filters out most plugin scratch buffers; also
+				-- allow an unlisted buffer if it actually has a filename (e.g. hidden file buffer)
+				if vim.bo[buf].buflisted or vim.api.nvim_buf_get_name(buf) ~= "" then
+					table.insert(modified, buf)
+				end
+			end
+		end
+	end
+	if #modified > 0 then
+		local names = {}
+		for _, b in ipairs(modified) do
+			local name = vim.api.nvim_buf_get_name(b)
+			if name == "" then
+				name = "[No Name]:" .. b
+			else
+				name = vim.fn.fnamemodify(name, ":~:.")
+			end
+			table.insert(names, name)
+		end
+		vim.notify(
+			"Unsaved changes in: " .. table.concat(names, ", ") .. " — :w or :wa before restarting",
+			vim.log.levels.WARN
+		)
 		return
 	end
 	pcall(function()

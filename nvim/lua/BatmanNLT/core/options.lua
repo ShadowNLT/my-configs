@@ -37,3 +37,5 @@ opt.clipboard:append("unnamedplus") -- Use system clipboard as default register
 -- Split Windows
 opt.splitright = true -- When splitting a window, the original window will go to the right
 opt.splitbelow = true -- When splitting a window, the original window will go to the bottom
+opt.equalalways = true -- Auto-equalize splits when a window is closed/opened
+opt.eadirection = "both" -- Equalize in both directions (also for VimResized autocmd)

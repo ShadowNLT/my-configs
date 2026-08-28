@@ -143,10 +143,10 @@ alias cdi="zi"
 # Cursor profiles — corporate vs personal (isolated --user-data-dir)
 # Corporate uses the default data dir (~/Library/Application Support/Cursor), personal is isolated
 # ~/.cursor and ~/.cursor-personal hold commands/extensions only, not the data dir
-# Use full binary path to avoid alias recursion (cursor -> cursor-work)
 CURSOR_BIN="$HOME/.local/bin/cursor"
-alias cursor-work='$CURSOR_BIN --user-data-dir="$HOME/Library/Application Support/Cursor" --extensions-dir="$HOME/.cursor/extensions"'
-alias cursor-personal='PATH="$HOME/.claude-safari-shim:$PATH" $CURSOR_BIN --user-data-dir="$HOME/Library/Application Support/Cursor-Personal" --extensions-dir="$HOME/.cursor-personal/extensions"'
+cursor-work() { "$CURSOR_BIN" --user-data-dir="$HOME/Library/Application Support/Cursor" --extensions-dir="$HOME/.cursor/extensions" "$@"; }
+cursor-personal() { PATH="$HOME/.claude-safari-shim:$PATH" "$CURSOR_BIN" --user-data-dir="$HOME/Library/Application Support/Cursor-Personal" --extensions-dir="$HOME/.cursor-personal/extensions" "$@"; }
+# default `cursor` remains corporate; use `cursor-personal` for Safari-forced personal profile
 alias cursor='cursor-work'
 
 # User configuration

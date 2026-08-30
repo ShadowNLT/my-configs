@@ -16,7 +16,8 @@ discussion: a file, a diff, a feature being implemented, or a testing strategy. 
 ambiguous which target that is, ask rather than guess.
 
 Do not install this protocol anywhere else; running it means applying the procedure to the
-target. Read `protocols/write-tests/references.md` (same folder) when you need the source URL
+target. Read `references.md` in this protocol folder (sidecar after a command install — see
+`protocols/README.md`; never hardcode a harness home path) when you need the source URL
 for a rule. Cite the episode name in findings.
 
 Source: [testing.googleblog.com](https://testing.googleblog.com/). This is the full write-tests

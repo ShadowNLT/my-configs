@@ -39,8 +39,9 @@ word 'synergy' three times") — replacing the word there would misstate what th
    or explanation that isn't in the source, even if it would make the prose read more smoothly.
    If you're tempted to write "because X" and X isn't in the source, cut the claim or flag it
    (step 5).
-2. **No unexplained jargon or buzzwords.** Check every sentence against `denylist.txt` (bundled
-   alongside this file) and replace hits with their plain equivalents. A real technical term or
+2. **No unexplained jargon or buzzwords.** Check every sentence against `denylist.txt` in this
+   protocol folder (sidecar after a command install — see `protocols/README.md`; never hardcode a
+   harness home path) and replace hits with their plain equivalents. A real technical term or
    proper noun that's genuinely unavoidable may stay, but define it inline in a few words the
    first time it appears. That inline definition is exempt scaffolding, not a new claim — but if
    a specific the source never gave (a number, a name, a "which") would be needed to complete the

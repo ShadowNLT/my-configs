@@ -11,18 +11,13 @@ An atlas is one data file that renders two views: an **interactive isometric map
 
 The reason for this shape: an architecture discussion produces decisions, questions, and vocabulary faster than any one document can hold, and the person you are discussing with wants to *see* the system, not read it. The map is for them; the text twin is for the repo and for you next session; the single source is what keeps the two honest.
 
-This protocol was seeded from `inkboard/system-atlas` (`skills/system-atlas/SKILL.md` + `assets/` + `references/`). The `assets/` and `references/` folders ship beside this file.
+This protocol was seeded from `inkboard/system-atlas` (`skills/system-atlas/SKILL.md` + `assets/` + `references/`).
 
-## Seeding / asset resolution
+## Asset resolution
 
-- **This file** is the command: `protocols/system-atlas/command.md` in the repo, installed to the harness's command directory (e.g. `~/.config/opencode/command/system-atlas.md` for opencode).
-- **Assets**: `assets/template.html`, `assets/build.mjs`, `assets/data.example.mjs` beside this file → installed to `~/.config/opencode/system-atlas/assets/` (opencode) or `~/.claude/skills/system-atlas/assets/` etc. per harness.
-- **References**: `references/design-language.md`, `references/process-and-lessons.md` beside this file.
-- **Evals**: `evals.json` beside this file.
+`assets/`, `references/`, and `evals.json` live in this protocol folder. Never hardcode a harness home path. Resolve them per `protocols/README.md`: this folder in the repo, the skill folder after a skill install, or the command-form sidecar `$CONFIG_DIR/system-atlas/` after a command install (ask for `CONFIG_DIR` if it is not already known). Copy `assets/` into an atlas home from that resolved folder. `system-atlas-update` is always installed alongside this command.
 
-Resolve `assets/` and `references/` relative to wherever this folder was seeded; never hardcode an absolute path. When the command needs to copy `assets/` into an atlas home, copy from that resolved location. This folder installs as a unit.
-
-Upstream source: `https://github.com/inkboard/system-atlas` — update by `git clone --depth 1 https://github.com/inkboard/system-atlas.git /tmp/system-atlas` and re-copy `skills/system-atlas/assets/*`, `references/*`, `SKILL.md` into this folder.
+Upstream source: `https://github.com/inkboard/system-atlas`. Refresh with the `system-atlas-update` protocol rather than cloning by hand.
 
 ## When to reach for it — and when not
 
@@ -36,7 +31,7 @@ Follow the order — each step was earned by a correction the first time round.
 
 1. **Read the inputs before drawing.** The vision doc, the repo's existing surfaces, and whatever prior art the user allows (ask — they may forbid a branch or a source). If you will build on a framework, read its docs first; hand long docs to a subagent with your specific design questions and have it return a primer with gotchas and a "what it does not give us" list. Drawing before this produces boxes that don't map to anything real.
 2. **Discuss before drawing.** Propose the structure in chat, mapped to the runtime's real primitives, and ask only the questions you cannot derive from the repo. Take defaults for the rest and say which. Ask as plain chat text.
-3. **First atlas — the whole system.** Copy `assets/` into the atlas home (`template.html`, `build.mjs`, and `data.example.mjs` renamed to `data.mjs`), fill the data, build, publish. **Where the atlas home is depends on the repo's docs policy.** Some repos commit design docs freely — then `docs/<system>/atlas/` in-tree is right. Other repos deliberately commit only ADRs and `CONTEXT.md`, with specs and evidence going to the issue tracker instead; in that case put the atlas, `SYSTEM.md` and `research/` in a git-ignored scratch directory and attach `SYSTEM.md` plus the research to the spec issue as comments when the spec is published, keeping only `docs/<system>/adr/` and `docs/<system>/CONTEXT.md` in-tree. Ask which policy applies before committing anything. Learned the hard way: committing the whole set produced a 3,900-line docs PR and four review rounds reconciling three restatements of one design — with ADRs plus a glossary only, there is one place to be consistent. If your agent has a design-guidance skill for HTML artifacts, load it before touching the template; read `references/design-language.md` for the visual rules either way. Resolve `assets/` and `references/` relative to this protocol folder per Seeding above.
+3. **First atlas — the whole system.** Copy `assets/` into the atlas home (`template.html`, `build.mjs`, and `data.example.mjs` renamed to `data.mjs`), fill the data, build, publish. **Where the atlas home is depends on the repo's docs policy.** Some repos commit design docs freely — then `docs/<system>/atlas/` in-tree is right. Other repos deliberately commit only ADRs and `CONTEXT.md`, with specs and evidence going to the issue tracker instead; in that case put the atlas, `SYSTEM.md` and `research/` in a git-ignored scratch directory and attach `SYSTEM.md` plus the research to the spec issue as comments when the spec is published, keeping only `docs/<system>/adr/` and `docs/<system>/CONTEXT.md` in-tree. Ask which policy applies before committing anything. Learned the hard way: committing the whole set produced a 3,900-line docs PR and four review rounds reconciling three restatements of one design — with ADRs plus a glossary only, there is one place to be consistent. If your agent has a design-guidance skill for HTML artifacts, load it before touching the template; read `references/design-language.md` for the visual rules either way. Resolve `assets/` and `references/` per Asset resolution above.
 4. **Progressive disclosure.** A whole system at once reads as noise ("hard to parse" was the first correction). Ten-ish chapters; each adds at most three structures and runs one small flow that only touches revealed structures; the last chapter shows everything with a flow picker. Unrevealed structures stay in the index, dimmed, with their chapter number. Panels are summary-first: one sentence, then *Read more* and *Steps* folded.
 5. **Shapes and labels.** Letters on boxes are not enough ("better box shapes/labelling" was the second correction). Give each role a shape and put a readable name label on the canvas under every structure — see design-language.
 6. **Text twin.** `CONTEXT.md` is a glossary and nothing else (domain-model format: the nouns, one line each); ADRs only for decisions that are hard to reverse, surprising without context, and the result of a real trade-off — these two are the in-tree pieces. `SYSTEM.md` is generated and `research/` holds evidence; both live with the atlas (scratch dir or `docs/`, per step 3). Don't open issues unless asked.
@@ -65,7 +60,7 @@ Either way the rule is the same: one URL, republished after every data change, n
 
 Syntax-check the built script (`new Function(js)`), then look at it: serve the folder with a static server and open it in a real browser — `file://` renders as a static snapshot in some in-app browsers and the fonts may not load. Resize to ~1280×800 and screenshot a first chapter, a middle chapter, the last chapter, an inside view, and the light theme. Keep `<meta charset="utf-8">` at the top of the template or arrows render as mojibake. After every decision, grep the outputs for the stale words (`pending`, the old model name, the rejected design) — the person reads everything.
 
-## Files in this protocol (resolved via Seeding)
+## Files in this protocol (resolved via Asset resolution)
 
 - `assets/template.html` — the atlas renderer (title and top-strip stats injected at build)
 - `assets/build.mjs` — `data.mjs` → `atlas.html` + `SYSTEM.md`

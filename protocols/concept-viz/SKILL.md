@@ -9,8 +9,10 @@ Infer the concept from the conversation — the thing being explained, debugged 
 several are in play, or the target is vague, ask which one and what specifically about it should
 be shown, then let the user correct you before building.
 
-The `template/` folder ships beside this file. Resolve it relative to wherever this folder was
-seeded; never hardcode an absolute path.
+The `template/` folder lives in this protocol folder. Never hardcode a harness home path.
+Resolve it per `protocols/README.md`: this folder in the repo, the skill folder after a skill
+install, or the command-form sidecar (sibling of the commands directory, named `concept-viz/`)
+after a command install.
 
 Turn a concept into an animated page the learner can play, pause, step through and scrub.
 

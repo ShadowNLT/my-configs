@@ -8,8 +8,10 @@ argument-hint: [concept to visualise]
 Target: $ARGUMENTS. If empty or too vague to build from, ask what concept to visualise, and let
 the user correct the mechanism before you build anything.
 
-The `template/` folder ships beside this file. Resolve it relative to wherever this folder was
-seeded; never hardcode an absolute path.
+The `template/` folder lives in this protocol folder. Never hardcode a harness home path.
+Resolve it per `protocols/README.md`: this folder in the repo, the skill folder after a skill
+install, or the command-form sidecar (sibling of the commands directory, named `concept-viz/`)
+after a command install.
 
 Turn a concept into an animated page the learner can play, pause, step through and scrub.
 

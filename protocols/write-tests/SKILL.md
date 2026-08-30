@@ -19,7 +19,8 @@ Target: the tests (or missing tests) in play — a file, a diff, a feature being
 a testing strategy — inferred from the conversation. If it is ambiguous which target that is,
 ask rather than guess.
 
-Read `protocols/write-tests/references.md` (same folder) when you need the source URL for a
+Read `references.md` in this protocol folder (sidecar after a command install — see
+`protocols/README.md`; never hardcode a harness home path) when you need the source URL for a
 rule. Cite the episode name in findings.
 
 Source: [testing.googleblog.com](https://testing.googleblog.com/). This is the full write-tests

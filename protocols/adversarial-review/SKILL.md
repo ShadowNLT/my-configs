@@ -17,7 +17,7 @@ description: >
 
 # Adversarial Review
 
-Version: 5 — 2026-07-22 (bump on every edit; a mirror whose version differs from the repo copy is stale)
+Version: 6 — 2026-08-26 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 
 You are running an autonomous adversarial review. Find every gap, ambiguity, contradiction, or
 missing rule that is meaningful given the user's stated context; try hard to *kill* each
@@ -192,6 +192,15 @@ corroborated by a second hat or survive a dedicated refuter (§5 Round 2); if it
 corroborated, downgrade it (record the downgrade). Confidence also sets refute priority:
 low-confidence findings are attacked first in Round 2.
 
+**Evidence check (orchestrator, once per cycle, before Round 2 closes).** Verify every finding's
+citation against the working copy already embedded in context: a claim about what the target says
+must quote text that occurs verbatim; a claim about what it omits must name a term or topic that
+occurs nowhere. A citation that does not verify **demotes the finding one tier and records the
+demotion** (`evidence: cited text not found in working copy`) — it is never dropped, because an
+unverifiable write-up is a defect in the reviewer, not evidence that the target is sound. This
+check establishes only that the cited text exists or is absent as claimed. It does not establish
+that the citation supports the finding, and no finding is ever labelled proven.
+
 ---
 
 ## 5. The Review
@@ -212,8 +221,10 @@ running it more than once on unchanged reasoning would only reproduce the same f
 
 ### Round 1 — Independent attack
 Each hat attacks the current working copy on its own terms. Tag every finding with tier +
-confidence, and record **hat**, **exact location** (section/rule/step/line), and **concrete
-consequence** (the specific wrong outcome in the user's context).
+confidence, and record **hat**, **exact location** (section/rule/step/line) **with the verbatim
+text it turns on** — the quoted passage for a claim about what the target says, the missing term
+or topic for a claim about what it omits — and **concrete consequence** (the specific wrong
+outcome in the user's context).
 
 - **Parallel by default.** Unless the target is clearly trivial and reversible, run one Agent
   tool call per hat, in parallel, each given only the target text and its own hat's mandate (not

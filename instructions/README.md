@@ -12,7 +12,8 @@ zsh/           zshrc + p10k.zsh (symlinked to ~/.zshrc and ~/.p10k.zsh)
 yazi/          yazi file manager config
 docs/          Cheat sheets (nvim-cheatsheet.md, tmux-cheatsheet.md)
 setup.sh       Full bootstrap script for a fresh Mac
-protocols/     Agent-agnostic procedures (agent decides skill vs command on install)
+protocols/     Agent-agnostic procedures (agent decides skill vs command on install);
+               teaching-standard/ is the canonical Teaching Standard (harness sidecar)
 corporate/     Work agent seed: corporate-agent.md + work slash commands
 personal/      Personal agent seed: AGENT.md (no work commands)
 ```

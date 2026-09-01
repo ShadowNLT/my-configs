@@ -9,7 +9,7 @@ Target: $ARGUMENTS — or, if empty, the most recent complex/technical thing dis
 
 Goal: make the target genuinely understood by someone with no prior background — not simplified to the point of being wrong, not jargon relabeled, and not longer than the actual dependency chain requires. Every new idea is built entirely out of ideas already established earlier in the explanation, or true common knowledge — never introduced by assuming familiarity.
 
-This command is the **command-form embodiment of the Teaching Standard's TS-1** (see `Teaching-Standard.md`) — the same "derive everything, no undefined jargon, scaled to the real dependency chain" bar that governs teaching in every other command. When the target is code, also cite it by `repo/path` (TS-2); keep the step-8 confirming question plain, never cryptic (TS-4).
+This command is the **command-form embodiment of Teaching Standard §Procedure P2+P5 (TS-1)** — see `{{TEACHING_STANDARD_PATH}}`. When the target is code, also cite it by `repo/path` (TS-2); keep the step-8 confirming question plain, never cryptic (TS-4).
 
 ## Process (your reasoning steps — not a template to reproduce in the output)
 

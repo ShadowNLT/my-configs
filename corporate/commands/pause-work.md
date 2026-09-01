@@ -7,7 +7,8 @@ argument-hint: [optional one-line reason for pausing]
 
 Use this when the current conversation needs to end (context limit, token budget, a break, switching machines) but the work itself is **not** done — contrast with `/end-work`, which closes the session out. The next agent session picks this up with `/resume-work`.
 
-Vault root: `/Users/nlekanetamba/Documents/DigitalBrain`
+Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
+Teaching Standard: `{{TEACHING_STANDARD_PATH}}`
 Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
 
 1. Determine the current repo (`git rev-parse --show-toplevel`, basename it). Then find the session note to pause, matching on *this chat*, not on recency:
@@ -28,7 +29,7 @@ Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
      - `### Relevant files` — paths (and line numbers where it matters) worth reading first next session.
      - `### Pedagogy` *(for every session that ran a tutorial — routine `4a`, code-review `4b`, issue-work `4c`, feature `4d`; omit only for a session with genuinely no tutorial)* — the checkpoint that lets `/resume-work` re-enter the teaching flow without losing a passed gate or re-quizzing it. Because one session can teach+gate more than one issue (TS-7 re-arms on each materially-different issue worked), this is a **per-work-item list**, not a single gate — one row per item worked this session:
        `- item: <short id/desc> | gate1: passed|open | gate2: passed|open|n/a | pos: step N of M|not-started|n/a | status: active|done|opted-out|parked`
-       Plus the session `type:`, and — if the pause happened during `/end-work`'s sandbox — the sandbox path (the note's frontmatter already carries `sandbox: in-progress`). **Presentation is deliberately NOT recorded as durably done:** TS-7 requires each fresh session to re-present a still-open gate's material before running it, so there is no `presented:` flag to go stale. **Per-type notes:** `4c`/`4d` use all fields; **`4a`** the same, but gates were run *proportionately*; **`4b`** gates diff-comprehension only — `gate2: n/a`, `pos: n/a`. When a pause happens *inside* `/end-work`'s sandbox, `/end-work` writes this block itself rather than routing through `/pause-work`. See the Phase 1–4 flow in `start-work.md`, TS-7 in `Teaching-Standard.md`, and the sandbox step in `end-work.md`.
+       Plus the session `type:`, and — if the pause happened during `/end-work`'s sandbox — the sandbox path (the note's frontmatter already carries `sandbox: in-progress`). **Presentation is deliberately NOT recorded as durably done:** TS-7 requires each fresh session to re-present a still-open gate's material before running it, so there is no `presented:` flag to go stale. **Per-type notes:** `4c`/`4d` use all fields; **`4a`** the same, but gates were run *proportionately*; **`4b`** gates diff-comprehension only — `gate2: n/a`, `pos: n/a`. When a pause happens *inside* `/end-work`'s sandbox, `/end-work` writes this block itself rather than routing through `/pause-work`. See the Phase 1–4 flow in `start-work.md`, TS-7 in `{{TEACHING_STANDARD_PATH}}`, and the sandbox step in `end-work.md`.
    - Append one line to `## Log`: `paused at <timestamp> — <reason>`, where `<reason>` is `$ARGUMENTS` if given, else a one-line inferred summary of the current task.
 
 4. Tell the user in ≤2 lines: paused, the session note path, and that their next session should run `/resume-work` — it will detect and offer to resume this automatically. Keep it short.

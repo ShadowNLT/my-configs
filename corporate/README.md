@@ -12,10 +12,12 @@ Work profile only. The personal profile lives in `personal/`; never seed it from
 ## Variables (resolved at seed time)
 
 Ask the user which harnesses to seed as work harnesses and **where each one
-lives** (`CONFIG_DIR`, `COMMANDS_DIR`, and harness memory path if needed). Do
-not assume a product maps to one directory. Then substitute:
+lives** (`CONFIG_DIR`, `COMMANDS_DIR`, knowledge vault root, and harness memory
+path if needed). Do not assume a product maps to one directory. Then substitute:
 
-- `{{VAULT_AGENT_DIR}}` -> `~/Documents/DigitalBrain/Agent`
+- `{{KNOWLEDGE_VAULT_ROOT}}` -> the knowledge/work vault root the user named (corporate work data: sessions, curricula, Concepts/, Learning/, etc.)
+- `{{VAULT_AGENT_DIR}}` -> `$KNOWLEDGE_VAULT_ROOT/Agent`
+- `{{TEACHING_STANDARD_PATH}}` -> `$CONFIG_DIR/teaching-standard/Teaching-Standard.md`
 - `{{AGENT_CONFIG_DIR}}` -> the `CONFIG_DIR` the user named for this harness
 - `{{AGENT_COMMANDS_DIR}}` -> the `COMMANDS_DIR` the user named for this harness
 - `{{AGENT_HARNESS_MEMORY}}` -> the harness memory path the user named (if any)
@@ -26,13 +28,19 @@ Do not rename them for a product or make one harness's home directory authoritat
 
 ## Sidecars
 
-`concept-viz` and `layman-terms` are not self-contained `.md` files. After
-copying commands, copy their supporting files from `protocols/` into
+After copying commands, copy protocol sidecars from `protocols/` into
 `$CONFIG_DIR/<name>/` (see `protocols/README.md`). Do not skip this; a command
 directory cannot hold those files.
 
+Required for corporate work harnesses:
+
+- `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault)
+- `concept-viz/template/`
+- `layman-terms/denylist.txt`
+
 ```bash
-mkdir -p "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
@@ -48,19 +56,37 @@ A personal harness never gets this folder's `commands/` dump or
 
 ## Seed (agent copies, never symlinks)
 
-Ask which harnesses and their `CONFIG_DIR` / `COMMANDS_DIR`. Echo the paths and
-get confirmation, then:
+Ask which harnesses and their `CONFIG_DIR`, `COMMANDS_DIR`, and
+`KNOWLEDGE_VAULT_ROOT`. Echo the paths and get confirmation, then:
 
 ```bash
 src=corporate/commands
 dst="$COMMANDS_DIR"
+CONFIG_DIR="$CONFIG_DIR"   # harness config root — user-named
+KNOWLEDGE_VAULT_ROOT="$KNOWLEDGE_VAULT_ROOT"   # user-named
+TEACHING_STANDARD_PATH="$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 AGENT_SOURCE_FILE="$(pwd)/corporate/corporate-agent.md"
 mkdir -p "$dst"
 for f in "$src"/*.md; do
-  sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g; s|{{AGENT_SOURCE_FILE}}|$AGENT_SOURCE_FILE|g" "$f" > "$dst/$(basename "$f")"
+  sed \
+    "s|{{KNOWLEDGE_VAULT_ROOT}}|$KNOWLEDGE_VAULT_ROOT|g; \
+     s|{{VAULT_AGENT_DIR}}|$KNOWLEDGE_VAULT_ROOT/Agent|g; \
+     s|{{TEACHING_STANDARD_PATH}}|$TEACHING_STANDARD_PATH|g; \
+     s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; \
+     s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; \
+     s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g; \
+     s|{{AGENT_SOURCE_FILE}}|$AGENT_SOURCE_FILE|g" \
+    "$f" > "$dst/$(basename "$f")"
 done
-sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
-mkdir -p "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+sed \
+  "s|{{KNOWLEDGE_VAULT_ROOT}}|$KNOWLEDGE_VAULT_ROOT|g; \
+   s|{{VAULT_AGENT_DIR}}|$KNOWLEDGE_VAULT_ROOT/Agent|g; \
+   s|{{TEACHING_STANDARD_PATH}}|$TEACHING_STANDARD_PATH|g; \
+   s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; \
+   s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" \
+  "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
+mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```

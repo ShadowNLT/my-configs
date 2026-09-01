@@ -71,6 +71,7 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | `concept-viz` | `template/` |
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
+| `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
 
 `system-atlas` and `system-atlas-update` are a pair. Whenever you install
 `system-atlas`, also copy `protocols/system-atlas-update/command.md` to
@@ -105,6 +106,10 @@ cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 cp protocols/write-tests/command.md "$COMMANDS_DIR/write-tests.md"
 mkdir -p "$CONFIG_DIR/write-tests"
 cp protocols/write-tests/references.md "$CONFIG_DIR/write-tests/"
+
+# teaching-standard (every harness that teaches — corporate or personal)
+mkdir -p "$CONFIG_DIR/teaching-standard"
+cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
 ```
 
 If `concept-viz` or `layman-terms` were already seeded from `corporate/commands/`

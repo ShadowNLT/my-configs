@@ -5,7 +5,7 @@ argument-hint: (no arguments needed)
 
 # End Session
 
-Vault root: `/Users/nlekanetamba/Documents/DigitalBrain`. This is the authoritative procedure for each track's `Engine/00-How-This-Works.md` end-of-session rule — those files point here rather than restating these steps, so there's one place this logic lives. You (the user) can invoke this at any time; Claude doesn't run it unprompted.
+Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`. Teaching Standard: `{{TEACHING_STANDARD_PATH}}`. This is the authoritative procedure for each track's `Engine/00-How-This-Works.md` end-of-session rule — those files point here rather than restating these steps, so there's one place this logic lives. You (the user) can invoke this at any time; Claude doesn't run it unprompted.
 
 A module's own ID prefix (`M` or `W`) determines which curriculum root it belongs to (`Vivenu/Onboarding/` or `Vivenu/Onboarding-Web3/` — see `Vivenu/Track-State.md` for the full track table). Everything below operates per-module against that module's own track, not against `current-track` — a session resolved onto a specific track by `/new-session` writes to that track regardless of what's currently active.
 

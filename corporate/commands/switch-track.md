@@ -5,7 +5,7 @@ argument-hint: [web3 | checkout | leave blank to just check]
 
 # Switch Track
 
-Vault root: `/Users/nlekanetamba/Documents/DigitalBrain`. Changes `current-track` in `Vivenu/Track-State.md` — the flag `/new-session` reads when a request doesn't name a track-prefixed module explicitly. See `Vivenu/Track-State.md` itself for the full mechanics (why this file exists, how the staleness guard works, why module IDs are prefixed per track).
+Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`. Changes `current-track` in that vault's track-state file — the flag `/new-session` reads when a request doesn't name a track-prefixed module explicitly. See that track-state file itself for the full mechanics (why this file exists, how the staleness guard works, why module IDs are prefixed per track).
 
 This command **only** changes routing. It never touches either curriculum's content, spaced-repetition state, or Progress Dashboards.
 

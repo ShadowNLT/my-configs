@@ -7,7 +7,8 @@ argument-hint: (no arguments needed)
 
 Picks up a session paused with `/pause-work`. Run this at the start of a fresh agent session.
 
-Vault root: `/Users/nlekanetamba/Documents/DigitalBrain`
+Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
+Teaching Standard: `{{TEACHING_STANDARD_PATH}}`
 Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
 
 1. Determine the current repo (`git rev-parse --show-toplevel`, basename it). If it fails (not a git repo), tell the user and stop.
@@ -34,7 +35,7 @@ Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
 
 7. Continue the work described in `### What's next`.
 
-   **If this is a tutorial session (`4a`/`4b`/`4c`/`4d`) with a `### Pedagogy` checkpoint, re-enter the teaching flow at that point rather than restarting it** (see the Phase 1–4 flow in `start-work.md` and the sandbox step in `end-work.md`). For **4a** resume the proportionate gates/tutorial as recorded; for **4b** resume the diff-comprehension gate (there is no Phase 4). The **Teaching Standard (`Teaching-Standard.md`) applies to the resumed teaching exactly as in the original session** — TS-1 (plain, first-principles), TS-2 (cite `repo/path`), TS-3 (lead each Phase-4 step with the why-here), TS-4 (plain hints), TS-5 (the user writes the production code / sandbox fix), TS-6 (the gate/reveal ladder), **TS-7 (teach before gate — re-present a still-open gate's material *this session* before running it)**:
+   **If this is a tutorial session (`4a`/`4b`/`4c`/`4d`) with a `### Pedagogy` checkpoint, re-enter the teaching flow at that point rather than restarting it** (see the Phase 1–4 flow in `start-work.md` and the sandbox step in `end-work.md`). For **4a** resume the proportionate gates/tutorial as recorded; for **4b** resume the diff-comprehension gate (there is no Phase 4). **`{{TEACHING_STANDARD_PATH}}` applies to the resumed teaching exactly as in the original session** — §Procedure + TS-1, TS-2, TS-3, TS-4, TS-5, TS-6, **TS-7 (re-present still-open gate material *this session* before running it)**:
    - **Do not re-quiz a `passed` gate** — treat `gate1: passed`/`gate2: passed` as already cleared (a `4b` session has only `gate1`; its `gate2` is `n/a`). **Resume an `open` gate by first re-presenting the material it tests this session, then running the ladder (TS-7)** — the 0→100 picture for an open Gate 1, the Phase-2 solution for an open Gate 2 — because presentation is not durably checkpointed. Resume the tutorial at the recorded `step N of M`; don't restart from step 1.
    - **Multiple work-items in one `### Pedagogy` block** (a session that taught+gated issue A, then re-armed for issue B — see TS-7): re-enter **each item at its own recorded state**; a `passed`/`done` item stays cleared, an `open` item re-presents-then-gates per the rule above, an `opted-out` item is not re-taught. Match `gate1: passed` to the item it belongs to — never to the wrong issue.
    - **A materially-different issue surfacing after resume** is handled exactly as in `start-work` (the TS-7 fork): stop, surface **work-now vs park**; if worked, its fix-edit is blocked until its picture+solution are taught *this* session.

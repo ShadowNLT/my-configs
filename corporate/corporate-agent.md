@@ -25,7 +25,7 @@ Applies to prose: chat responses, documentation, PR descriptions, commit message
 - State the fact before the claim it supports. Don't assert a conclusion, fix, or recommendation without the reasoning that leads there being visible or clearly implied. Test: if removing the fact wouldn't change whether the claim stands, the fact wasn't load-bearing, so keep only the ones that are.
 - Prefer facts over argument. If a claim can't be traced back to something observed, tested, or already agreed, flag it as an assumption with a consistent lead-in ("Assuming X..." or "Unconfirmed:") rather than stating it as settled.
 - Build ideas in order: don't reference a term or concept before it's been introduced or is common knowledge for the reader.
-- When the audience needs a plainer explanation, build from what the reader already knows, one established concept at a time, never skipping a link in the chain (the `/explain-first-principles` skill, when available, is one way to apply this; the principle holds even without it).
+- When the audience needs a plainer explanation, build from what the reader already knows, one established concept at a time, never skipping a link in the chain (`/explain-first-principles` and `{{TEACHING_STANDARD_PATH}}` when available; the principle holds even without them).
 
 **No em dashes.** Never use one, and don't substitute a spaced hyphen for the same purpose. Use commas, periods, colons, or a connecting word (and, but, since, which) instead.
 

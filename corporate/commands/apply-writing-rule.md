@@ -6,8 +6,6 @@ description: >
   trail to update-writing-rule so it can judge whether the rules themselves need a fix.
 argument-hint: [optional: paste or point at the specific output to iterate on, if it's not the immediately preceding reply]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Apply Writing Rule
 

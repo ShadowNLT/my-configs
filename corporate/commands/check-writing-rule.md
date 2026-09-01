@@ -2,8 +2,6 @@
 description: Audit a piece of text against the Writing style rules in AGENT.md, applying only the rules relevant to what kind of artifact it is, and report findings without editing anything.
 argument-hint: [the text, file, or artifact to check, or leave blank to target the most recent draft in this conversation]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Check Writing Rule
 

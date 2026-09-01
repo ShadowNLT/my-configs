@@ -1,24 +1,27 @@
-# Corporate — Agent-agnostic source of truth
+# Corporate — durable agent seed
 
-This folder survives a machine reset. An agent seeds it to its own config dir; no symlink.
+This folder survives a machine reset. An agent seeds it to a harness config dir; no symlink.
+
+Work profile only. The personal profile lives in `personal/`; never seed it from here.
 
 ## What lives here
-- `AGENT.md` — the durable, agent-agnostic source for global rules.
-- `commands/` — 21 corporate slash commands (excludes `adversarial-review` which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
+
+- `corporate-agent.md` — work-profile global rules. Seeded to a harness as `$CONFIG_DIR/AGENT.md`.
+- `commands/` — 21 work slash commands (excludes `adversarial-review`, which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
 
 ## Variables (resolved at seed time)
 
-Ask the user which harnesses to seed and **where each one lives** (`CONFIG_DIR`,
-`COMMANDS_DIR`, and harness memory path if needed). Do not assume a product
-maps to one directory. Then substitute:
+Ask the user which harnesses to seed as work harnesses and **where each one
+lives** (`CONFIG_DIR`, `COMMANDS_DIR`, and harness memory path if needed). Do
+not assume a product maps to one directory. Then substitute:
 
 - `{{VAULT_AGENT_DIR}}` -> `~/Documents/DigitalBrain/Agent`
 - `{{AGENT_CONFIG_DIR}}` -> the `CONFIG_DIR` the user named for this harness
 - `{{AGENT_COMMANDS_DIR}}` -> the `COMMANDS_DIR` the user named for this harness
 - `{{AGENT_HARNESS_MEMORY}}` -> the harness memory path the user named (if any)
-- `{{AGENT_SOURCE_FILE}}` -> the absolute path to this checkout's `corporate/AGENT.md`
+- `{{AGENT_SOURCE_FILE}}` -> the absolute path to this checkout's `corporate/corporate-agent.md`
 
-Every seeded harness uses the same names: `AGENT.md`, `AGENT-review-log.md`, and `Agent/`.
+Every seeded harness uses the same live names: `AGENT.md`, `AGENT-review-log.md`, and `Agent/`.
 Do not rename them for a product or make one harness's home directory authoritative for another.
 
 ## Sidecars
@@ -40,6 +43,9 @@ cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 `protocols/` **together with** `system-atlas-update` (never one without the other).
 See `protocols/README.md`.
 
+A personal harness never gets this folder's `commands/` dump or
+`corporate-agent.md`. Seed it from `personal/` and `protocols/` instead.
+
 ## Seed (agent copies, never symlinks)
 
 Ask which harnesses and their `CONFIG_DIR` / `COMMANDS_DIR`. Echo the paths and
@@ -48,18 +54,18 @@ get confirmation, then:
 ```bash
 src=corporate/commands
 dst="$COMMANDS_DIR"
-AGENT_SOURCE_FILE="$(pwd)/corporate/AGENT.md"
+AGENT_SOURCE_FILE="$(pwd)/corporate/corporate-agent.md"
 mkdir -p "$dst"
 for f in "$src"/*.md; do
   sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g; s|{{AGENT_SOURCE_FILE}}|$AGENT_SOURCE_FILE|g" "$f" > "$dst/$(basename "$f")"
 done
-cp "$AGENT_SOURCE_FILE" "$CONFIG_DIR/AGENT.md"
+sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
 mkdir -p "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
 
-Repeat once per harness the user named. Do not keep a per-product copy of this
-block with baked-in home paths. A harness that cannot load `AGENT.md` directly
+Repeat once per work harness the user named. Do not keep a per-product copy of
+this block with baked-in home paths. A harness that cannot load `AGENT.md` directly
 needs an adapter outside this source tree; the adapter must point to the seeded
 `AGENT.md` and must never become a second source of truth.

@@ -2,8 +2,6 @@
 description: Pause the current tracked work session — checkpoint state into the session note so a fresh agent session can resume it. Does not end the session.
 argument-hint: [optional one-line reason for pausing]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Pause Work
 

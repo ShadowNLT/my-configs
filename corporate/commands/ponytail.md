@@ -2,8 +2,6 @@
 description: Keep a change as minimal as possible without cutting anything that actually needs to stay — the best code is the code you don't have to write
 argument-hint: [the plan, requirement, or diff to check, or leave blank to target the most recent one]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Ponytail
 

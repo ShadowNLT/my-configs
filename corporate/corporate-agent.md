@@ -1,8 +1,3 @@
-<!-- Agent-agnostic: variables resolved at seed time by the seeding agent -->
-<!-- {{AGENT_CONFIG_DIR}} -> the config root chosen for the target harness -->
-<!-- {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands or command -->
-<!-- {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent -->
-
 # Global rules — Agent-agnostic
 
 These apply across every project, not just one repo.

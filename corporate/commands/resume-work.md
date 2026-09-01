@@ -2,8 +2,6 @@
 description: Resume a paused work session — reads the handoff from the session note and picks the work back up in this fresh agent session
 argument-hint: (no arguments needed)
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Resume Work
 

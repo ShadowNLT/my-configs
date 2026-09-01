@@ -2,8 +2,6 @@
 description: Verify an onboarding curriculum against the latest vivenu-core, and surface new material
 argument-hint: [optional: "web3" | "checkout" — defaults to the active track]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Sync Core
 

@@ -2,8 +2,6 @@
 description: Start a tracked work session on the current repo and log it to the DigitalBrain vault
 argument-hint: [optional one-line goal for this session]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Start Work
 

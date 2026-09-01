@@ -2,8 +2,6 @@
 description: Start an onboarding session on the active track (or a named one) — checks what's due before teaching or quizzing
 argument-hint: [optional: "start W0X"/"start M0X", "quiz me on W0X"/"M0X", "continue W0X"/"M0X", or leave blank]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # New Session
 

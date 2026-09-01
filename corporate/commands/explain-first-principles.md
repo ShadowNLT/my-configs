@@ -2,8 +2,6 @@
 description: Explain any input from first principles, scaled to how deep it actually needs to go, each concept built strictly on ones already established
 argument-hint: [term, question, block of text/code, or leave blank to target the most recent complex thing discussed]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Layman Term
 

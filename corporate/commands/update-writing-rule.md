@@ -7,8 +7,6 @@ description: >
   write it to the durable source and this harness's seeded copy after the user signs off.
 argument-hint: [optional: paste or point at the specific output that fell short, if it's not the immediately preceding reply]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path, {{AGENT_SOURCE_FILE}} -> absolute path to corporate/AGENT.md in the source checkout -->
-
 
 # Update Writing Rule
 

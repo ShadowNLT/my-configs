@@ -2,8 +2,6 @@
 description: Understand the blast radius of a proposed change before implementing it — read and reason about callers, downstream effects, and pattern-fit, not just grep for symbol occurrences
 argument-hint: [the change or surface to analyze, or leave blank to target the most recently proposed change]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # Code Pi
 

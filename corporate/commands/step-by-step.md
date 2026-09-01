@@ -2,8 +2,6 @@
 description: Walk the user through achieving a goal ONE step at a time, with a checkpoint after each step — never advance until the current step's result is explicitly confirmed
 argument-hint: [the goal to walk toward, or leave blank to infer]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
-
 
 # step-by-step
 

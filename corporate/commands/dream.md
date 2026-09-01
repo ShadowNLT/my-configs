@@ -2,7 +2,7 @@
 description: Periodic consolidation pass across the whole vault + memory system — merge, prune, connect, and surface insights
 argument-hint: (no arguments needed)
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # Dream

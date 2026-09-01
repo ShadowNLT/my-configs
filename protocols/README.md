@@ -42,7 +42,7 @@ Then install:
   Assets then sit beside `SKILL.md`. If they did not give a skills dir, use
   command form plus sidecar only.
 - **Standing rule or convention** — neither form; it belongs in project
-  instructions (`CLAUDE.md`, `AGENTS.md`, rules) rather than a command or skill.
+  instructions (`AGENT.md`, `AGENTS.md`, rules) rather than a command or skill.
 
 Only install when the user asks. Echo the resolved `CONFIG_DIR` /
 `COMMANDS_DIR` (and `SKILLS_DIR` if any) and get confirmation before writing.

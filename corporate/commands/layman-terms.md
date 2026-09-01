@@ -2,7 +2,7 @@
 description: Rewrite a piece of text into plain language understandable in a single read, without sacrificing length beyond what clarity requires — a clarity rewrite, never a summary
 argument-hint: [the text to rewrite, or leave blank to target the most recent text in the conversation]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # Layman Terms

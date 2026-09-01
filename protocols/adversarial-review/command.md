@@ -107,8 +107,8 @@ another. It may never be used to suppress a finding's *existence*; only to tier 
 
 ## 2. Assemble the Hat Stack
 
-**Step 1 — Read project context** (priority order): `.claude/CLAUDE.md` / `CLAUDE.md` in the
-working dir or any parent, then `PROCESS.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, or any file
+**Step 1 — Read project context** (priority order): `AGENT.md` / `AGENTS.md` in the working
+dir or any parent, then `PROCESS.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, or any file
 describing how the project works. **Project context overrides inference** — use any hat stack,
 domain vocabulary, or role definitions it declares.
 

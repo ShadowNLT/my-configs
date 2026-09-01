@@ -2,7 +2,7 @@
 description: Close out the current tracked work session and record what happened in the DigitalBrain vault
 argument-hint: (no arguments needed)
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # End Work
@@ -10,7 +10,7 @@ argument-hint: (no arguments needed)
 Vault root: `/Users/nlekanetamba/Documents/DigitalBrain`
 
 1. Determine the current repo (`git rev-parse --show-toplevel`, basename it). Then find the session note to close, matching on *this agent session*, not on recency:
-   - Read **this** agent session's id — each agent exposes its own, so use yours: Claude Code → `echo "$CLAUDE_CODE_SESSION_ID"`, Cursor → `echo "$CURSOR_CONVERSATION_ID"`, any other agent → whatever session id it exposes. Don't reach for a Claude-Code variable if you aren't Claude Code.
+   - Read the session identifier exposed by the current harness. Do not guess another harness's variable. If this harness exposes no session identifier, leave `agent_id` blank and match the work note by its stable `session_uid`.
    - Look under `Work/<repo>/Sessions/` for a `status: in-progress` note whose frontmatter `agent_id` equals that value. (On older notes the owner id may sit under the legacy `session_id` name — that legacy field is an *agent* id, distinct from the new stable `session_uid`; fall back to it. Never match on `session_uid` — it identifies the session across agents, not the running agent.) **If exactly one matches, use it** — this is the normal path and closes the session this agent actually started.
    - **If none matches** (a legacy note predating the `agent_id` field, or every in-progress note belongs to another agent session): do NOT silently pick the newest — that's the bug this matching exists to prevent. List every `status: in-progress` note for the repo with its `goal` and `started_at`, and ask the user which one to close (or whether to close none). Only proceed on their pick.
    - **If no `status: in-progress` note exists at all**, do not fabricate one from git (with no note there's no `agent_id`/start-point to bound *this* session's commits, and a fabricated note would have no `type:`). If real work happened without a tracked session, tell the user the session was untracked and **offer to create a note now, asking them for the goal and the `type:`** (user-supplied, not git-inferred). If they decline, leave it untracked and stop — never invent one silently.

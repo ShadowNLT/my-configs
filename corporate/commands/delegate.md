@@ -2,7 +2,7 @@
 description: Hand off one independent subtask to a DIFFERENT AI tool (Cursor, a CLI agent like Gemini/Codex, another terminal) while you keep working the rest, then resume and verify when the user says the other tool is done
 argument-hint: [the subtask to hand off, or leave blank to infer]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # delegate

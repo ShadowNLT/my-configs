@@ -3,7 +3,7 @@
 This folder survives a machine reset. An agent seeds it to its own config dir; no symlink.
 
 ## What lives here
-- `AGENT.md` — global rules (was `CLAUDE.md` in some harnesses). Agent-agnostic.
+- `AGENT.md` — the durable, agent-agnostic source for global rules.
 - `commands/` — 21 corporate slash commands (excludes `adversarial-review` which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
 
 ## Variables (resolved at seed time)
@@ -16,7 +16,10 @@ maps to one directory. Then substitute:
 - `{{AGENT_CONFIG_DIR}}` -> the `CONFIG_DIR` the user named for this harness
 - `{{AGENT_COMMANDS_DIR}}` -> the `COMMANDS_DIR` the user named for this harness
 - `{{AGENT_HARNESS_MEMORY}}` -> the harness memory path the user named (if any)
-- `AGENT.md` replaces `CLAUDE.md`, `AGENT-review-log.md` replaces `CLAUDE-review-log.md`, `Agent/` replaces `Claude/` in vault.
+- `{{AGENT_SOURCE_FILE}}` -> the absolute path to this checkout's `corporate/AGENT.md`
+
+Every seeded harness uses the same names: `AGENT.md`, `AGENT-review-log.md`, and `Agent/`.
+Do not rename them for a product or make one harness's home directory authoritative for another.
 
 ## Sidecars
 
@@ -39,26 +42,24 @@ See `protocols/README.md`.
 
 ## Seed (agent copies, never symlinks)
 
-Ask which harnesses and their `CONFIG_DIR` / `COMMANDS_DIR` (and whether
-`AGENT.md` should also be copied as `CLAUDE.md` for that harness). Echo the
-paths and get confirmation, then:
+Ask which harnesses and their `CONFIG_DIR` / `COMMANDS_DIR`. Echo the paths and
+get confirmation, then:
 
 ```bash
 src=corporate/commands
 dst="$COMMANDS_DIR"
+AGENT_SOURCE_FILE="$(pwd)/corporate/AGENT.md"
 mkdir -p "$dst"
 for f in "$src"/*.md; do
-  sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g" "$f" > "$dst/$(basename "$f")"
+  sed "s|{{VAULT_AGENT_DIR}}|~/Documents/DigitalBrain/Agent|g; s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g; s|{{AGENT_SOURCE_FILE}}|$AGENT_SOURCE_FILE|g" "$f" > "$dst/$(basename "$f")"
 done
-cp corporate/AGENT.md "$CONFIG_DIR/AGENT.md"
-# if this harness still reads CLAUDE.md, also:
-# cp corporate/AGENT.md "$CONFIG_DIR/CLAUDE.md"
+cp "$AGENT_SOURCE_FILE" "$CONFIG_DIR/AGENT.md"
 mkdir -p "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
 
 Repeat once per harness the user named. Do not keep a per-product copy of this
-block with baked-in home paths.
-
-Vault is already renamed: `~/Documents/DigitalBrain/Claude` -> `~/Documents/DigitalBrain/Agent` (no shim, all 65 vault notes patched).
+block with baked-in home paths. A harness that cannot load `AGENT.md` directly
+needs an adapter outside this source tree; the adapter must point to the seeded
+`AGENT.md` and must never become a second source of truth.

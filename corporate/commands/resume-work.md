@@ -2,7 +2,7 @@
 description: Resume a paused work session — reads the handoff from the session note and picks the work back up in this fresh agent session
 argument-hint: (no arguments needed)
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # Resume Work
@@ -25,7 +25,7 @@ Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
 4. Read the note's `## Handoff` section and summarize its `### What's next` back to the user in 2-3 sentences so both sides are aligned on where things stand. **For any tutorial session (`4a`/`4b`/`4c`/`4d`), also read the `### Pedagogy` subsection** (if present) — it records how far the comprehension-gated tutorial / sandbox got, and step 7 re-enters at exactly that point.
 
 5. Update the session note in place: clear `paused_at` (blank it), then **re-stamp `agent_id` — but leave `session_uid` exactly as it is.** These two do opposite things on resume:
-   - `agent_id` → set to *this* agent session's id, because resume runs in a **new** agent session: Claude Code → `echo "$CLAUDE_CODE_SESSION_ID"`, Cursor → `echo "$CURSOR_CONVERSATION_ID"`, any other agent stamps its own. Add the field if the note predates it; a legacy note may carry this ownership id under the old `session_id` name instead — rename that to `agent_id` as you re-stamp. Re-stamping is what lets a later `/pause-work` or `/end-work` in this resuming session find the note by agent match — the paused note still carries the id of the agent session that paused it, which is no longer this one.
+   - `agent_id` → set to the session identifier exposed by the current harness, because resume runs in a **new** agent session. Add the field if the note predates it; a legacy note may carry this ownership id under the old `session_id` name instead — rename that to `agent_id` as you re-stamp. Re-stamping is what lets a later `/pause-work` or `/end-work` in this resuming session find the note by agent match — the paused note still carries the id of the agent session that paused it, which is no longer this one. If this harness exposes no session identifier, leave `agent_id` blank and use the stable `session_uid`.
    - `session_uid` → **do not change it.** It is the session's stable identity across every handoff; the whole point is that it stays constant no matter how many agents pass the work along. If the note predates `session_uid` and has none, back-fill one now with `uuidgen` (a one-time addition — this is the only place other than `/start-work` that ever writes it), so the resumed session gains a durable id going forward.
 
    Append a `## Log` line `resumed at <timestamp>`. If the note predates journaling and has no `## Journal` section, add an empty one now (placed after `## Goal`) so the rest of this session has somewhere to journal into.

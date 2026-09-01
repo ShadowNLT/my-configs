@@ -2,7 +2,7 @@
 description: Build an animated explainer of a concept and open it in the browser. Choose the shape that makes the mechanism clearest — graph, tree, grid, state machine, flow, timeline — and write its renderer; a shared shell supplies controls, in-frame legend, live annotations and notes. Iterative: the first render is a draft.
 argument-hint: [concept to visualise]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # Concept Viz

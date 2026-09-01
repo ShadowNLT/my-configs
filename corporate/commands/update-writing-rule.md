@@ -4,10 +4,10 @@ description: >
   When an assistant reply reads too AI-generated or otherwise falls short, even though it may
   already pass every rule in {{AGENT_CONFIG_DIR}}/AGENT.md's Writing style section, diagnose exactly what
   was wrong, draft a surgical update to that section, adversarial-review the draft, and only
-  write it to disk after the user signs off.
+  write it to the durable source and this harness's seeded copy after the user signs off.
 argument-hint: [optional: paste or point at the specific output that fell short, if it's not the immediately preceding reply]
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path, {{AGENT_SOURCE_FILE}} -> absolute path to corporate/AGENT.md in the source checkout -->
 
 
 # Update Writing Rule
@@ -28,6 +28,19 @@ Triggered when the user flags an assistant output, usually the most recent one, 
 
 5. **Present the diagnosis and the reviewed draft together.** Quote the exact AGENT.md text that would change, and wait for explicit sign-off. Don't apply anything before the user replies. When the diagnosis is trail-derived, don't reproduce the whole trail here, quote the specific round(s) that drove it (per step 1) alongside the proposed AGENT.md text, and summarize in one line how many rounds or what pattern led here, so the user can verify the change without re-reading the full history.
 
-6. **On sign-off**, edit `{{AGENT_CONFIG_DIR}}/AGENT.md` directly, and append a dated entry to `{{AGENT_CONFIG_DIR}}/AGENT-review-log.md` recording what was flagged, what changed, and why. That log is the section's own changelog, keep it current every time this command runs.
+6. **On sign-off**, first verify that `{{AGENT_SOURCE_FILE}}` and
+   `{{AGENT_CONFIG_DIR}}/AGENT.md` have the same content. If they differ, stop and show the
+   difference; do not choose a winner or merge silently. If they match, apply the approved edit
+   to `{{AGENT_SOURCE_FILE}}`, then copy the resulting file to
+   `{{AGENT_CONFIG_DIR}}/AGENT.md`. Verify the two files are identical afterward. Append a dated
+   entry to `{{AGENT_CONFIG_DIR}}/AGENT-review-log.md` recording what was flagged, what changed,
+   and why. The source file is durable; the harness copy is what the current harness reads.
 
-Reminder: this command only touches `{{AGENT_CONFIG_DIR}}/AGENT.md`'s Writing style section and its own review log, nothing else. If the flagged output's actual problem is technical, wrong information, not stylistic, say so and stop. That's not this command's job. When handed a trail, this reminder applies per-round: some rounds may be technical, others stylistic, only the stylistic ones are this command's concern (see step 2). Name which rounds were excluded as technical and why when presenting the diagnosis, so the user can check the exclusion themselves rather than take it on faith.
+Reminder: this command only touches the Writing style section in
+`{{AGENT_SOURCE_FILE}}`, synchronizes that file to `{{AGENT_CONFIG_DIR}}/AGENT.md`, and updates
+the current harness's review log. If the flagged output's actual problem is technical, wrong
+information, not stylistic, say so and stop. That's not this command's job. When handed a
+trail, this reminder applies per-round: some rounds may be technical, others stylistic, only
+the stylistic ones are this command's concern (see step 2). Name which rounds were excluded as
+technical and why when presenting the diagnosis, so the user can check the exclusion
+themselves rather than take it on faith.

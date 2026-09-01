@@ -2,7 +2,7 @@
 description: Ad hoc, mid-work teaching — just enough to unblock the task at hand, reconciled against the vivenu onboarding knowledge graph
 argument-hint: <topic or question>, ideally with the blocking task named inline (e.g. "how does OrderProvider's expiration polling work — I need it before I touch the timeout logic")
 ---
-<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> ~/.claude|~/.cursor|~/.codex|~/.config/opencode, {{AGENT_COMMANDS_DIR}} -> {{AGENT_CONFIG_DIR}}/commands, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
+<!-- Variables: {{VAULT_AGENT_DIR}} -> ~/Documents/DigitalBrain/Agent, {{AGENT_CONFIG_DIR}} -> harness config root, {{AGENT_COMMANDS_DIR}} -> harness command dir, {{AGENT_HARNESS_MEMORY}} -> harness memory path -->
 
 
 # Learn

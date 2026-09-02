@@ -188,6 +188,25 @@ is exempt. Whenever you name a file or show a snippet:
 
 Never a bare filename; never an uncited block.
 
+#### Cursor harness — citation widgets
+
+*Added 2026-09-02, after a P5 rebuild put the full path in a citation fence while the rendered widget showed basename only.*
+
+TS-2 is about what the **learner reads in chat**, not what the fence metadata contains. In Cursor,
+`startLine:endLine:filepath` fences render as **widgets** whose visible label is **basename +
+line range only** (e.g. `ShopFactory.ts Ln 1180–1183`). That widget header **does not satisfy
+TS-2**, even if the fence path is long.
+
+- Put the full cite in **visible prose** that introduces or follows the snippet:
+  `<repo>/<path>:line` or line range (e.g. `vivenu-core/apps/backend/src/factories/ShopFactory.ts:1180-1183`).
+  The repo prefix matters in multi-repo sessions.
+- Keep the **fence path workspace-relative** (`apps/backend/src/...`) so Cursor can link the
+  widget. **Do not** put `<repo>/` inside the fence — that breaks resolution when the workspace
+  root is already the repo.
+- *Fail:* prose names only `ShopFactory.ts`; the fence holds the rest.
+- *Pass:* prose names `vivenu-core/.../ShopFactory.ts:1180-1183`; the fence is workspace-relative
+  for the widget.
+
 ### TS-3 — Lead every walkthrough step with the why-here
 *(Fires only where the learner edits real code — see Applicability.)* Each step **opens with why
 this file and why this edit here**, before mechanics — depth proportionate to how non-obvious the
@@ -298,13 +317,13 @@ copy as source of truth.
 ## Compact triggers (copy into commands)
 
 **Load-bearing teach:**
-`Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path + TS-4 plain hints`
+`Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path in visible prose (Cursor widget headers do not count) + TS-4 plain hints`
 
 **Gate:**
 `Teaching Standard TS-6 ladder + TS-7 teach-before-gate + TS-4 plain hints`
 
 **Phase 4 / sandbox edit:**
-`Teaching Standard TS-3 why-here + TS-5 you write production code + TS-2 cite path`
+`Teaching Standard TS-3 why-here + TS-5 you write production code + TS-2 cite path in visible prose (Cursor widget headers do not count)`
 
 **JIT learn:**
 `Teaching Standard §Procedure (JIT floor) + TS-1 + TS-2 + TS-4; confirm-by-application gate`

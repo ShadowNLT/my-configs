@@ -99,3 +99,35 @@ Repeat once per work harness the user named. Do not keep a per-product copy of
 this block with baked-in home paths. A harness that cannot load `AGENT.md` directly
 needs an adapter outside this source tree; the adapter must point to the seeded
 `AGENT.md` and must never become a second source of truth.
+
+## Vault seed (living meta docs only)
+
+Operational vault meta docs (session schema, Agent/README, Engine corners, etc.) live in the
+knowledge vault, not in the harness. Source copies with **vault-relative language** (no
+`{{AGENT_*}}` placeholders) live in `corporate/vault-seed/`. See
+`corporate/vault-seed/00-SEED-MANIFEST.md` for scope, exclusions, and the full file list.
+
+**Policy:** copy-if-missing only — the live vault wins once it exists. Never bulk-overwrite
+session notes, review logs, or design records.
+
+After harness seed, run the vault seed pass (same `KNOWLEDGE_VAULT_ROOT`):
+
+```bash
+src="$(pwd)/corporate/vault-seed"
+dst="$KNOWLEDGE_VAULT_ROOT"   # user-named
+
+while IFS= read -r -d '' f; do
+  rel="${f#"$src"/}"
+  target="$dst/$rel"
+  if [ -f "$target" ]; then
+    echo "skip (exists): $rel"
+  else
+    mkdir -p "$(dirname "$target")"
+    cp "$f" "$target"
+    echo "seeded: $rel"
+  fi
+done < <(find "$src" -type f ! -name '00-SEED-MANIFEST.md' -print0)
+```
+
+To refresh one meta doc the user explicitly wants updated, copy that file directly — see the
+manifest for examples.

@@ -1,0 +1,25 @@
+---
+type: pattern
+repo: vivenu-core
+scope: git-conventions
+confidence: high
+learned: 2026-07-02
+verified_last: 2026-08-13
+source_session: "[[2026-07-02-1436-checkout-native-loading]]", "[[2026-07-08-1059-afg-3070-coupon-detailed-errors]]", "[[2026-07-13-1530-afg-3106-web3-phone-optional-validation]]"
+---
+
+**Fact — branch naming for `AFG-####` tickets:** use `AFG-####/kebab-case-slug` — the ticket ID itself is the top-level prefix, with no `feature/`/`fix/` wrapper. Verified against all 25 `AFG-*` branches in remote history (only one outlier used `-` instead of `/` after the number, everything else consistent). Other ticket namespaces in this repo (`TBT-`, `SPX-`, `ATL-`, etc.) commonly use a different scheme — `feature/<ticket-id-lowercase>-<slug>` — so don't assume one convention covers the whole repo; check the specific ticket prefix's own branch history if it's not `AFG-`.
+
+**Fact — ticketless branches (no Linear/Jira ticket):** when work has no ticket ID, use `<type>/<kebab-slug>` — e.g. `feature/page-builder-event-grid`, `fix/checkout-overflow`, `chore/remove-caddy-proxy`. Pick `type` from the session's character (`feature`, `fix`, `chore`, …) and derive the slug from the goal. Do not invent a fake ticket ID and do not ask the user for a ticket that does not exist.
+
+**Fact — commit message format:** Conventional-commits style: `type(scope): TICKET-ID lowercase description`. Observed types: `feat`, `fix`, `chore`, `test`. Scope is usually the app/area name (`web3`, `dashboard`, `feeinvoice`, `agents`, ...) or a comma-separated multi-scope (`web3, checkout`, `web3, dialog`). The ticket ID sits right after `type(scope): `, before the description. A trailing `(#NNNNN)` on most `develop` commits is GitHub's auto-appended PR/merge number — not something to add manually on a local commit. Example precedent for this app specifically: `fix(web3, checkout): add voucher translation`.
+
+**Fact — PR titles are CI-checked for the same conventional-commits prefix, separately from commit messages:** this repo has a CI check (semantic-release-style) that inspects the PR title itself, not just the commits inside it, and fails with "No release type found in pull request title" if the title doesn't start with a `type(scope):` prefix. A PR title like `[web3] AFG-3070 add coupon detailed errors` (matching the Linear ticket title, no prefix) fails this check even when every commit inside the PR is correctly formatted. Fix is to `gh pr edit <number> --title "..."` with the same `type(scope): TICKET-ID description` shape used for commits.
+
+**Why it matters:** a commit/branch that doesn't match these conventions still works, but stands out in `git log`/PR history and is easy to get wrong by default (e.g. plain `TICKET-ID: description` with no `type(scope):` prefix, which is what a first-pass commit looked like before this was checked). The PR-title check specifically is easy to miss because it's a separate CI gate from the commit-message convention, fixing your commits doesn't fix the PR title, and the natural first instinct (copying the Linear ticket's own title verbatim into the PR title) will fail it every time.
+
+**Evidence:** `git for-each-ref` over `refs/remotes/origin` filtered to `AFG-*` branches; `git log develop -40 --format='%s'` for commit message shapes; cross-checked against a `web3, checkout`-scoped precedent commit already on `develop`. PR-title check confirmed directly: PR #13650 (AFG-3070) failed CI with title `[web3] AFG-3070 add coupon detailed errors` (copied from the Linear ticket title), fixed by retitling to `fix(web3, checkout): AFG-3070 show specific error when promo code is not found`.
+
+**Recurrence (2026-07-14, AFG-3106):** made the exact same mistake again — opened PR #13732 with title `AFG-3106: fix web3 checkout phone/extraField validation gaps` (no `type(scope):` prefix), CI failed with the same "No release type found" message, fixed via `gh pr edit 13732 --title "fix(web3): AFG-3106 fix checkout phone and extraField validation gaps"`. This happened despite the fact above already documenting the exact failure mode — the gap wasn't missing information, it was not re-checking this file at the moment of calling `gh pr create`, deep into a long session, after already having gotten commit messages right by eye from `git log` alone. See the "Re-check every PR-convention file immediately before `gh pr create`" rule in `Agent/Feedback.md` for the behavioral fix.
+
+**How to apply:** for any `AFG-####` ticket in this repo, branch as `AFG-####/kebab-case-slug`, commit as `fix(web3, <subarea>): AFG-#### <description>`, and **set the PR title to that same `type(scope): TICKET-ID description` string, not the Linear ticket's own title** (adjust `type`/scope to match the actual change and app). If a PR is opened with a non-conforming title (e.g. copied straight from Linear), retitle with `gh pr edit <number> --title "..."` before expecting the release-type CI check to pass. For tickets under a different prefix, re-derive the branch convention from that prefix's own history before assuming `AFG-`'s pattern applies.

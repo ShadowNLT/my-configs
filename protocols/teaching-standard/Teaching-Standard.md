@@ -1,6 +1,6 @@
 ---
 type: teaching-meta
-version: 1 — 2026-09-01
+version: 2 — 2026-09-02
 repo-canonical: true
 ---
 
@@ -111,6 +111,12 @@ For each node in P2's chain, classify:
   re-teach**
 - **Partial** — note exists but misses the load-bearing slice → teach **delta only**, then link
 - **Gap** — no prior coverage → full build in P4
+- **Stale** — a vault note exists but **live code contradicts it** → teach from the code, name the
+  contradiction explicitly in the reconcile line, and queue a note correction in the session note's
+  `## Follow-ups` (so `/end-work` can fix the vault note rather than leaving it to rot)
+
+A configured directory that does not exist on disk (e.g. a track with no `Concepts/` folder) is a
+**normal no-op**, not an error — skip it and continue.
 
 **Deliverable before P4:** one explicit reconcile line naming each P2 node and its classification,
 plus any links. Example: *"idempotency → mastered [[Concepts/idempotency]]; reducer dispatch order
@@ -135,18 +141,27 @@ Teach P4 in **forward order**, one link at a time:
 - Cite real locations (TS-2) as you touch code or vault notes
 - Analogies only when they clarify a real relationship — flag where they break down
 
-This step **is** the `/explain-first-principles` procedure. For load-bearing moments, **invoke
-`/explain-first-principles`** (or run its steps as a visible sub-procedure the user can see —
-prerequisite chain stated, then forward build). A prose summary with no visible chain is a
+This step **is** the explain-first-principles procedure. For load-bearing moments, read
+`{{AGENT_COMMANDS_DIR}}/explain-first-principles.md` and **execute its steps inline** — you
+cannot invoke a slash command; reading the file and executing its steps is the only path. When
+running as load-bearing 0→100, the P2 prerequisite chain and forward build must appear in the
+delivered output (see that file's P5-mode output rule). A prose summary with no visible chain is a
 §Procedure failure, not TS-1 compliance.
+
+**P5 completion test (before gating or treating P5 done):** the delivered explanation must
+include (a) the mandatory P3 reconcile line naming every P2 node, and (b) each P2 node built
+forward in dependency order — each derived from common knowledge, vault-linked mastery, or a node
+already established earlier in the same explanation, not dropped as asserted jargon. If any node
+is missing from the delivery or appears only as an assertion, P5 is not complete.
 
 Modality within P5: **worked-example-first** for procedural chains; **analogy-build** for
 conceptual ones — always after the prerequisite link is established, never instead of it.
 
 ### P6 — Plain render (clarity pass)
-Run `/layman-terms` on the P5 output when the explanation is dense, jargon-heavy, or multi-layer.
-`/layman-terms` is a **clarity rewrite**, not a substitute for P2–P5 — it never creates
-content that wasn't derived in P5. If P5 is already plain, skip P6.
+When the explanation is dense, jargon-heavy, or multi-layer, read
+`{{AGENT_COMMANDS_DIR}}/layman-terms.md` and execute its clarity pass on the P5 output — you
+cannot invoke a slash command. It is a **clarity rewrite**, not a substitute for P2–P5 — it never
+creates content that wasn't derived in P5. If P5 is already plain, skip P6.
 
 **Self-check before gating or editing:** any term in the delivered explanation that appears before
 it was defined in P5 or linked from vault? If yes, go back — do not gate on asserted jargon.
@@ -217,8 +232,16 @@ this session is blocked — the edit requires go-ahead, and go-ahead requires te
 not "until PR merges."
 
 **New issue mid-session:** stop; offer **work now** (→ its own §Procedure + gates) or **park**
-(→ `Parking-Lot/` entry, no teaching). Never fold a materially-different issue into current work
-ungated. Per-item `"just fix it"` bypasses teaching for that item only.
+(→ create `Parking-Lot/<repo>/<slug>.md` and add a row to the flat `Parking-Lot/INDEX.md`; no
+teaching). Never fold a materially-different issue into current work ungated. Per-item `"just fix
+it"` bypasses teaching for that item only.
+
+**`procedure:` on Pedagogy rows (compliance receipt, not presentation):** when a work-session gate
+passes under the new schema, record `procedure: complete` (or `partial(…)` / `none` if §Procedure
+was skipped or defective). A `none` or `partial` value **blocks recording the gate as passed**.
+Absent `procedure:` on legacy rows = `unrecorded` — do not invalidate an existing `gate1:
+passed`. `procedure: complete` does **not** satisfy TS-7's re-present requirement on resume — it
+only records that §Procedure ran when the gate was first taught this session.
 
 ---
 
@@ -275,7 +298,7 @@ copy as source of truth.
 ## Compact triggers (copy into commands)
 
 **Load-bearing teach:**
-`Teaching Standard §Procedure + TS-1 derived + TS-2 cite path + TS-4 plain hints`
+`Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path + TS-4 plain hints`
 
 **Gate:**
 `Teaching Standard TS-6 ladder + TS-7 teach-before-gate + TS-4 plain hints`

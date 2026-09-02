@@ -23,12 +23,14 @@ machine path into this repo.
 
 ## Install
 
-Ask the user for `CONFIG_DIR` (harness config root) before copying. Echo the resolved path and
-get confirmation, then:
+Ask the user for `CONFIG_DIR` (harness config root) and `COMMANDS_DIR` before copying. Echo the
+resolved paths and get confirmation, then:
 
 ```bash
 mkdir -p "$CONFIG_DIR/teaching-standard"
-cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
+sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
+  protocols/teaching-standard/Teaching-Standard.md \
+  > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 ```
 
 **Corporate seed:** also add to the harness variable map (resolved in command templates at seed):
@@ -36,8 +38,10 @@ cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standa
 | Variable | Resolves to |
 |---|---|
 | `{{TEACHING_STANDARD_PATH}}` | `$CONFIG_DIR/teaching-standard/Teaching-Standard.md` |
+| `{{AGENT_COMMANDS_DIR}}` | `$COMMANDS_DIR` (substituted into Teaching-Standard.md at seed) |
 
-**Personal seed:** same sidecar install; same variable if teaching commands are seeded.
+**Personal seed:** same sidecar install with the same `sed` substitution if teaching commands are
+seeded.
 
 **Knowledge vault** (optional, separate concern): corporate work harnesses that run `/learn`,
 `/start-work`, etc. also need a configured knowledge vault root for P3 graph reconcile — that is

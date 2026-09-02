@@ -34,13 +34,15 @@ directory cannot hold those files.
 
 Required for corporate work harnesses:
 
-- `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault)
+- `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault). Substitute `{{AGENT_COMMANDS_DIR}}` at seed time.
 - `concept-viz/template/`
 - `layman-terms/denylist.txt`
 
 ```bash
 mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
-cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
+sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
+  protocols/teaching-standard/Teaching-Standard.md \
+  > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
@@ -86,7 +88,9 @@ sed \
    s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" \
   "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
 mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
-cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
+sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
+  protocols/teaching-standard/Teaching-Standard.md \
+  > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```

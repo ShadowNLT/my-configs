@@ -19,19 +19,48 @@ Programming work in any repo under `~/Developer/` is tracked via four commands: 
 
 This is a default, not an absolute. An explicit request in the moment (for example, "just give me a bulleted list" or "skip the reasoning, one-line answer") overrides it for that response only. A more specific project-level AGENT.md instruction also takes precedence over this one where they conflict.
 
-Applies to prose: chat responses, documentation, PR descriptions, commit messages, write-ups, and similar explanatory writing. Does not apply to code, code comments, docstrings, or structured/machine-readable output such as tables, JSON, logs, or error strings, each governed by its own conventions.
+Applies to prose: chat responses, documentation, PR descriptions, commit messages, code review comments, write-ups, and similar explanatory writing. Does not apply to code, code comments, docstrings, or structured/machine-readable output such as tables, JSON, logs, or error strings, each governed by its own conventions.
 
-**First-principles writing.** Reserve this discipline for claims that are non-obvious, contestable, or a judgment call, not for simple lookup facts or short procedural updates ("Running tests now," "Done, fixed in file.py"), which get a direct answer with no premise chain needed. For claims that do need it:
-- State the fact before the claim it supports. Don't assert a conclusion, fix, or recommendation without the reasoning that leads there being visible or clearly implied. Test: if removing the fact wouldn't change whether the claim stands, the fact wasn't load-bearing, so keep only the ones that are.
-- Prefer facts over argument. If a claim can't be traced back to something observed, tested, or already agreed, flag it as an assumption with a consistent lead-in ("Assuming X..." or "Unconfirmed:") rather than stating it as settled.
-- Build ideas in order: don't reference a term or concept before it's been introduced or is common knowledge for the reader.
-- When the audience needs a plainer explanation, build from what the reader already knows, one established concept at a time, never skipping a link in the chain (`/explain-first-principles` and `{{TEACHING_STANDARD_PATH}}` when available; the principle holds even without them).
+**Claim provenance (always-on).** *Added 2026-09-02, after a code-review reply stated runtime behavior from a static library read and recommended an API the current file could not see. Revisit if it stops fitting.*
+
+Every contestable claim — anything non-obvious the reader would act on (a diagnosis, a review comment, a "this will happen," a "do this because," a verdict) — must show where it came from. Simple lookups (`the file is foo.tsx`) and procedural status (`running tests`) are exempt.
+
+For each such claim, make the chain visible: **observation → inference → claim**. Name the observation's source in the same sentence or the next. If you cannot name a source, cut the claim or lead with `Assuming …` / `Unconfirmed:` (same lead-ins as below).
+
+| Tag | Means |
+|---|---|
+| `code:` | Behavior read in a repo this session — cite `repo/path:line` |
+| `lib:` | Installed package + version + function or line you read |
+| `run:` | Command, browser, or test you ran this session |
+| `spec:` | A named HTML/CSS/React rule, only for what it actually states |
+| `session:` | Established earlier in this chat *with a named source then* — not bare recall |
+
+One observation supports one inference. Do not stack several claims on one cite.
+
+**Reading code is not running it.** `code:` and `lib:` prove what the program *calls* or *constructs*, not what the browser *does*. If you have not `run:` it, write the static fact ("the library calls `.focus()` on that node"), not the user-visible outcome ("focus jumps to the close button"). Mixing those is the main failure mode.
+
+**Not evidence on their own:** a PR description, a code comment, Bugbot's verdict, or an author's assertion — re-tag any underlying code, log, or test output properly instead. A vault Pattern or memory note is not evidence unless you opened and read the relevant file this session.
+
+Do not recommend an API, ref, or handle the current file cannot see unless the chain shows how this file gets it. Do not cite a file you did not open this session.
+
+In chat, compress the chain into connected prose as long as the source is still named. In a GitHub review comment, keep the source visible — that is what the author will argue with.
+
+*Bad:* "Focus jumps to the close button when the dialog opens because Radix traps focus. Use `triggerRef` to restore focus."
+
+*Good:* "In `@radix-ui/react-focus-scope`, the mount effect calls `.focus()` without reading `trapped` (`lib: …/focus-scope.tsx:…`). That can request focus on mount while `Content` is force-mounted but closed. I have not reproduced focus in the browser (`run:` missing), so I am not claiming where the ring goes. This file has no `triggerRef`; any return-focus fix needs wiring shown, not a bare `triggerRef`."
+
+Teaching moments still follow `{{TEACHING_STANDARD_PATH}}` TS-1 (derive for the learner); this rule governs whether a sentence may ship in any reply, including reviews.
+
+**First-principles writing.** The claim-provenance rule above is the enforcement; these bullets are how to explain once a claim is allowed:
+- State the supporting fact before the conclusion. Test: if removing the fact wouldn't change whether the claim stands, the fact wasn't doing work — drop it.
+- Build ideas in order: don't reference a term before it's introduced or is common knowledge for the reader.
+- When the audience needs a plainer explanation, build one concept at a time (`/explain-first-principles` and `{{TEACHING_STANDARD_PATH}}` when available).
 
 **No em dashes.** Never use one, and don't substitute a spaced hyphen for the same purpose. Use commas, periods, colons, or a connecting word (and, but, since, which) instead.
 
 **Always lowercase "vivenu".** Never capitalize the "V", no exceptions for sentence-initial position, headings, or titles ("vivenu local-dev CLI", not "Vivenu local-dev CLI"). Applies to prose I compose myself across every project. Does not mean renaming pre-existing files/folders that already use a capitalized "Vivenu" on disk (e.g. the vault's `Vivenu/` folder); those are real paths.
 
-**Self-check before sending.** Before presenting any user-facing prose as ready (chat replies of substance, Slack/email drafts, PR descriptions, commit messages, docs, and equally HTML/artifact copy or slide decks), explicitly scan the draft against this Writing style section, starting with em dashes. Having the rule loaded in context is not enough; em dashes and AI-tells slip in precisely when the check is passive. This applies regardless of medium, not just plain text, and every time, not only after being corrected once.
+**Self-check before sending.** Before presenting any user-facing prose as ready (chat replies of substance, Slack/email drafts, PR descriptions, commit messages, docs, and equally HTML/artifact copy or slide decks), explicitly scan the draft against this Writing style section, starting with em dashes. Having the rule loaded in context is not enough; em dashes and AI-tells slip in precisely when the check is passive. This applies regardless of medium, not just plain text, and every time, not only after being corrected once. **Claim provenance pass:** for each contestable claim, point at the named source; if there is none, cut or mark `Unconfirmed:`. If the claim is user-visible behavior, confirm you have `run:` or rewrite as the static call. If you recommend an API or ref, confirm this file can reach it.
 
 **Tone for explanatory writing:**
 - Write like a person explaining something to a colleague, not a changelog. The defect to avoid is a list of facts with no reasoning connecting them, not the list format itself: an enumerable set of independent items (a changelog of unrelated fixes, a table of options) is fine as a list.

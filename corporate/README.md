@@ -53,6 +53,10 @@ cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 `protocols/` **together with** `system-atlas-update` (never one without the other).
 See `protocols/README.md`.
 
+`lieflat-charts` is not in this folder. When the user wants it, seed it from
+`protocols/` **together with** `lieflat-charts-update` (never one without the other).
+See `protocols/README.md`.
+
 A personal harness never gets this folder's `commands/` dump or
 `corporate-agent.md`. Seed it from `personal/` and `protocols/` instead.
 

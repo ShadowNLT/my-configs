@@ -62,12 +62,13 @@ At run time, resolve supporting files in this order:
 
 ## Protocols that need a sidecar
 
-These four are not self-contained markdown. Command install is the `.md` **plus**
+These are not self-contained markdown. Command install is the `.md` **plus**
 the sidecar. Do not also install the skill unless the user asked for auto-discovery.
 
 | Protocol | Copy into `$CONFIG_DIR/<name>/` |
 | -------- | -------------------------------- |
 | `system-atlas` | `assets/`, `references/`, `evals.json`, `SKILL.md` (raw upstream copy for the updater) |
+| `lieflat-charts` | `catalog.md`, `report-catalog.md`, `color-presets.js`, `mono-tokens.js`, `LICENSE`, `THIRD_PARTY_NOTICES.md`, `templates/`, `examples/`, `scripts/`, `SKILL.md` (skill form), `SKILL.upstream.md` (raw upstream `SKILL.md` for the updater). Do not copy `docs/`. |
 | `concept-viz` | `template/` |
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
@@ -77,6 +78,13 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 `system-atlas`, also copy `protocols/system-atlas-update/command.md` to
 `$COMMANDS_DIR/system-atlas-update.md`. Never seed one without the other.
 `system-atlas-update` is markdown-only (it writes the `system-atlas` sidecar;
+it has none of its own).
+
+`lieflat-charts` and `lieflat-charts-update` are a pair the same way.
+Whenever you install `lieflat-charts`, also copy
+`protocols/lieflat-charts-update/command.md` to
+`$COMMANDS_DIR/lieflat-charts-update.md`. Never seed one without the other.
+`lieflat-charts-update` is markdown-only (it writes the `lieflat-charts` sidecar;
 it has none of its own).
 
 Every other protocol in this folder is markdown-only: copy `command.md` and stop.
@@ -91,6 +99,14 @@ cp protocols/system-atlas/assets/* "$CONFIG_DIR/system-atlas/assets/"
 cp protocols/system-atlas/references/* "$CONFIG_DIR/system-atlas/references/"
 cp protocols/system-atlas/evals.json protocols/system-atlas/SKILL.md "$CONFIG_DIR/system-atlas/"
 cp protocols/system-atlas-update/command.md "$COMMANDS_DIR/system-atlas-update.md"
+
+# lieflat-charts + lieflat-charts-update (always together)
+cp protocols/lieflat-charts/command.md "$COMMANDS_DIR/lieflat-charts.md"
+mkdir -p "$CONFIG_DIR/lieflat-charts"
+rsync -a --delete \
+  --exclude command.md \
+  protocols/lieflat-charts/ "$CONFIG_DIR/lieflat-charts/"
+cp protocols/lieflat-charts-update/command.md "$COMMANDS_DIR/lieflat-charts-update.md"
 
 # concept-viz
 cp protocols/concept-viz/command.md "$COMMANDS_DIR/concept-viz.md"

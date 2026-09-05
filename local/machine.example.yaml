@@ -1,0 +1,6 @@
+# Copy to local/machine.yaml and fill in this machine's paths.
+# local/machine.yaml is gitignored — do not commit it.
+
+cheatsheets:
+  nvim: /absolute/path/to/NeoVim Cheat Sheet.md
+  tmux: /absolute/path/to/Tmux.md

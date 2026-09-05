@@ -10,7 +10,9 @@ tmux/          tmux config + TPM plugins
 ghostty/       Ghostty terminal config
 zsh/           zshrc + p10k.zsh (symlinked to ~/.zshrc and ~/.p10k.zsh)
 yazi/          yazi file manager config
-docs/          Cheat sheets (nvim-cheatsheet.md, tmux-cheatsheet.md)
+docs/          Cheat sheets (nvim-cheatsheet.md, tmux-cheatsheet.md) — source of truth
+local/         Machine-local config (machine.example.yaml committed; machine.yaml gitignored)
+instructions/  Shared agent instructions (all harness adapters point here)
 setup.sh       Full bootstrap script for a fresh Mac
 protocols/     Agent-agnostic procedures (agent decides skill vs command on install);
                teaching-standard/ is the canonical Teaching Standard (harness sidecar)
@@ -67,6 +69,6 @@ Open a new terminal window. Powerlevel10k and oh-my-zsh will be active immediate
 
 ## Conventions
 
-- Cheat sheets live in `docs/` (repo) AND in Obsidian at `6- Zettelkasten/`. Keep both in sync when keymaps change.
-- Never add `Co-Authored-By` trailers to commits (regardless of which agent is writing them).
-- LSP arg placeholders must stay on for every server (current and future). See `claude-memory/feedback_lsp_arg_placeholders.md`.
+- Cheat sheets: repo `docs/` is the source of truth; machine mirrors use paths in `local/machine.yaml`. See `instructions/cheatsheets.md`.
+- Never add `Co-Authored-By` trailers (or any AI attribution) to commits, regardless of which agent is writing them.
+- LSP arg placeholders must stay on for every server (current and future). See `instructions/lsp-placeholders.md`.

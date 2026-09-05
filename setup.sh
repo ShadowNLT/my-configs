@@ -301,8 +301,46 @@ phase7_fzf() {
   fi
 }
 
-# ─── Phase 8: Manual steps reminder ─────────────────────────────────────────
-phase8_reminder() {
+# ─── Phase 8: Optional machine cheatsheet paths ─────────────────────────────
+# Empty skip is fine — an agent will ask the next time a sync is needed.
+phase8_machine_cheatsheets() {
+  local dest="$DOTFILES_DIR/local/machine.yaml"
+
+  if [ -f "$dest" ]; then
+    success "Machine cheatsheet config already exists: $dest"
+    return
+  fi
+
+  if [ ! -t 0 ]; then
+    info "No TTY — skipping machine cheatsheet paths. An agent will ask later."
+    return
+  fi
+
+  echo ""
+  info "Machine cheat-sheet mirrors (optional). Leave blank to skip."
+  echo "  Repo docs/ is the source of truth. These paths are this machine's copies."
+  echo ""
+
+  local nvim_path tmux_path
+  read -r -p "  Neovim cheatsheet path: " nvim_path
+  read -r -p "  tmux cheatsheet path:   " tmux_path
+
+  if [ -z "$nvim_path" ] && [ -z "$tmux_path" ]; then
+    info "Skipped. An agent will ask the next time a sync is needed."
+    return
+  fi
+
+  mkdir -p "$(dirname "$dest")"
+  cat > "$dest" <<EOF
+cheatsheets:
+  nvim: ${nvim_path}
+  tmux: ${tmux_path}
+EOF
+  success "Wrote $dest (gitignored)."
+}
+
+# ─── Phase 9: Manual steps reminder ─────────────────────────────────────────
+phase9_reminder() {
   echo ""
   echo -e "${YELLOW}══════════════════════════════════════════════════════${RESET}"
   echo -e "${YELLOW}  Manual steps required after this script completes   ${RESET}"
@@ -353,7 +391,8 @@ main() {
   phase5_tpm
   phase6_nvim
   phase7_fzf
-  phase8_reminder
+  phase8_machine_cheatsheets
+  phase9_reminder
 }
 
 main "$@"

@@ -104,7 +104,7 @@ Before acting on a consequential or structural decision (not routine/reversible 
 
 ## Git commit hygiene — hard rules, no exceptions
 
-- Never add a "Co-Authored-By: Claude" (or any AI attribution) trailer to commit messages, even though default tooling conventions suggest one. Commit messages should read as if the user alone wrote them.
+- Never add a `Co-Authored-By` trailer (or any AI attribution) to commit messages, even though default tooling conventions suggest one. Commit messages should read as if the user alone wrote them.
 - Never stage or commit a `.agent/` directory or its contents into any repo — check the file list before every `git add`/`git commit` and exclude `.agent/` explicitly, even if it shows up untracked in `git status`. If a repo doesn't already gitignore `.agent/`, flag it to the user rather than editing their `.gitignore` yourself.
 
 ## Agent and subagent orchestration: hard rules, no exceptions

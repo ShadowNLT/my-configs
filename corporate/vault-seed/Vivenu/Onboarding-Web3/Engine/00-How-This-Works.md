@@ -5,7 +5,7 @@ created: 2026-07-07
 
 # How This Works
 
-This is a self-run curriculum for going from beginner to expert on the **`apps/web3` checkout frontend** in `vivenu-core`, built and maintained by Claude across sessions. It lives entirely in this vault — Claude never edits the `vivenu-core` repo itself, only reads it for source material.
+This is a self-run curriculum for going from beginner to expert on the **`apps/web3` checkout frontend** in `vivenu-core`, built and maintained by the agent across sessions. It lives entirely in this vault — the agent never edits the `vivenu-core` repo itself, only reads it for source material.
 
 It is a sibling of [[../../Onboarding/Engine/00-How-This-Works|the checkout curriculum]], not a replacement for it — see [[../../Track-State|Track-State]] for how the two coexist and how a session picks which one applies. Everything in this file that isn't about `apps/web3` specifically is deliberately the same as the checkout curriculum's copy; see that file's own text if this one ever looks like it's drifted without a reason.
 
@@ -15,7 +15,7 @@ Modeled on mastery-learning systems like MathAcademy, grounded in well-evidenced
 
 - **Prerequisite graph, not a linear list.** You can't understand the checkout flow before you understand the app's own architecture and state management. See [[../Curriculum-Map|Curriculum-Map]].
 - **Retrieval practice over re-reading.** Each module accumulates a question bank in its own "Retrieval Practice" section — you get quizzed, not re-shown notes.
-- **Spaced repetition, hand-rolled.** No Obsidian plugins are used (by design — plain vault only). Spacing is tracked in each module's frontmatter (`next_review`, `interval_days`, `ease`) and Claude manages it manually each session — there is no passive reminder inside Obsidian itself. If you don't open a session, nothing nudges you.
+- **Spaced repetition, hand-rolled.** No Obsidian plugins are used (by design — plain vault only). Spacing is tracked in each module's frontmatter (`next_review`, `interval_days`, `ease`) and the agent manages it manually each session — there is no passive reminder inside Obsidian itself. If you don't open a session, nothing nudges you.
 - **Interleaving.** Once past the first few modules, review questions mix older and newer modules rather than drilling one topic to exhaustion.
 - **Desirable difficulty.** Quizzes are asked without hints first; hints only after a failed attempt, since struggle-before-help is what makes retrieval durable.
 
@@ -25,7 +25,7 @@ Same three axes as the checkout curriculum (your call, stated there): **codebase
 
 ## Cadence contract
 
-Same daily, 15-30 minute session shape as the checkout curriculum. Since `web3` is the **active** track (per [[../../Track-State|Track-State]]), this is currently where that daily slot goes. If your actual cadence drifts, tell Claude — the intervals should be renegotiated, not silently ignored.
+Same daily, 15-30 minute session shape as the checkout curriculum. Since `web3` is the **active** track (per [[../../Track-State|Track-State]]), this is currently where that daily slot goes. If your actual cadence drifts, tell the agent — the intervals should be renegotiated, not silently ignored.
 
 ## Switching tracks
 
@@ -37,10 +37,10 @@ Same four tutoring personas as the checkout curriculum. See [[Hats]] for the per
 
 ## How to run a session
 
-Just say what you want in a Claude Code session, e.g.:
-- "Start W01" — Claude teaches the module, ends with a few retrieval questions.
+Just say what you want in an agent session, e.g.:
+- "Start W01" — the agent teaches the module, ends with a few retrieval questions.
 - "Quiz me on W03" (or "quiz me, interleaved" once several modules are underway) — retrieval practice only, no re-teaching.
-- "Where am I?" — Claude reads [[../Progress-Dashboard|Progress-Dashboard]] (and, per the staleness guard, glances at the checkout track's dashboard too) and tells you what's due.
+- "Where am I?" — the agent reads [[../Progress-Dashboard|Progress-Dashboard]] (and, per the staleness guard, glances at the checkout track's dashboard too) and tells you what's due.
 
 `/new-session` and `/end-session` formalize this exactly as they do for the checkout curriculum — see the harness `/new-session` and `/end-session` commands, both now track-aware rather than checkout-specific. Plain language still works either way.
 
@@ -48,7 +48,7 @@ Just say what you want in a Claude Code session, e.g.:
 
 ## Mid-module checkpoints
 
-Identical mechanism to the checkout curriculum: if a session ends before a module is fully taught, Claude fills in that module's **Session Notes** section (last checkpoint, covered so far, still to cover, exact resume point) instead of an ad hoc recap. Say "checkpoint this module" to trigger it explicitly. Next session, say "continue W0X" — Claude reads Session Notes first and resumes from the stated point.
+Identical mechanism to the checkout curriculum: if a session ends before a module is fully taught, the agent fills in that module's **Session Notes** section (last checkpoint, covered so far, still to cover, exact resume point) instead of an ad hoc recap. Say "checkpoint this module" to trigger it explicitly. Next session, say "continue W0X" — the agent reads Session Notes first and resumes from the stated point.
 
 A cut-short session still owes a `Lessons/` note, written with whatever was actually covered and marked `status: in-progress` per [[Note-System]]. Once a module reaches `practicing` status, its Session Notes are cleared.
 
@@ -62,7 +62,7 @@ Same taxonomy as the checkout curriculum. Every taught session gets a dated note
 
 ## Boundaries
 
-- Claude reads `vivenu-core` read-only for source material; it never edits, commits, or runs anything destructive there as part of this curriculum.
+- The agent reads `vivenu-core` read-only for source material; it never edits, commits, or runs anything destructive there as part of this curriculum.
 - Notes point to files/classes by name rather than pasting large code blocks.
 - Nothing here syncs anywhere outside this machine.
 - This curriculum does not re-teach the checkout **backend** (`CheckoutManager`, `TransactionManager`, entity model) — that's the checkout curriculum's job (its M01-M03, M06-M07 specifically). Where a web3 module needs that backend context, it links to the relevant checkout module rather than re-explaining it. See the Scope section below.

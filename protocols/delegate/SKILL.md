@@ -3,11 +3,11 @@ name: delegate
 description: >-
   Hand off one independent subtask to a DIFFERENT AI tool (Cursor, a CLI agent
   like Gemini/Codex, another terminal) while you keep working the rest, then
-  resume and verify when you say the other tool is done. Claude infers the
+  resume and verify when you say the other tool is done. The agent infers the
   subtask from context (and grills you if scope is fuzzy), prepares a complete
   two-way hand-off file, redacts obvious secrets and reports what is being
   shared, and emits ONE line to paste into the other tool. The same file is the
-  return channel: on your "it's done" ping, Claude reads the result, checks it
+  return channel: on your "it's done" ping, the agent reads the result, checks it
   against the acceptance criteria, integrates, and cleans up (or reports the
   file if it might still matter).
   Trigger on: "/delegate", "delegate this", "hand this off", "offload <X> to
@@ -18,7 +18,7 @@ description: >-
 
 Hand off an **independent** subtask to a different AI tool and keep working the
 rest yourself. **You are the sole orchestrator** — you invoke this, you run the
-other tool, you ping when it's done. Claude never runs the other tool and never
+other tool, you ping when it's done. The agent never runs the other tool and never
 polls; it prepares the hand-off, hands control back to you, and resumes only
 when you say so. This makes cleanup safe: it happens on your ping, after the
 result has been read — it never races the tool that's reading the file.
@@ -45,13 +45,13 @@ Infer the subtask to delegate from the conversation and any argument given — d
 - If the task, its boundaries, or its acceptance criteria are **fuzzy**, ask the
   user targeted clarifying questions until it is crisp. Goal ambiguity is a top
   reason a delegated task fails — resolve it here, not by dumping more context.
-- Confirm the subtask is genuinely **independent** of what Claude will keep
+- Confirm the subtask is genuinely **independent** of what the agent will keep
   doing (no shared files in flight). If it isn't, say so and propose a split.
 
 ### 2. Prepare the context
 Gather everything the other tool needs to succeed with no back-channel to this
 conversation: relevant files/paths, the goal, constraints, gotchas, acceptance
-criteria, and explicitly **what is out of scope** (the files Claude keeps).
+criteria, and explicitly **what is out of scope** (the files the agent keeps).
 
 - **Redact obvious secrets** before writing them: `.env` values, API keys,
   tokens, connection strings, credential files, PII. Never copy these into the
@@ -90,7 +90,7 @@ copy it elsewhere. Use this template:
 <how "done" is judged — concrete and checkable>
 
 ## Do not touch
-<the files/areas Claude is keeping — the concurrency seatbelt>
+<the files/areas the agent is keeping — the concurrency seatbelt>
 
 ## Results  ⟵ the other tool writes its output here
 <empty>
@@ -110,7 +110,7 @@ shell variables:
     Read <absolute path>, do the task, write your output into "## Results", and set Status: DONE.
 
 ### 5. Hand control back
-Tell the user: the file path, that the channel is ready, and that Claude will
+Tell the user: the file path, that the channel is ready, and that the agent will
 wait for their ping. Then continue with the other (independent) work. **Do not
 poll or block** — the session yields until the user returns.
 

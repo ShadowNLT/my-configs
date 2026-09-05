@@ -2,7 +2,7 @@
 name: step-by-step
 description: >-
   Walk the user through achieving a goal ONE step at a time, with a checkpoint
-  after each step. Claude infers the goal (and grills the user if it is
+  after each step. The agent infers the goal (and grills the user if it is
   unclear), lays out the full arc, gets the plan approved, then executes exactly
   one step per turn: it states an expected result the user can actually observe,
   performs the step (or hands the user clear instructions), shows the ACTUAL
@@ -60,8 +60,8 @@ Produce an ordered list from here to the goal:
 - Keep steps **small and checkable**. The *near* steps should be concrete; *far*
   steps may be coarse and get sharpened as you approach them (the plan is a
   living list, not a contract).
-- Each step notes **who acts** — Claude, the user, or a composite
-  ("Claude does X, then you do Y").
+- Each step notes **who acts** — the agent, the user, or a composite
+  ("the agent does X, then you do Y").
 - Show the **full arc** with a marker on the current step (`Step 1 of N`).
 - **Then wait for approval.** Do not start step 1 until the user approves or
   adjusts the plan. Write the approved plan to the state file.
@@ -77,11 +77,11 @@ For the current step only, in one turn:
 2. **If the step is irreversible** (delete, deploy, send, overwrite, pay):
    say so explicitly, note it can't be retried, and get a clear go-ahead
    *before* acting.
-3. Perform it (if it's Claude's) or give the user minimal, exact instructions
+3. Perform it (if it's the agent's) or give the user minimal, exact instructions
    (if it's theirs).
-4. Show the **actual result**. Where Claude can verify it itself (exit code,
+4. Show the **actual result**. Where the agent can verify it itself (exit code,
    file exists, test passes), do so and report the verdict — don't make the
-   user adjudicate what Claude already knows. If the step has **no observable
+   user adjudicate what the agent already knows. If the step has **no observable
    outcome yet**, say so honestly and note which later step will confirm it.
 5. **Stop.** Don't read ahead, prepare, or hint at step N+1. (The no-look-ahead
    rule applies to execution turns; showing the whole arc in §2 is fine.)

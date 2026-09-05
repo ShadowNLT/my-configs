@@ -3,25 +3,25 @@ type: meta
 created: 2026-07-02
 ---
 
-# Claude's Corner
+# Agent corner
 
-This folder is Claude's — by agreement, you don't edit it. Claude reads and writes here freely; nothing here should ever conflict with something you were maintaining by hand.
+This folder is the agent's — by agreement, you don't edit it. The agent reads and writes here freely; nothing here should ever conflict with something you were maintaining by hand.
 
 ## What lives here vs. what doesn't
 
-*Reorganized 2026-07-24: Claude Code's harness memory was demoted to a non-authoritative cache and emptied; its durable content moved here and into `AGENT.md`.*
+*Reorganized 2026-07-24: harness memory was demoted to a non-authoritative cache and emptied; its durable content moved here and into `AGENT.md`.*
 
-1. **Claude Code's own memory system** (the agent harness memory directory, outside this vault): now a non-authoritative *cache* only, not a source of truth. It stays where it is (the harness injects tracking metadata on write) but should be near-empty. On any conflict, this vault, the seeded harness `AGENT.md`, and the installed harness command files win — see `AGENT.md`'s "Two-tier memory > Trust order."
-2. **This corner** (`Agent/` in your vault) — durable knowledge Claude relies on, in two kinds:
+1. **The agent's own harness memory** (the harness memory directory, outside this vault): now a non-authoritative *cache* only, not a source of truth. It stays where it is (the harness injects tracking metadata on write) but should be near-empty. On any conflict, this vault, the seeded harness `AGENT.md`, and the installed harness command files win — see `AGENT.md`'s "Two-tier memory > Trust order."
+2. **This corner** (`Agent/` in your vault) — durable knowledge the agent relies on, in two kinds:
    - `Patterns/<repo>/`: *repo-specific technical knowledge* (patterns, gotchas) discovered while doing programming work. Each carries a `verified_last` staleness field.
    - `Feedback.md`: *standing behavioral rules* that fire on a specific action or context (git, PR, CI, web3, the vault). Read by `/start-work` at session start. (Rules that must fire on every response regardless of action — writing style, edit scope, adversarial review — live in `AGENT.md` instead, since this vault is not auto-loaded.)
 
 ## Why markdown + frontmatter, not something more exotic
 
-Plain markdown with YAML frontmatter is what Claude reads and writes most reliably — no format conversion overhead, no compatibility loss with Obsidian if you ever do look in here, and `grep`/`Read` both work on it without any special tooling. The lever that actually matters for "encoding this well for an LLM" isn't the file format, it's:
+Plain markdown with YAML frontmatter is what the agent reads and writes most reliably — no format conversion overhead, no compatibility loss with Obsidian if you ever do look in here, and `grep`/`Read` both work on it without any special tooling. The lever that actually matters for "encoding this well for an LLM" isn't the file format, it's:
 - **Consistent, dense frontmatter** (same fields every time) so entries are scannable and diffable without re-parsing prose.
 - **Explicit `[[wikilinks]]`** between related entries, so this becomes a real traversable graph instead of a pile of isolated notes.
-- **A staleness field** (`verified_last`) on every technical claim, because code drifts and a memory system for a codebase needs to know when to distrust itself — this is the one thing that's genuinely different from how Claude Code's own memory (facts about you) is encoded, since those don't rot the same way code does.
+- **A staleness field** (`verified_last`) on every technical claim, because code drifts and a memory system for a codebase needs to know when to distrust itself — this is the one thing that's genuinely different from how a harness memory of facts about you is encoded, since those don't rot the same way code does.
 
 ## Structure
 

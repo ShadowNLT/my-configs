@@ -11,7 +11,7 @@ Paths under this directory mirror the knowledge vault layout. Only files listed 
 | Path | Role |
 |---|---|
 | `README.md` | Vault-wide conventions (diagrams, scope) |
-| `Agent/README.md` | Claude's corner — patterns, Feedback, dreaming |
+| `Agent/README.md` | Agent corner — patterns, Feedback, dreaming |
 | `Agent/Patterns/vivenu-core/pr-template.md` | PR body template pattern |
 | `Agent/Patterns/vivenu-core/git-branch-and-commit-conventions.md` | Branch/commit/PR-title rules |
 | `Learning/README.md` | Freestanding `/learn` notes schema |

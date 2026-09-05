@@ -9,7 +9,7 @@ This is the mechanical corner of the checkout-domain onboarding curriculum: the 
 
 ## What lives here vs. what doesn't
 
-- **This corner (`Engine/`)** — the rules: why the curriculum is shaped this way, the tutor personas, how it stays in sync with `vivenu-core`, and how notes link into a graph. You can read and edit this like any other note, but it's Claude's reference for *how to run a session*, so treat edits here as changing the rules, not just fixing a typo.
+- **This corner (`Engine/`)** — the rules: why the curriculum is shaped this way, the tutor personas, how it stays in sync with `vivenu-core`, and how notes link into a graph. You can read and edit this like any other note, but it's the agent's reference for *how to run a session*, so treat edits here as changing the rules, not just fixing a typo.
 - **Content folders** (`Modules/`, `Lessons/`, `Concepts/`, `Curriculum-Map.md`, `Progress-Dashboard.md`) — what's actually being taught and your record of learning it.
 
 ## Structure
@@ -37,4 +37,4 @@ The two groups aren't a folder split — just a way to read the tree at a glance
 
 ## Relationship to `Agent/`
 
-This corner is modeled on [[../../Agent/README|Claude's Corner]] one folder up — same idea (a labeled home for mechanics rather than mixing them into content), same bias toward dense frontmatter and explicit `[[wikilinks]]` so the rules themselves stay a traversable graph. It's a separate corner rather than a subfolder of `Agent/` because it's about *this specific curriculum's* machinery, not general cross-repo technical knowledge.
+This corner is modeled on [[../../Agent/README|the Agent corner]] one folder up — same idea (a labeled home for mechanics rather than mixing them into content), same bias toward dense frontmatter and explicit `[[wikilinks]]` so the rules themselves stay a traversable graph. It's a separate corner rather than a subfolder of `Agent/` because it's about *this specific curriculum's* machinery, not general cross-repo technical knowledge.

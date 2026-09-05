@@ -11,6 +11,7 @@
 - Buffers
 - Comments
 - Completion
+- Cursor
 - Debugging
 - File Explorer
 - Flash
@@ -83,6 +84,16 @@ Keys active while the completion menu is open (insert mode), plus snippet jumps.
 | `S-Tab` | Jump to previous placeholder; also moves menu selection |
 
 Function-argument placeholders come from the LSP (gopls `usePlaceholders`, lua_ls `callSnippet`, snippet support enabled for every server). Signature help pops up automatically as you type inside `(...)`.
+
+---
+
+## 🖱️ Cursor (smear-cursor.nvim)
+
+Neovide-style smear trail in Ghostty. Uses the plugin's official **faster** preset (snappier than the default gooey trail).
+
+| Command | Description |
+|---------|-------------|
+| `:SmearCursorToggle` | Turn the smear on / off |
 
 ---
 

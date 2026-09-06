@@ -149,6 +149,9 @@ cursor-personal() { PATH="$HOME/.claude-safari-shim:$PATH" "$CURSOR_BIN" --user-
 # default `cursor` remains corporate; use `cursor-personal` for Safari-forced personal profile
 alias cursor='cursor-work'
 
+# glow (charmbracelet): match terminal width — requires glow installed
+alias glow='GLOW_WIDTH=$(tput cols) command glow'
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"

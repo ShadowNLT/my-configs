@@ -178,13 +178,17 @@ return {
 			transparent = false,
 			italic_comments = true,
 			terminal_colors = true,
+			-- cyberdream's overrides *replace* the whole group (tbl_extend force),
+			-- so bg-only tables wipe guifg and leave markdown/body text as a flat
+			-- terminal fallback color — Telescope still looks fine because it
+			-- applies treesitter captures with explicit fgs. Always keep fg.
 			overrides = function(colors)
 				return {
-					Normal      = { bg = "#1e2030" }, -- navy-dark, visible against black
-					NormalNC    = { bg = "#191b28" }, -- dimmed inactive panes = depth
-					NormalFloat = { bg = "#232538" }, -- floats sit one layer above
-					SignColumn  = { bg = "#1e2030" },
-					LineNr      = { bg = "#1e2030" },
+					Normal      = { fg = colors.fg, bg = "#1e2030" }, -- navy-dark, visible against black
+					NormalNC    = { fg = colors.fg, bg = "#191b28" }, -- dimmed inactive panes = depth
+					NormalFloat = { fg = colors.fg, bg = "#232538" }, -- floats sit one layer above
+					SignColumn  = { fg = colors.grey, bg = "#1e2030" },
+					LineNr      = { fg = colors.grey, bg = "#1e2030" },
 				}
 			end,
 		})

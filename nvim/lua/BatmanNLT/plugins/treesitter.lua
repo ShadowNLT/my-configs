@@ -42,9 +42,6 @@ return {
 			"go",
 		}
 
-		-- Install/update parsers (async no-op if already present).
-		require("nvim-treesitter").install(parsers)
-
 		--------------------------------------------------------------------------
 		-- Incremental selection
 		--
@@ -169,43 +166,91 @@ return {
 		-- start them yourself via the native API. Attach on every FileType and
 		-- let vim.treesitter.start() decide (it errors when no parser exists, so
 		-- we guard it and only wire up the rest when it succeeds).
+		--
+		-- `start()` clears legacy `syntax`, so a failed/missed attach leaves the
+		-- buffer monochrome (the "Telescope preview is colorful, buffer isn't"
+		-- look). Retry on BufWinEnter if the highlighter never came up, and again
+		-- after async :TS install finishes for already-open buffers.
 		--------------------------------------------------------------------------
+		local function attach_treesitter(buf)
+			if not vim.api.nvim_buf_is_valid(buf) then
+				return false
+			end
+			if vim.treesitter.highlighter.active[buf] then
+				return true
+			end
+			return pcall(vim.treesitter.start, buf)
+		end
+
+		local function setup_buffer(buf)
+			if not attach_treesitter(buf) then
+				return
+			end
+
+			-- Tree-sitter based folding (native). Only set on windows showing this buf.
+			for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+				vim.wo[win][0].foldmethod = "expr"
+				vim.wo[win][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+			end
+
+			-- Tree-sitter based indentation (experimental, provided by main).
+			vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+			-- Incremental selection keymaps (buffer-local; replace if re-attached).
+			local opts = { buffer = buf, silent = true }
+			vim.keymap.set(
+				"n",
+				"<C-space>",
+				pwrap(init_selection),
+				vim.tbl_extend("force", opts, { desc = "TS: start selection" })
+			)
+			vim.keymap.set(
+				"x",
+				"<C-space>",
+				pwrap(node_incremental),
+				vim.tbl_extend("force", opts, { desc = "TS: expand selection" })
+			)
+			vim.keymap.set(
+				"x",
+				"<bs>",
+				pwrap(node_decremental),
+				vim.tbl_extend("force", opts, { desc = "TS: shrink selection" })
+			)
+		end
+
+		local ts_group = vim.api.nvim_create_augroup("batman_treesitter", { clear = true })
 		vim.api.nvim_create_autocmd("FileType", {
-			group = vim.api.nvim_create_augroup("batman_treesitter", { clear = true }),
+			group = ts_group,
 			callback = function(ev)
-				if not pcall(vim.treesitter.start, ev.buf) then
-					return
-				end
-
-				-- Tree-sitter based folding (native).
-				vim.wo[0][0].foldmethod = "expr"
-				vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
-
-				-- Tree-sitter based indentation (experimental, provided by main).
-				vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-
-				-- Incremental selection keymaps (buffer-local).
-				local opts = { buffer = ev.buf, silent = true }
-				vim.keymap.set(
-					"n",
-					"<C-space>",
-					pwrap(init_selection),
-					vim.tbl_extend("force", opts, { desc = "TS: start selection" })
-				)
-				vim.keymap.set(
-					"x",
-					"<C-space>",
-					pwrap(node_incremental),
-					vim.tbl_extend("force", opts, { desc = "TS: expand selection" })
-				)
-				vim.keymap.set(
-					"x",
-					"<bs>",
-					pwrap(node_decremental),
-					vim.tbl_extend("force", opts, { desc = "TS: shrink selection" })
-				)
+				setup_buffer(ev.buf)
 			end,
 		})
+		-- Session restore / race with async parser install: FileType may fire
+		-- before the parser is ready. Re-attempt when the window is shown.
+		vim.api.nvim_create_autocmd("BufWinEnter", {
+			group = ts_group,
+			callback = function(ev)
+				if vim.bo[ev.buf].filetype == "" then
+					return
+				end
+				if vim.treesitter.highlighter.active[ev.buf] then
+					return
+				end
+				setup_buffer(ev.buf)
+			end,
+		})
+
+		-- Install/update parsers (async no-op if already present). When it
+		-- finishes, attach to any buffers that opened during the race.
+		require("nvim-treesitter").install(parsers):await(function()
+			for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+				if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].filetype ~= "" then
+					if not vim.treesitter.highlighter.active[buf] then
+						setup_buffer(buf)
+					end
+				end
+			end
+		end)
 
 		-- Fold display preferences (start fully open, never auto-collapse).
 		vim.opt.foldenable = false

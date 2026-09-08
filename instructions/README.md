@@ -70,5 +70,6 @@ Open a new terminal window. Powerlevel10k and oh-my-zsh will be active immediate
 ## Conventions
 
 - Cheat sheets: repo `docs/` is the source of truth; machine mirrors use paths in `local/machine.yaml`. See `instructions/cheatsheets.md`.
+- Machine-local secrets: each machine owns `$HOME/.dev/.env`. The consume protocol is in the seeded work `AGENT.md` **Local secrets** section. `setup.sh` does not create or symlink that file.
 - Never add `Co-Authored-By` trailers (or any AI attribution) to commits, regardless of which agent is writing them.
 - LSP arg placeholders must stay on for every server (current and future). See `instructions/lsp-placeholders.md`.

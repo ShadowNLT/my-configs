@@ -9,6 +9,10 @@ Work profile only. The personal profile lives in `personal/`; never seed it from
 - `corporate-agent.md` — work-profile global rules. Seeded to a harness as `$CONFIG_DIR/AGENT.md`.
 - `commands/` — 21 work slash commands (excludes `adversarial-review`, which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
 
+## Machine-local secrets
+
+Values never live in this folder and are not installed by `setup.sh`. Each machine owns `$HOME/.dev/.env` (`export NAME=...`, mode `600`). Agents consume those vars by the **Local secrets** section in `corporate-agent.md`: source that file in the same shell as the call, never print it. Do not invent a second path.
+
 ## Variables (resolved at seed time)
 
 Ask the user which harnesses to seed as work harnesses and **where each one

@@ -102,6 +102,29 @@ When asked to "add" or "change" something and several related artifacts exist (a
 
 Before acting on a consequential or structural decision (not routine/reversible ones), don't run an adversarial review unprompted, and don't just proceed either. **Suggest it and wait for sign-off:** say the decision looks consequential and offer to battle-test it via `/adversarial-review` (`{{AGENT_COMMANDS_DIR}}/adversarial-review.md`), then let the user choose to run it, skip it, or proceed. The user signs off on both whether to review and the decision itself. The command file is the full spec; don't duplicate it here.
 
+## Local secrets (`$HOME/.dev/.env`)
+
+*Added 2026-09-08, after a local agent treated an inherited process environment as empty while the key lived in `$HOME/.dev/.env`. Revisit if the file layout changes.*
+
+Machine-local secrets live in `$HOME/.dev/.env` as `export NAME=...`. That file is per-machine, never committed, and not installed by the corporate seed or `setup.sh`. Do not rely on a shared `.zshenv` or on the inherited process environment. Source the file in the shell that makes the call.
+
+When a skill, command, or task needs a local env var:
+
+1. Do not `Read`, `cat`, or print `$HOME/.dev/.env`, and do not print secret values (`printenv`, debug dumps, chat, logs).
+2. Do not treat an unset inherited `process.env` / `printenv` as "the file is missing." Source the file in the **same** shell as the call that needs it:
+
+```bash
+set -a
+# shellcheck disable=SC1090
+source "$HOME/.dev/.env"
+set +a
+```
+
+3. Test with `[ -z "${NAME:-}" ]` (or equivalent) and report only SET/UNSET. If the file is missing, say so once and stop; do not invent a value.
+4. A GUI-launched app does not load zsh startup files. A new chat is not a reload. If the process itself must see the var, fully quit and relaunch that app.
+
+This stays in this file, not `Agent/Feedback.md`, because home-directory and `/support` sessions never run `/start-work`.
+
 ## Git commit hygiene — hard rules, no exceptions
 
 - Never add a `Co-Authored-By` trailer (or any AI attribution) to commit messages, even though default tooling conventions suggest one. Commit messages should read as if the user alone wrote them.

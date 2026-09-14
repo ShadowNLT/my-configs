@@ -1,6 +1,6 @@
 ---
 type: teaching-meta
-version: 2 — 2026-09-02
+version: 3 — 2026-09-14
 repo-canonical: true
 ---
 
@@ -133,29 +133,49 @@ Scale by context:
 - **Proportionate** (routine 4a, JIT `/learn`, code-review 4b): only the nodes the moment actually
   needs — a one-link chain is one node, not a manufactured graph.
 
-### P5 — Build forward (first-principles delivery)
+### P5 — Build forward (delivery)
 Teach P4 in **forward order**, one link at a time:
 - Each new idea uses only common knowledge, vault-linked mastery, or concepts established
   **earlier in this same explanation**
 - Make callbacks explicit: "Now that X holds, Y is…"
-- Cite real locations (TS-2) as you touch code or vault notes
 - Analogies only when they clarify a real relationship — flag where they break down
 
-This step **is** the explain-first-principles procedure. For load-bearing moments, read
-`{{AGENT_COMMANDS_DIR}}/explain-first-principles.md` and **execute its steps inline** — you
-cannot invoke a slash command; reading the file and executing its steps is the only path. When
-running as load-bearing 0→100, the P2 prerequisite chain and forward build must appear in the
-delivered output (see that file's P5-mode output rule). A prose summary with no visible chain is a
-§Procedure failure, not TS-1 compliance.
+**Default modality (most teaching commands):** this step **is** the
+explain-first-principles procedure. Read `{{AGENT_COMMANDS_DIR}}/explain-first-principles.md`
+and **execute its steps inline** — you cannot invoke a slash command. When running as
+load-bearing 0→100, the P2 prerequisite chain and forward build must appear in the
+delivered output (see that file's P5-mode output rule). A prose summary with no visible
+chain is a §Procedure failure, not TS-1 compliance.
+
+**Hybrid modality — Algo Sketch for mechanisms (opt-in per command; required in
+`start-work` 4a/4c/4d picture + solution):** when the command's compact trigger says
+**P5 hybrid**, split P4 nodes by kind and deliver both forms in one teaching moment:
+
+1. **Vocab / conceptual nodes** (what a term *means*): short
+   `explain-first-principles` prose — derive, don't assert (TS-1).
+2. **Mechanism / procedure / solution nodes** (how control flow and data move): an
+   **Algo Sketch** — read `{{AGENT_COMMANDS_DIR}}/algo-sketch.md` and execute it
+   inline (same rule as other inlines: read the file, do not rely on slash invoke).
+   The sketch is the durable artifact the learner holds through Gate 1 / Gate 2.
+3. **No language-flavored code** in this teaching moment: no real-language operators,
+   no production snippets, no diff dumps as the lesson. Pointers to where the mechanism
+   *lives* are fine (see TS-2 sketch-phase). Real code appears only when the command
+   opens its post-gate edit walkthrough (e.g. `start-work` Phase 4).
+
+Do **not** layman-rewrite the sketch dialect in P6 — P6 may clarify surrounding prose
+only. If a command has not opted into hybrid P5, do not invent Algo Sketch delivery.
 
 **P5 completion test (before gating or treating P5 done):** the delivered explanation must
 include (a) the mandatory P3 reconcile line naming every P2 node, and (b) each P2 node built
-forward in dependency order — each derived from common knowledge, vault-linked mastery, or a node
-already established earlier in the same explanation, not dropped as asserted jargon. If any node
-is missing from the delivery or appears only as an assertion, P5 is not complete.
+forward in dependency order — each derived from common knowledge, vault-linked mastery, or a
+node already established earlier in the same explanation, not dropped as asserted jargon.
+Under **hybrid P5**, every mechanism/solution node must appear in the Algo Sketch (not only
+in prose). If any node is missing from the delivery or appears only as an assertion, P5 is
+not complete.
 
-Modality within P5: **worked-example-first** for procedural chains; **analogy-build** for
-conceptual ones — always after the prerequisite link is established, never instead of it.
+Modality within non-sketch P5 prose: **worked-example-first** for procedural chains;
+**analogy-build** for conceptual ones — always after the prerequisite link is established,
+never instead of it. Under hybrid P5, the worked example *is* the Algo Sketch.
 
 ### P6 — Plain render (clarity pass)
 When the explanation is dense, jargon-heavy, or multi-layer, read
@@ -187,6 +207,15 @@ is exempt. Whenever you name a file or show a snippet:
 - **external** → URL
 
 Never a bare filename; never an uncited block.
+
+#### Sketch-phase teaching (hybrid P5 / pre-gate)
+When the active command is in **Algo Sketch teaching** (e.g. `start-work` Phases 1–3):
+- **Pointers OK** — name `<repo>/<path>` (and symbol if useful) in prose so the learner knows
+  where the mechanism lives.
+- **No production snippets** — do not fence real-language code, diffs, or language-flavored
+  pseudo as the lesson. The Algo Sketch *is* the artifact.
+- Full TS-2 snippet cites (fences + visible prose path) **resume in the post-gate edit
+  walkthrough** when real code is shown (e.g. `start-work` Phase 4).
 
 #### Cursor harness — citation widgets
 
@@ -282,12 +311,13 @@ only. Say so in one line when they flip on.
 
 | Command | §Procedure | TS-1 | TS-2 | TS-3 | TS-4 | TS-5 | TS-6 | TS-7 |
 |---|---|---|---|---|---|---|---|---|
-| `start-work` | ✓ (0→100, solution, reveals) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `start-work` | ✓ **P5 hybrid** (vocab prose + Algo Sketch mechanism/solution; real code only after Gate 2 / Phase 4) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `end-work` | ✓ (lesson, sandbox README, reveals) | ✓ | ✓ | ✓† | ✓ | ✓‡ | ✓ | ✓ |
-| `resume-work` | ✓ (re-present) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `learn` | ✓ (scaled to JIT depth) | ✓ | ✓ | when editing | ✓ | when editing | —§ | —§ |
-| `new-session` | ✓ (module teaching) | ✓ | ✓ | N/A | ✓ | N/A | —¶ | N/A |
-| `explain-first-principles` | ✓ (= P2+P5) | ✓ | ✓ | N/A | ✓ | N/A | N/A | N/A |
+| `resume-work` | ✓ (re-present; same hybrid as start-work when resuming 4a/4c/4d) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `learn` | ✓ (scaled to JIT depth; default P5 prose unless command later opts in) | ✓ | ✓ | when editing | ✓ | when editing | —§ | —§ |
+| `new-session` | ✓ (module teaching; default P5 prose) | ✓ | ✓ | N/A | ✓ | N/A | —¶ | N/A |
+| `explain-first-principles` | ✓ (= P2+P5 default / hybrid vocab nodes) | ✓ | ✓ | N/A | ✓ | N/A | N/A | N/A |
+| `algo-sketch` | ✓ (= P5 mechanism form when hybrid) | ✓ | pointer-only in sketch-phase | N/A | ✓ | N/A | N/A | N/A |
 | `layman-terms` | —‖ | —‖ | — | — | — | — | — | — |
 | `concept-viz` | optional (after P5) | ✓ | ✓ | N/A | N/A | N/A | N/A | N/A |
 | `pause-work` | — | — | — | — | — | — | checkpoint only | checkpoint only |
@@ -316,8 +346,11 @@ copy as source of truth.
 
 ## Compact triggers (copy into commands)
 
-**Load-bearing teach:**
+**Load-bearing teach (default prose P5):**
 `Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path in visible prose (Cursor widget headers do not count) + TS-4 plain hints`
+
+**Load-bearing teach (`start-work` hybrid P5):**
+`Teaching Standard §Procedure + P5 hybrid (explain-first-principles for vocab nodes; algo-sketch for mechanism/solution; no language snippets until Phase 4) + P5 completion test + TS-1 + TS-2 sketch-phase pointers + TS-4`
 
 **Gate:**
 `Teaching Standard TS-6 ladder + TS-7 teach-before-gate + TS-4 plain hints`

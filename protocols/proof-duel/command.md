@@ -1,20 +1,23 @@
 ---
 name: proof-duel
-version: 1 — 2026-09-10 (bump on every edit; a mirror whose version differs from the repo copy is stale)
+version: 2 — 2026-09-14 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 description: >
   Compete independent writer/hater pairs on one problem until each pair lands a proposal plus
   a proof that it solves the problem best; one blinded final judge scores the sealed artifacts
-  against a predeclared rubric. Protocol owns pair count (default 3); the orchestrator does not
-  invent N mid-run. Use when you need the strongest fix proposal under adversarial pressure, not
-  a single agent's first idea.
+  against a predeclared rubric. Default cast also assigns per-pair lens SKUs (exploration
+  emphasis) from a sealed catalog — `--lenses off` restores model-roster-only diversity.
+  Protocol owns pair count (default 3); the orchestrator does not invent N mid-run. Use when
+  you need the strongest fix proposal under adversarial pressure, not a single agent's first idea.
 
   Trigger on: "/proof-duel", "proof duel", "duel this problem", "compete proposals", "writer vs
-  hater", "independent pairs then judge".
-argument-hint: ["N"] <problem or fix target> [--pairs N] [--rounds R] [--solo]
+  hater", "independent pairs then judge", "lens cast", "proof duel lenses".
+argument-hint: ["N"] <problem or fix target> [--pairs N] [--rounds R] [--solo] [--lenses on|off] [--slots 1|2] [--axis-mode no-optimand|full] [--secondary-mode stakeholder|full] [--deck full|core] [--exclude id,id]
 ---
 
 # Proof Duel
 
+**Lens assets** (resolve beside this protocol, or `$CONFIG_DIR/proof-duel/` after command install):
+`lens-catalog.md`, `lens-cast.md`, `cast-lenses.sh`.
 You are the **orchestrator** of a sealed competition. The question you answer: **which proposal
 best solves this problem, after adversarial pressure inside independent pairs?**
 
@@ -48,11 +51,18 @@ already-chosen plan → `/ponytail`.
 | problem text (remainder) | required | The problem / fix target. If empty, infer the most recent substantive problem in the conversation and **state which you picked**. Ambiguity → ask, don't guess. |
 | `--rounds R` | `2` | Max writer↔hater revise cycles per pair after the opening draft (integer ≥ 1). |
 | `--solo` | off | Forbid real parallel sub-agents; run pairs sequentially in one mind and **log reduced independence**. |
+| `--lenses on\|off` | `on` | Per-pair lens SKUs via `lens-cast.md`. `off` = model-roster only. |
+| `--slots 1\|2` | `2` | Primary only or primary+secondary. |
+| `--axis-mode no-optimand\|full` | `no-optimand` | Primary axes {2,4}; `full` adds Axis 3. |
+| `--secondary-mode stakeholder\|full` | `stakeholder` | Secondary {5}; `full` adds Axis 6. |
+| `--deck full\|core` | `full` | Catalog subset. |
+| `--exclude id,id` | empty | Hard-exclude ids (must still satisfy rule-1 at seal; passed into `cast-lenses.sh`). |
 
 **Who decides N:** the protocol (`3`) or an explicit user override. The orchestrator never
 chooses N from vibes, stakes, or "how hard this feels." Reject non-integer / `< 1` / `> 5` for N
-or R — stop and report rather than clamping silently. Cap at 5 keeps cost bounded; if the user
-wants more, ask them to confirm the spend.
+or R, and reject invalid lens knobs — stop and report rather than clamping silently. Cap at 5
+keeps cost bounded; if the user wants more, ask them to confirm the spend. Full lens table:
+`lens-cast.md`.
 
 Unknown flags → stop and report.
 
@@ -70,6 +80,7 @@ enrichment for one pair only.
 - **Out of scope:** <explicit>
 - **Success looks like:** <checkable outcomes>
 - **Context refs:** <paths / facts every pair may use — same list for all>
+- **Shared diagnosis lens:** <axis-1-id>   # optional; default root-cause when lenses on
 ```
 
 If the problem is too vague to fill this, ask targeted questions first. Do not start pairs on a
@@ -90,7 +101,8 @@ pairs start):
 **Predeclared tie-break (in order):** (1) higher rubric total → (2) smaller blast radius →
 (3) clearer falsifiable proof → (4) fewer unanswered residuals. Never "I like this voice."
 
-State in one line: `N=<n> rounds=<r> parallel=<yes|solo> rubric=locked` and proceed.
+State in one line: `N=<n> rounds=<r> parallel=<yes|solo> rubric=locked` then, after lens cast
+(when lenses on), amend with `lenses=… slots=… seed=… catalog=… axis_mode=… secondary_mode=…`.
 
 ---
 
@@ -103,6 +115,11 @@ Spawn **N independent pairs**. Each pair has exactly two roles:
 | **Writer** | Restate the problem, propose a fix, and write a proof that this proposal solves it best under the rubric. |
 | **Ethical Hater** | Attack diagnosis, proposal, and proof. Find flaws, hidden costs, false "best" claims, missing constraints. Ethical = kill weak reasoning, not sneer. **May not author a competing proposal.** |
 
+**Lens cast (default `--lenses on`):** before any pair starts, follow `lens-cast.md` end-to-end
+(prefer `cast-lenses.sh --catalog lens-catalog.md --n N …` with matching flags). Lenses are
+exploration emphasis only; sealed rubric + tie-break remain the only scoring order.
+`--lenses off` skips this block and logs `lenses: off`.
+
 **Model assignment (when the harness supports choosing models):**
 1. Prefer distinct model families across pairs when a pool is available (e.g. pstack / arena
    runners). Same-family clones across all pairs are allowed only if the pool is too small —
@@ -112,20 +129,22 @@ Spawn **N independent pairs**. Each pair has exactly two roles:
    Do not assign "who seems good for this problem."
 4. The **Judge** must not be a Writer or Hater model used in this run when another model is
    available; otherwise log `judge: pool-exhausted, independence reduced`.
+5. Model roster and lens draw are **independent** — do not couple model family to lens id.
 
 **If the Agent / Task tool is unavailable:** degrade to sequential single-mind role-play, label
 every section `independence: reduced`, and still keep pair outputs sealed from each other in
-the write-up (no cross-references while drafting).
+the write-up (no cross-references while drafting). Still assign SKUs when lenses on.
 
 Label pairs `A`, `B`, `C`, … only in orchestrator-private notes. Pairs never see other pairs'
-labels, models, or drafts.
+labels, models, drafts, or SKUs.
 
 ---
 
 ## 4. Run each duel (pairs sealed)
 
 Run all pairs **in parallel** unless `--solo`. Each pair receives **only**: the Problem Brief,
-the Judge Rubric, `--rounds R`, and its role prompts. No other pair's output. No judge hints.
+the Judge Rubric, `--rounds R`, its role prompts, and (when lenses on) its Pair Lens block from
+`lens-cast.md` (no SKU string in the prompt). No other pair's output. No judge hints.
 
 ### 4.1 Opening (Writer)
 Writer produces the draft artifact sections: Diagnosis, Proposal, Proof, Assumptions.
@@ -185,7 +204,9 @@ Build a judge packet:
 2. Judge Rubric + tie-break rules (verbatim)
 3. Artifacts labeled **Candidate 1..K** in **randomized order** (not A/B/C order). Keep a
    private map Candidate→pair; the judge never sees it.
-4. Strip model names, pair ids, and any "we are pair B" leakage.
+4. Strip model names, pair ids, SKUs, lens ids, and any "we are pair B" leakage. Artifact SKU
+   leakage = regex `pd-[0-9a-f]{4}-[a-z0-9-]+(\+[a-z0-9-]+)?` only — one re-request then
+   DISQUALIFY that pair; continue with remaining candidates.
 
 Judge mandate:
 
@@ -214,7 +235,9 @@ Return to the user:
 - **Tie-break used:** <none | which rule>
 - **Residuals on winner:** …
 - **Disqualified:** … or none
-- **Independence notes:** N, models/diversity, parallel vs solo, judge blinding
+- **Independence notes:** N, models/diversity, parallel vs solo, judge blinding; when lenses on
+  also seed, catalog_version, axis_mode, secondary_mode, deck, Pair→SKU map, excluded,
+  collisions/degrades, `blinding: label-only` (see `lens-cast.md`)
 
 ## Winning artifact
 <paste winner's artifact verbatim>
@@ -240,3 +263,5 @@ The deliverable of this command is the judged selection, not the patch.
   visible in the verdict.
 - **Be terse** — tables and bullets; a pair with nothing left to fight gets a short close, not
   padding.
+- **Lenses emphasize, rubric scores** — brief + sealed rubric outrank lenses; hater is general
+  first, lens second; soft lens-ignore is a nit only.

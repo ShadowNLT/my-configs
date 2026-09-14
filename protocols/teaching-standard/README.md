@@ -59,7 +59,7 @@ changes, re-install the sidecar and update command inline triggers in the same c
 | Protocol | Relationship |
 |---|---|
 | `explain-first-principles` | Command form of §Procedure P2+P5 default / hybrid **vocab** nodes (TS-1) |
-| `algo-sketch` | Hybrid P5 **mechanism/solution** form (opt-in; required in `start-work` 4a/4c/4d through Gate 2) |
+| `algo-sketch` | Hybrid P5 **mechanism/solution delivery** (opt-in; required in `start-work` 4a/4c/4d Phases 1–3; gates quiz map + claims, not the sketch) |
 | `layman-terms` | §Procedure P6 clarity pass only — not a substitute for teaching; never rewrite sketch dialect |
 | `concept-viz` | Optional visual layer after P5 |
 

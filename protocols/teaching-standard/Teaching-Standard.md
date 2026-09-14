@@ -1,6 +1,6 @@
 ---
 type: teaching-meta
-version: 3 — 2026-09-14
+version: 4 — 2026-09-14
 repo-canonical: true
 ---
 
@@ -156,7 +156,8 @@ chain is a §Procedure failure, not TS-1 compliance.
 2. **Mechanism / procedure / solution nodes** (how control flow and data move): an
    **Algo Sketch** — read `{{AGENT_COMMANDS_DIR}}/algo-sketch.md` and execute it
    inline (same rule as other inlines: read the file, do not rely on slash invoke).
-   The sketch is the durable artifact the learner holds through Gate 1 / Gate 2.
+   The sketch is the mechanism/solution **delivery form**, not the durable gate
+   object (Gates quiz the P4 map + learner-produced derived claims — see TS-6).
 3. **No language-flavored code** in this teaching moment: no real-language operators,
    no production snippets, no diff dumps as the lesson. Pointers to where the mechanism
    *lives* are fine (see TS-2 sketch-phase). Real code appears only when the command
@@ -170,12 +171,14 @@ include (a) the mandatory P3 reconcile line naming every P2 node, and (b) each P
 forward in dependency order — each derived from common knowledge, vault-linked mastery, or a
 node already established earlier in the same explanation, not dropped as asserted jargon.
 Under **hybrid P5**, every mechanism/solution node must appear in the Algo Sketch (not only
-in prose). If any node is missing from the delivery or appears only as an assertion, P5 is
-not complete.
+in prose) — that is **delivery completeness**, not the gate pass-bar; a complete sketch does
+not pass Gate 1/2. If any node is missing from the delivery or appears only as an assertion,
+P5 is not complete.
 
 Modality within non-sketch P5 prose: **worked-example-first** for procedural chains;
 **analogy-build** for conceptual ones — always after the prerequisite link is established,
-never instead of it. Under hybrid P5, the worked example *is* the Algo Sketch.
+never instead of it. Under hybrid P5, the worked example is **rendered as** the Algo Sketch;
+retrieval targets map + learner claims.
 
 ### P6 — Plain render (clarity pass)
 When the explanation is dense, jargon-heavy, or multi-layer, read
@@ -213,7 +216,8 @@ When the active command is in **Algo Sketch teaching** (e.g. `start-work` Phases
 - **Pointers OK** — name `<repo>/<path>` (and symbol if useful) in prose so the learner knows
   where the mechanism lives.
 - **No production snippets** — do not fence real-language code, diffs, or language-flavored
-  pseudo as the lesson. The Algo Sketch *is* the artifact.
+  pseudo as the lesson. The Algo Sketch *is* the **delivery** artifact in this phase (not
+  production code); work gates still quiz the P4 map + learner claims (TS-6).
 - Full TS-2 snippet cites (fences + visible prose path) **resume in the post-gate edit
   walkthrough** when real code is shown (e.g. `start-work` Phase 4).
 
@@ -264,6 +268,12 @@ The **`/end-work` sandbox** is stricter: the user always writes the fix; no esca
 - **Terminal states: pass or pause.** Never advance without pass; never silent skip. Fatigue after
   reveal → offer `/pause-work`.
 
+**Work-gate object** (`start-work` / `resume-work` 4a/4c/4d only — not 4b, not `/end-work`
+lesson quizzes, not `new-session` graded mastery): pass = visible P4 map + **learner-produced
+derived claims** + why/how that uses those claims. **Sketch narration or node-title lists alone
+are a miss**, even if accurate. Completing hybrid P5 (sketch-complete delivery) does **not**
+pass the gate. Commands inline the operational bars; this clause is the doctrine pointer.
+
 **Ungraded** work-tutorial ladder. `new-session` curriculum quizzes use **graded mastery** per
 Module Hat — TS-6 does not govern those.
 
@@ -272,6 +282,12 @@ Teaching **precedes** every comprehension gate. **No gate runs on material not p
 current agent session.** Picture → Gate 1; solution → Gate 2. Resumed sessions **re-present**
 still-open gate material before running the gate (presentation is not durably checkpointed).
 Passed gates are not re-run.
+
+For `start-work` / `resume-work` 4a/4c/4d work gates: when the Pedagogy row carries a `claims:`
+sibling and `procedure: complete`, re-present of still-open material **is short P5 on that
+item's stored claims** (rebuild each claim's TS-1 derivation this session) — not a floor P1
+from ordinary-adult, and not reading the sibling aloud as the lesson. Absent `claims:` does
+not invent a presentation (see `resume-work.md`).
 
 **Enforcement rides the edit-gate:** fixing an issue whose §Procedure + presentation has not run
 this session is blocked — the edit requires go-ahead, and go-ahead requires teach-first.
@@ -311,7 +327,7 @@ only. Say so in one line when they flip on.
 
 | Command | §Procedure | TS-1 | TS-2 | TS-3 | TS-4 | TS-5 | TS-6 | TS-7 |
 |---|---|---|---|---|---|---|---|---|
-| `start-work` | ✓ **P5 hybrid** (vocab prose + Algo Sketch mechanism/solution; real code only after Gate 2 / Phase 4) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `start-work` | ✓ **P5 hybrid** (vocab prose + Algo Sketch **delivery**; gates quiz map + claims; real code only after Gate 2 / Phase 4) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `end-work` | ✓ (lesson, sandbox README, reveals) | ✓ | ✓ | ✓† | ✓ | ✓‡ | ✓ | ✓ |
 | `resume-work` | ✓ (re-present; same hybrid as start-work when resuming 4a/4c/4d) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `learn` | ✓ (scaled to JIT depth; default P5 prose unless command later opts in) | ✓ | ✓ | when editing | ✓ | when editing | —§ | —§ |
@@ -350,10 +366,10 @@ copy as source of truth.
 `Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path in visible prose (Cursor widget headers do not count) + TS-4 plain hints`
 
 **Load-bearing teach (`start-work` hybrid P5):**
-`Teaching Standard §Procedure + P5 hybrid (explain-first-principles for vocab nodes; algo-sketch for mechanism/solution; no language snippets until Phase 4) + P5 completion test + TS-1 + TS-2 sketch-phase pointers + TS-4`
+`Teaching Standard §Procedure + P5 hybrid (explain-first-principles for vocab nodes; algo-sketch for mechanism/solution delivery; no language snippets until Phase 4) + P5 completion test (delivery completeness ≠ gate pass) + TS-1 + TS-2 sketch-phase pointers + TS-4`
 
 **Gate:**
-`Teaching Standard TS-6 ladder + TS-7 teach-before-gate + TS-4 plain hints`
+`Teaching Standard TS-6 ladder (work gates: map + derived claims, not sketch narration) + TS-7 teach-before-gate (short P5 on claims: when present) + TS-4 plain hints`
 
 **Phase 4 / sandbox edit:**
 `Teaching Standard TS-3 why-here + TS-5 you write production code + TS-2 cite path in visible prose (Cursor widget headers do not count)`

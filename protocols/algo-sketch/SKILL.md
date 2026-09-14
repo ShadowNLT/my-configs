@@ -1,6 +1,6 @@
 ---
 name: algo-sketch
-version: 2 — 2026-09-14 (bump on every edit; a mirror whose version differs from the repo copy is stale)
+version: 4 — 2026-09-14 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 description: >
   Present logic as an Algo Sketch — Algorithm-101 pseudo-code with just-in-time
   records, soft invariants, and puzzle-piece composition across functions and
@@ -43,8 +43,10 @@ named.
    `function`(s) → optional `// handoff: name (Record)` when the seam is not
    obvious from the next piece’s args.
 5. **Self-check** (fail closed — fix before return) — see checklist below.
-6. **Return only the Algo Sketch artifact** (title + optional seam map + pieces).
-   No preamble essay unless the user asks for commentary or iteration notes.
+6. **Return only the Algo Sketch artifact** (title + optional seam map + pieces),
+   **always inside one fenced code block** — see Output envelope. Never emit the
+   dialect as bare chat markdown (that collapses indentation and turns `# title`
+   into a heading).
 
 ### Iteration mode
 
@@ -57,6 +59,8 @@ Map complaints to dials:
 - “too prose / mushy” → **invariant density** (add field notes) or tighter piece titles
 - “seams unclear” → **piece size** (re-cut) and/or seam map labels
 - “should this be modular?” → **module explicitness** only if 2+ groupings exist
+- “looks like plain text / lost indentation / title became a heading” → **fence**
+  (wrap the whole artifact; dials above are content, this is rendering)
 
 | Dial | Range |
 |------|--------|
@@ -70,7 +74,13 @@ reintroduces language tokens.
 
 ### Output envelope
 
-```
+**Always** wrap the entire artifact in a single markdown fenced code block with
+info string `text` (not a language that triggers syntax highlighting as JS/Python/
+etc.). One fence for the whole sketch — do not fence each piece separately.
+No prose before or after the fence unless the user asked for commentary or
+iteration notes.
+
+```text
 # <required title — the one-sentence behavior name>
 
 // seam map (if 2+ pieces)
@@ -84,7 +94,12 @@ reintroduces language tokens.
 ```
 
 Optional footer only when asked: glossary of records in appearance order
-(never as a required preamble).
+(never as a required preamble) — still **inside** the same fence, or a second
+fenced block only if the user asked for a separate glossary.
+
+**Why the fence is mandatory:** bare chat markdown treats `#` as a heading and
+may flatten leading spaces, so the dialect stops reading as Algorithm-101.
+The fence is rendering, not “production code.”
 
 ### Self-check (fail closed)
 
@@ -107,6 +122,7 @@ Optional footer only when asked: glossary of records in appearance order
 - seam map present iff 2+ pieces
 - builtins (`sameReference`, `belongsTo`, `blank …`, `append`) not redeclared as local helpers
 - no preamble essay outside the artifact envelope
+- entire artifact is wrapped in one ```text fence (not bare chat markdown)
 
 ---
 
@@ -351,8 +367,12 @@ language-idiomatic translations; formal verification; UML / diagram rendering
 
 ### Teaching mode (when executed inline from `start-work`)
 
-- Prefer mechanism sketches the learner can gate on; keep dialect frozen.
-- Path **pointers** OK; no production code fences or language tokens.
+- Prefer mechanism sketches the learner **uses**; the parent command gates the
+  **map + learner-produced claims**, not this artifact. Keep dialect frozen.
+- Emit the sketch in the **mandatory ```text fence** (Output envelope) — that is
+  rendering, not production code.
+- Path **pointers** OK; no **production-language** code fences or language tokens
+  (real JS/TS/Python/etc. snippets stay forbidden).
 - Do not ask the user to “install” anything — the invoking command already
   pointed here; just produce the artifact.
 - P6 layman-terms (if the parent runs it) must not rewrite this dialect.

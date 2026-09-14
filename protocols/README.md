@@ -73,6 +73,7 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
 | `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
+| `proof-duel` | `lens-catalog.md`, `lens-cast.md`, `cast-lenses.sh` |
 
 `system-atlas` and `system-atlas-update` are a pair. Whenever you install
 `system-atlas`, also copy `protocols/system-atlas-update/command.md` to
@@ -87,7 +88,11 @@ Whenever you install `lieflat-charts`, also copy
 `lieflat-charts-update` is markdown-only (it writes the `lieflat-charts` sidecar;
 it has none of its own).
 
-Every other protocol in this folder is markdown-only: copy `command.md` and stop.
+Every other protocol in this folder is markdown-only: copy `command.md` and stop
+(and copy `SKILL.md` only if a skills dir was requested). That includes
+`algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
+`code-pi`, `delegate`, `ponytail`, and similar markdown-only protocols.
+`proof-duel` is **not** markdown-only — use the sidecar install block below.
 
 Command-form install after the user has named `$COMMANDS_DIR` and `$CONFIG_DIR`:
 
@@ -126,6 +131,13 @@ cp protocols/write-tests/references.md "$CONFIG_DIR/write-tests/"
 # teaching-standard (every harness that teaches — corporate or personal)
 mkdir -p "$CONFIG_DIR/teaching-standard"
 cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
+
+# proof-duel (lenses + cast script)
+cp protocols/proof-duel/command.md "$COMMANDS_DIR/proof-duel.md"
+mkdir -p "$CONFIG_DIR/proof-duel"
+cp protocols/proof-duel/lens-catalog.md protocols/proof-duel/lens-cast.md \
+  protocols/proof-duel/cast-lenses.sh "$CONFIG_DIR/proof-duel/"
+chmod +x "$CONFIG_DIR/proof-duel/cast-lenses.sh"
 ```
 
 If `concept-viz` or `layman-terms` were already seeded from `corporate/commands/`

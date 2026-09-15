@@ -91,7 +91,7 @@ it has none of its own).
 Every other protocol in this folder is markdown-only: copy `command.md` and stop
 (and copy `SKILL.md` only if a skills dir was requested). That includes
 `algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
-`code-pi`, `delegate`, `ponytail`, and similar markdown-only protocols.
+`code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
 `proof-duel` is **not** markdown-only — use the sidecar install block below.
 
 Command-form install after the user has named `$COMMANDS_DIR` and `$CONFIG_DIR`:

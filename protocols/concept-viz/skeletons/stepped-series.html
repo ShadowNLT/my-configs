@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  --ink: #1c1c1c;
+  --paper: #f3efe6;
+  --stage: #fffdf8;
+  --mark: #215c45;
+  --rule: #c9c2b4;
+  --mute: #5c574e;
+  --hit: 3rem;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.45;
+  min-height: 100vh;
+}
+main {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+h1 { font-size: 1.25rem; margin: 0 0 0.25rem; }
+.meta { color: var(--mute); font-size: 0.95rem; margin: 0 0 1rem; }
+.stage {
+  background: var(--stage);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  min-height: 16rem;
+}
+.stage svg { display: block; width: 100%; height: auto; max-height: 22rem; }
+.caption { margin: 0.75rem 0 0; font-size: 1.05rem; }
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  align-items: center;
+}
+.nav button {
+  min-height: var(--hit);
+  min-width: var(--hit);
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  background: var(--stage);
+  color: var(--ink);
+  border-radius: 0.4rem;
+}
+.nav button[aria-current="true"] {
+  background: var(--mark);
+  color: #fff;
+  border-color: var(--mark);
+}
+.nav button:disabled { opacity: 0.4; }
+.dots { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.retrieval {
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+}
+.retrieval button {
+  min-height: var(--hit);
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.assumption {
+  color: var(--mute);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.75rem;
+}
+[hidden] { display: none !important; }
+@media (max-width: 40rem) {
+  .nav { flex-direction: column; align-items: stretch; }
+  .nav button { width: 100%; }
+  .dots { justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>{{TITLE}}</h1>
+  <p class="meta"><span id="pos"></span></p>
+  <section class="stage">
+    <article data-beat="1" data-kind="teach">
+      {{FIGURE}}
+      <p class="caption">{{CAPTION}}</p>
+    </article>
+  </section>
+  <nav class="nav" aria-label="Beats">
+    <button type="button" id="prev">Previous</button>
+    <div class="dots" id="dots"></div>
+    <button type="button" id="next">Next</button>
+  </nav>
+  <section class="retrieval" data-retrieval hidden>
+    <p id="ask">{{RETRIEVAL_Q}}</p>
+    <button type="button" id="reveal">Reveal</button>
+    <p id="answer" hidden>{{RETRIEVAL_A}}</p>
+  </section>
+  <footer class="assumption">{{FOOTER}}</footer>
+</main>
+<script>
+(function () {
+  var beats = Array.prototype.slice.call(document.querySelectorAll("[data-beat]"));
+  var i = 0;
+  var prev = document.getElementById("prev");
+  var next = document.getElementById("next");
+  var pos = document.getElementById("pos");
+  var dots = document.getElementById("dots");
+  var retrieval = document.querySelector("[data-retrieval]");
+  var reveal = document.getElementById("reveal");
+  var answer = document.getElementById("answer");
+
+  beats.forEach(function (_, idx) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = String(idx + 1);
+    b.addEventListener("click", function () { show(idx); });
+    dots.appendChild(b);
+  });
+
+  function show(n) {
+    i = Math.max(0, Math.min(beats.length - 1, n));
+    beats.forEach(function (el, idx) { el.hidden = idx !== i; });
+    Array.prototype.forEach.call(dots.children, function (el, idx) {
+      if (idx === i) el.setAttribute("aria-current", "true");
+      else el.removeAttribute("aria-current");
+    });
+    prev.disabled = i === 0;
+    next.disabled = i === beats.length - 1;
+    pos.textContent = "Beat " + (i + 1) + " of " + beats.length;
+    var isRetrieval = beats[i].getAttribute("data-kind") === "retrieval";
+    retrieval.hidden = !isRetrieval;
+    if (!isRetrieval) {
+      answer.hidden = true;
+    }
+  }
+
+  prev.addEventListener("click", function () { show(i - 1); });
+  next.addEventListener("click", function () { show(i + 1); });
+  reveal.addEventListener("click", function () { answer.hidden = false; });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "ArrowRight") show(i + 1);
+    if (ev.key === "ArrowLeft") show(i - 1);
+  });
+  show(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<div class="mod-bound-region" data-diagram-module="bound-region">
+  <style>
+    .mod-bound-region { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 0.75rem; align-items: center; min-height: 8rem; max-width: 100%; }
+    .mod-bound-region .legal { border: 3px dashed #215c45; border-radius: 50%; min-height: 7rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem; }
+    .mod-bound-region .lab { font-size: 0.8rem; color: #215c45; font-weight: 700; }
+    .mod-bound-region .out { padding: 0.5rem 0.65rem; border: 1px solid #1c1c1c; background: #f3efe6; }
+    @media (max-width: 40rem) {
+      .mod-bound-region { grid-template-columns: 1fr; }
+      .mod-bound-region .legal { border-radius: 0.75rem; min-height: 5rem; }
+    }
+  </style>
+  <div class="legal">
+    <div class="lab">inside</div>
+    <div>{{INSIDE}}</div>
+  </div>
+  <div class="out">outside {{OUTSIDE}}</div>
+</div>

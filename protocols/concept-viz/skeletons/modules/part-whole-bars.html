@@ -1,0 +1,26 @@
+<div class="mod-part-whole-bars" data-diagram-module="part-whole-bars">
+  <style>
+    .mod-part-whole-bars { display: flex; flex-direction: column; gap: 0.45rem; max-width: 100%; }
+    .mod-part-whole-bars .lab { font-size: 0.8rem; color: #5c574e; }
+    .mod-part-whole-bars .whole { height: 1.6rem; background: #215c45; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .mod-part-whole-bars .parts { display: flex; height: 1.6rem; width: 100%; }
+    .mod-part-whole-bars .p { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.8rem; font-weight: 700; border-right: 2px solid #fffdf8; }
+    .mod-part-whole-bars .p:last-child { border-right: 0; }
+    .mod-part-whole-bars .p1 { width: 50%; background: #215c45; }
+    .mod-part-whole-bars .p2 { width: 30%; background: #3d7a62; }
+    .mod-part-whole-bars .p3 { width: 20%; background: #5c574e; }
+    .mod-part-whole-bars .sum { font-size: 0.8rem; font-weight: 700; }
+    @media (max-width: 40rem) {
+      .mod-part-whole-bars .p { font-size: 0.7rem; }
+    }
+  </style>
+  <div class="lab">whole</div>
+  <div class="whole" role="img" aria-label="whole {{WHOLE}}">{{WHOLE}}</div>
+  <div class="lab">parts that sum to the whole</div>
+  <div class="parts" role="img" aria-label="parts {{P1}} {{P2}} {{P3}}">
+    <div class="p p1">{{P1}}</div>
+    <div class="p p2">{{P2}}</div>
+    <div class="p p3">{{P3}}</div>
+  </div>
+  <div class="sum">{{P1}} + {{P2}} + {{P3}} = {{WHOLE}}</div>
+</div>

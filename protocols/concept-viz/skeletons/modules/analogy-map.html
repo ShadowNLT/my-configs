@@ -1,0 +1,37 @@
+<div class="mod-analogy-map" data-diagram-module="analogy-map">
+  <style>
+    .mod-analogy-map { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: stretch; max-width: 100%; }
+    .mod-analogy-map fieldset { margin: 0; border: 2px solid #1c1c1c; padding: 0.6rem; }
+    .mod-analogy-map legend { font-weight: 700; }
+    .mod-analogy-map li { list-style: none; margin: 0 0 0.55rem; padding: 0.35rem 0.45rem; border: 1px solid #c9c2b4; background: #fffdf8; }
+    .mod-analogy-map ul { margin: 0; padding: 0; }
+    .mod-analogy-map .maps { display: flex; flex-direction: column; justify-content: space-around; min-width: 4.5rem; }
+    .mod-analogy-map .edge { font-size: 0.75rem; color: #215c45; font-weight: 700; text-align: center; }
+    .mod-analogy-map .break { color: #5c574e; font-weight: 600; }
+    @media (max-width: 40rem) {
+      .mod-analogy-map { grid-template-columns: 1fr; }
+      .mod-analogy-map .maps { flex-direction: row; flex-wrap: wrap; min-width: 0; }
+    }
+  </style>
+  <fieldset>
+    <legend>{{SRC}}</legend>
+    <ul>
+      <li>{{S1}}</li>
+      <li>{{S2}}</li>
+      <li>{{S3}}</li>
+    </ul>
+  </fieldset>
+  <div class="maps" aria-label="cross-map edges">
+    <div class="edge">{{M1}} →</div>
+    <div class="edge">{{M2}} →</div>
+    <div class="edge break">{{M3}} ↛</div>
+  </div>
+  <fieldset>
+    <legend>{{TGT}}</legend>
+    <ul>
+      <li>{{T1}}</li>
+      <li>{{T2}}</li>
+      <li>{{T3}}</li>
+    </ul>
+  </fieldset>
+</div>

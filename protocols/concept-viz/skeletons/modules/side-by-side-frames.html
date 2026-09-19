@@ -1,0 +1,25 @@
+<div class="mod-side-by-side-frames" data-diagram-module="side-by-side-frames">
+  <style>
+    .mod-side-by-side-frames { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 100%; }
+    .mod-side-by-side-frames fieldset { margin: 0; border: 2px solid #1c1c1c; padding: 0.75rem; }
+    .mod-side-by-side-frames dt { color: #5c574e; font-size: 0.8rem; }
+    .mod-side-by-side-frames dd { margin: 0 0 0.5rem; font-weight: 700; }
+    @media (max-width: 40rem) {
+      .mod-side-by-side-frames { grid-template-columns: 1fr; }
+    }
+  </style>
+  <fieldset>
+    <legend>{{LEFT_NAME}}</legend>
+    <dl>
+      <dt>{{ROW1}}</dt><dd>{{LEFT_R1}}</dd>
+      <dt>{{ROW2}}</dt><dd>{{LEFT_R2}}</dd>
+    </dl>
+  </fieldset>
+  <fieldset>
+    <legend>{{RIGHT_NAME}}</legend>
+    <dl>
+      <dt>{{ROW1}}</dt><dd>{{RIGHT_R1}}</dd>
+      <dt>{{ROW2}}</dt><dd>{{RIGHT_R2}}</dd>
+    </dl>
+  </fieldset>
+</div>

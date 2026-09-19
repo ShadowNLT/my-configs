@@ -69,7 +69,6 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | -------- | -------------------------------- |
 | `system-atlas` | `assets/`, `references/`, `evals.json`, `SKILL.md` (raw upstream copy for the updater) |
 | `lieflat-charts` | `catalog.md`, `report-catalog.md`, `color-presets.js`, `mono-tokens.js`, `LICENSE`, `THIRD_PARTY_NOTICES.md`, `templates/`, `examples/`, `scripts/`, `SKILL.md` (skill form), `SKILL.upstream.md` (raw upstream `SKILL.md` for the updater). Do not copy `docs/`. |
-| `concept-viz` | `template/` |
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
 | `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
@@ -113,11 +112,6 @@ rsync -a --delete \
   protocols/lieflat-charts/ "$CONFIG_DIR/lieflat-charts/"
 cp protocols/lieflat-charts-update/command.md "$COMMANDS_DIR/lieflat-charts-update.md"
 
-# concept-viz
-cp protocols/concept-viz/command.md "$COMMANDS_DIR/concept-viz.md"
-mkdir -p "$CONFIG_DIR/concept-viz/template"
-cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
-
 # layman-terms
 cp protocols/layman-terms/command.md "$COMMANDS_DIR/layman-terms.md"
 mkdir -p "$CONFIG_DIR/layman-terms"
@@ -140,8 +134,8 @@ cp protocols/proof-duel/lens-catalog.md protocols/proof-duel/lens-cast.md \
 chmod +x "$CONFIG_DIR/proof-duel/cast-lenses.sh"
 ```
 
-If `concept-viz` or `layman-terms` were already seeded from `corporate/commands/`
-(those copies carry `{{AGENT_*}}` variables), keep that command file and only
+If `layman-terms` was already seeded from `corporate/commands/`
+(that copy carries `{{AGENT_*}}` variables), keep that command file and only
 copy the sidecar files from `protocols/` as above. Do not overwrite the corporate
 command with the protocol `command.md` unless you intend to drop the variables.
 

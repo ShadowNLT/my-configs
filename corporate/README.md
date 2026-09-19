@@ -7,7 +7,7 @@ Work profile only. The personal profile lives in `personal/`; never seed it from
 ## What lives here
 
 - `corporate-agent.md` — work-profile global rules. Seeded to a harness as `$CONFIG_DIR/AGENT.md`.
-- `commands/` — 21 work slash commands (excludes `adversarial-review`, which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
+- `commands/` — 20 work slash commands (excludes `adversarial-review`, which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
 
 ## Machine-local secrets
 
@@ -39,15 +39,13 @@ directory cannot hold those files.
 Required for corporate work harnesses:
 
 - `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault). Substitute `{{AGENT_COMMANDS_DIR}}` at seed time.
-- `concept-viz/template/`
 - `layman-terms/denylist.txt`
 
 ```bash
-mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms"
 sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
   protocols/teaching-standard/Teaching-Standard.md \
   > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
-cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
 
@@ -95,11 +93,10 @@ sed \
    s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; \
    s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" \
   "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
-mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/concept-viz/template" "$CONFIG_DIR/layman-terms"
+mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms"
 sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
   protocols/teaching-standard/Teaching-Standard.md \
   > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
-cp protocols/concept-viz/template/player.html "$CONFIG_DIR/concept-viz/template/"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 ```
 

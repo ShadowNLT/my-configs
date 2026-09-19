@@ -1,6 +1,6 @@
 ---
 type: teaching-meta
-version: 4 — 2026-09-14
+version: 5 — 2026-09-20
 repo-canonical: true
 ---
 
@@ -335,7 +335,6 @@ only. Say so in one line when they flip on.
 | `explain-first-principles` | ✓ (= P2+P5 default / hybrid vocab nodes) | ✓ | ✓ | N/A | ✓ | N/A | N/A | N/A |
 | `algo-sketch` | ✓ (= P5 mechanism form when hybrid) | ✓ | pointer-only in sketch-phase | N/A | ✓ | N/A | N/A | N/A |
 | `layman-terms` | —‖ | —‖ | — | — | — | — | — | — |
-| `concept-viz` | optional (after P5) | ✓ | ✓ | N/A | N/A | N/A | N/A | N/A |
 | `pause-work` | — | — | — | — | — | — | checkpoint only | checkpoint only |
 
 † lesson walkthrough only, not sandbox brief  ‡ sandbox = stricter, no escape

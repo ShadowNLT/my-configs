@@ -11,7 +11,7 @@ Canonical teaching doctrine for all agent commands (corporate, personal, and cur
 ## Where it lives on disk
 
 **Not in a knowledge/work vault.** The Teaching Standard is harness-local agent config — the same
-class of thing as `layman-terms/denylist.txt` or `concept-viz/template/`. It stays with the agent
+class of thing as `layman-terms/denylist.txt`. It stays with the agent
 harness so personal and corporate profiles can both use it without coupling to a corporate vault.
 
 ```
@@ -61,6 +61,5 @@ changes, re-install the sidecar and update command inline triggers in the same c
 | `explain-first-principles` | Command form of §Procedure P2+P5 default / hybrid **vocab** nodes (TS-1) |
 | `algo-sketch` | Hybrid P5 **mechanism/solution delivery** (opt-in; required in `start-work` 4a/4c/4d Phases 1–3; gates quiz map + claims, not the sketch) |
 | `layman-terms` | §Procedure P6 clarity pass only — not a substitute for teaching; never rewrite sketch dialect |
-| `concept-viz` | Optional visual layer after P5 |
 
 Teaching commands (`start-work`, `learn`, `new-session`, etc.) live in `corporate/commands/` and reference `{{TEACHING_STANDARD_PATH}}`.

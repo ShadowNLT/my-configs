@@ -1,5 +1,5 @@
 ---
-version: 4 — 2026-09-14 (bump on every edit; a mirror whose version differs from the repo copy is stale)
+version: 5 — 2026-09-20 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 description: >
   Present logic as an Algo Sketch — Algorithm-101 pseudo-code with just-in-time
   records, soft invariants, and puzzle-piece composition across functions and
@@ -354,8 +354,7 @@ first-principles prose; no language snippets until that command’s post-gate
 edit phase).
 
 **Out of scope** (unless the user expands): compilable code generation;
-language-idiomatic translations; formal verification; UML / diagram rendering
-(point at `concept-viz` when animation helps more).
+language-idiomatic translations; formal verification; UML / diagram rendering.
 
 ### Teaching mode (when executed inline from `start-work`)
 

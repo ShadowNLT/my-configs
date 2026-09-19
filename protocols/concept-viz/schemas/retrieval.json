@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-viz.local/schemas/retrieval.json",
+  "title": "RetrievalPrompt",
+  "type": "object",
+  "required": ["given", "question", "options", "answer"],
+  "additionalProperties": false,
+  "properties": {
+    "given": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Every live name with a concrete ptr/len/cap or concrete value. Predicates such as cap(a)>1 are illegal unless the initial a is also stated."
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One question, separate from Given. Prefer one state-changing op after a fully stated Given."
+    },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string" }
+    },
+    "answer": { "type": "string" }
+  }
+}

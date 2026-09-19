@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-viz.local/schemas/catalog_audit.json",
+  "title": "CatalogAudit",
+  "type": "object",
+  "required": ["scored", "selected", "rejected", "job"],
+  "additionalProperties": false,
+  "properties": {
+    "selected": { "type": ["string", "null"] },
+    "job": { "type": "string" },
+    "seed_id": { "type": ["string", "null"] },
+    "scored": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "total", "scores"],
+        "properties": {
+          "id": { "type": "string" },
+          "total": { "type": "integer" },
+          "rejected": { "type": "boolean" },
+          "rubric_ids": { "type": "array", "items": { "type": "string" } },
+          "scores": {
+            "type": "object",
+            "required": [
+              "congruence",
+              "element_interactivity_fit",
+              "contiguity_feasible",
+              "segmentability",
+              "honesty",
+              "expertise_fit",
+              "seed_metaphor_consistency"
+            ],
+            "properties": {
+              "congruence": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "element_interactivity_fit": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "contiguity_feasible": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "segmentability": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "honesty": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "expertise_fit": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "seed_metaphor_consistency": { "type": "integer", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rubric_ids"],
+        "properties": {
+          "id": { "type": "string" },
+          "rubric_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

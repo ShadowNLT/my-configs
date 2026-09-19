@@ -1,0 +1,28 @@
+{
+  "id": "cs-se",
+  "title": "CS and software engineering",
+  "metaphor_zoo": ["call stack", "interface", "hash slot"],
+  "preferred_archetypes": [
+    "part-whole-map",
+    "nested-layers",
+    "node-link-tree",
+    "stack-frames",
+    "flow-sequence",
+    "state-steps",
+    "break-point",
+    "allowed-vs-blocked",
+    "worked-map"
+  ],
+  "forbidden_patterns": [
+    "network hairball as beat 1",
+    "index tape as a call stack"
+  ],
+  "common_assumed_chunks": ["variable", "function", "list"],
+  "common_missing_stairs": ["pointer versus value", "stack versus heap"],
+  "interference_pairs": [
+    "thread versus process",
+    "value versus reference",
+    "stack versus tape"
+  ],
+  "worked_example_skin": "code-adjacent boxes and call frames"
+}

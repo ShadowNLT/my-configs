@@ -1,0 +1,23 @@
+{
+  "id": "spatial-geometry",
+  "title": "Spatial geometry",
+  "metaphor_zoo": ["plane", "figure", "measure"],
+  "preferred_archetypes": [
+    "coordinate-figure",
+    "number-line",
+    "shared-grid",
+    "bound-region",
+    "proof-steps"
+  ],
+  "forbidden_patterns": [
+    "unscaled sketch as a metric claim",
+    "number-line as the only encoding for a plane figure"
+  ],
+  "common_assumed_chunks": ["point", "length", "angle"],
+  "common_missing_stairs": ["coordinate versus length", "axis origin"],
+  "interference_pairs": [
+    "distance versus displacement",
+    "grid versus plane"
+  ],
+  "worked_example_skin": "labeled vertices on a stated scale"
+}

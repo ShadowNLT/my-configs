@@ -1,0 +1,26 @@
+{
+  "id": "systems-infra",
+  "title": "Systems and infra",
+  "metaphor_zoo": ["queue", "pipeline", "lease"],
+  "preferred_archetypes": [
+    "pipeline-stages",
+    "cycle-loop",
+    "nested-layers",
+    "overflow-spill",
+    "bound-region",
+    "magnitude-scale",
+    "break-point"
+  ],
+  "forbidden_patterns": [
+    "unlabeled mesh of every service as beat 1",
+    "linear chevron for a retry loop"
+  ],
+  "common_assumed_chunks": ["request", "timeout", "replica"],
+  "common_missing_stairs": ["backpressure", "at-least-once versus exactly-once"],
+  "interference_pairs": [
+    "latency versus throughput",
+    "leader versus replica",
+    "stack versus tape"
+  ],
+  "worked_example_skin": "stage boxes, queues, and a named capacity bound"
+}

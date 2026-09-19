@@ -1,0 +1,23 @@
+{
+  "id": "natural-science",
+  "title": "Natural science",
+  "metaphor_zoo": ["force", "pathway", "state"],
+  "preferred_archetypes": [
+    "free-body",
+    "pathway-map",
+    "flow-sequence",
+    "state-steps",
+    "before-after"
+  ],
+  "forbidden_patterns": [
+    "decorative particle swarm as beat 1",
+    "unlabeled chevrons for a chemical mechanism"
+  ],
+  "common_assumed_chunks": ["object", "change", "cause"],
+  "common_missing_stairs": ["force versus motion", "intermediate versus product"],
+  "interference_pairs": [
+    "force versus velocity",
+    "pathway versus cycle"
+  ],
+  "worked_example_skin": "one body or one named conversion per beat"
+}

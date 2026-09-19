@@ -1,0 +1,148 @@
+{
+  "modules": [
+    {
+      "id": "header-triptych",
+      "title": "Header triptych",
+      "fragment": "modules/header-triptych.html",
+      "layout": "three-column-headers"
+    },
+    {
+      "id": "cell-tape",
+      "title": "Cell tape",
+      "fragment": "modules/cell-tape.html",
+      "layout": "index-row-cells"
+    },
+    {
+      "id": "before-after-panels",
+      "title": "Before after panels",
+      "fragment": "modules/before-after-panels.html",
+      "layout": "stacked-time-panels"
+    },
+    {
+      "id": "side-by-side-frames",
+      "title": "Side by side frames",
+      "fragment": "modules/side-by-side-frames.html",
+      "layout": "aligned-case-frames"
+    },
+    {
+      "id": "state-machine",
+      "title": "State machine",
+      "fragment": "modules/state-machine.html",
+      "layout": "labeled-state-graph"
+    },
+    {
+      "id": "flow-sequence",
+      "title": "Flow sequence",
+      "fragment": "modules/flow-sequence.html",
+      "layout": "ordered-chevron-steps"
+    },
+    {
+      "id": "nested-layers",
+      "title": "Nested layers",
+      "fragment": "modules/nested-layers.html",
+      "layout": "concentric-containment"
+    },
+    {
+      "id": "bound-region",
+      "title": "Bound region",
+      "fragment": "modules/bound-region.html",
+      "layout": "inside-outside-bound"
+    },
+    {
+      "id": "overflow-spill",
+      "title": "Overflow spill",
+      "fragment": "modules/overflow-spill.html",
+      "layout": "capacity-plus-spill"
+    },
+    {
+      "id": "node-link-tree",
+      "title": "Node link tree",
+      "fragment": "modules/node-link-tree.html",
+      "layout": "rooted-edge-tree"
+    },
+    {
+      "id": "common-scale-bars",
+      "title": "Common scale bars",
+      "fragment": "modules/common-scale-bars.html",
+      "layout": "aligned-quantity-bars"
+    },
+    {
+      "id": "node-link-graph",
+      "title": "Node link graph",
+      "fragment": "modules/node-link-graph.html",
+      "layout": "general-node-link"
+    },
+    {
+      "id": "stack-frames",
+      "title": "Stack frames",
+      "fragment": "modules/stack-frames.html",
+      "layout": "lifo-call-frames"
+    },
+    {
+      "id": "number-line",
+      "title": "Number line",
+      "fragment": "modules/number-line.html",
+      "layout": "pictorial-number-line"
+    },
+    {
+      "id": "matrix-grid",
+      "title": "Matrix grid",
+      "fragment": "modules/matrix-grid.html",
+      "layout": "attribute-case-matrix"
+    },
+    {
+      "id": "timeline",
+      "title": "Timeline",
+      "fragment": "modules/timeline.html",
+      "layout": "duration-event-axis"
+    },
+    {
+      "id": "free-body",
+      "title": "Free body",
+      "fragment": "modules/free-body.html",
+      "layout": "force-vector-body"
+    },
+    {
+      "id": "coordinate-figure",
+      "title": "Coordinate figure",
+      "fragment": "modules/coordinate-figure.html",
+      "layout": "metric-coordinate-plane"
+    },
+    {
+      "id": "distribution-strip",
+      "title": "Distribution strip",
+      "fragment": "modules/distribution-strip.html",
+      "layout": "common-scale-distribution"
+    },
+    {
+      "id": "cycle-return",
+      "title": "Cycle return",
+      "fragment": "modules/cycle-return.html",
+      "layout": "return-edge-cycle"
+    },
+    {
+      "id": "pathway-map",
+      "title": "Pathway map",
+      "fragment": "modules/pathway-map.html",
+      "layout": "mechanism-pathway"
+    },
+    {
+      "id": "proof-steps",
+      "title": "Proof steps",
+      "fragment": "modules/proof-steps.html",
+      "layout": "justification-columns"
+    },
+    {
+      "id": "analogy-map",
+      "title": "Analogy map",
+      "fragment": "modules/analogy-map.html",
+      "layout": "dual-panel-crossmap"
+    },
+    {
+      "id": "part-whole-bars",
+      "title": "Part whole bars",
+      "fragment": "modules/part-whole-bars.html",
+      "layout": "sum-to-whole-bars"
+    }
+  ]
+}

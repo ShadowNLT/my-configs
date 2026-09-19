@@ -69,6 +69,7 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | -------- | -------------------------------- |
 | `system-atlas` | `assets/`, `references/`, `evals.json`, `SKILL.md` (raw upstream copy for the updater) |
 | `lieflat-charts` | `catalog.md`, `report-catalog.md`, `color-presets.js`, `mono-tokens.js`, `LICENSE`, `THIRD_PARTY_NOTICES.md`, `templates/`, `examples/`, `scripts/`, `SKILL.md` (skill form), `SKILL.upstream.md` (raw upstream `SKILL.md` for the updater). Do not copy `docs/`. |
+| `concept-viz` | `catalog.py`, `gate.py`, `render.py`, `retrieval.py`, `runstore.py`, `LICENSE`, `catalog/`, `eval/`, `schemas/`, `scripts/`, `seeds/`, `skeletons/`, `examples/`, `docs/concept-viz-hardened.md`, `docs/concept-viz-serve-stop.md`, `docs/coverage-scorecard.md`, `SKILL.md` (skill form), `SKILL.upstream.md` (raw upstream `SKILL.md` for the updater). Do not copy repo-root `README.md`, `.gitignore`, `decisions.tsv`, `tests/`, repo-root `evals/`, or the rest of `docs/`. |
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
 | `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
@@ -85,6 +86,13 @@ Whenever you install `lieflat-charts`, also copy
 `protocols/lieflat-charts-update/command.md` to
 `$COMMANDS_DIR/lieflat-charts-update.md`. Never seed one without the other.
 `lieflat-charts-update` is markdown-only (it writes the `lieflat-charts` sidecar;
+it has none of its own).
+
+`concept-viz` and `concept-viz-update` are a pair the same way.
+Whenever you install `concept-viz`, also copy
+`protocols/concept-viz-update/command.md` to
+`$COMMANDS_DIR/concept-viz-update.md`. Never seed one without the other.
+`concept-viz-update` is markdown-only (it writes the `concept-viz` sidecar;
 it has none of its own).
 
 Every other protocol in this folder is markdown-only: copy `command.md` and stop
@@ -111,6 +119,14 @@ rsync -a --delete \
   --exclude command.md \
   protocols/lieflat-charts/ "$CONFIG_DIR/lieflat-charts/"
 cp protocols/lieflat-charts-update/command.md "$COMMANDS_DIR/lieflat-charts-update.md"
+
+# concept-viz + concept-viz-update (always together)
+cp protocols/concept-viz/command.md "$COMMANDS_DIR/concept-viz.md"
+mkdir -p "$CONFIG_DIR/concept-viz"
+rsync -a --delete \
+  --exclude command.md \
+  protocols/concept-viz/ "$CONFIG_DIR/concept-viz/"
+cp protocols/concept-viz-update/command.md "$COMMANDS_DIR/concept-viz-update.md"
 
 # layman-terms
 cp protocols/layman-terms/command.md "$COMMANDS_DIR/layman-terms.md"

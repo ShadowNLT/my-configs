@@ -1,0 +1,28 @@
+<div class="mod-overflow-spill" data-diagram-module="overflow-spill">
+  <style>
+    .mod-overflow-spill { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 0.75rem; align-items: end; max-width: 100%; }
+    .mod-overflow-spill .held { border: 3px solid #1c1c1c; min-height: 5rem; display: flex; align-items: flex-end; gap: 0.25rem; padding: 0.25rem; position: relative; }
+    .mod-overflow-spill .cap { font-size: 0.75rem; color: #215c45; font-weight: 700; border-bottom: 2px dashed #215c45; margin-bottom: 0.35rem; }
+    .mod-overflow-spill .item { width: 1.4rem; height: 1.4rem; background: #215c45; color: #fff; text-align: center; font-size: 0.75rem; line-height: 1.4rem; }
+    .mod-overflow-spill .spill { display: flex; gap: 0.25rem; align-items: flex-end; min-height: 5rem; }
+    .mod-overflow-spill .spill-lab { font-size: 0.75rem; color: #5c574e; }
+    @media (max-width: 40rem) {
+      .mod-overflow-spill { grid-template-columns: 1fr; }
+    }
+  </style>
+  <div>
+    <div class="cap">capacity {{CAP}}</div>
+    <div class="held" aria-label="held">
+      <div class="item">{{H1}}</div>
+      <div class="item">{{H2}}</div>
+      <div class="item">{{H3}}</div>
+    </div>
+  </div>
+  <div>
+    <div class="spill-lab">excess</div>
+    <div class="spill" aria-label="excess">
+      <div class="item">{{X1}}</div>
+      <div class="item">{{X2}}</div>
+    </div>
+  </div>
+</div>

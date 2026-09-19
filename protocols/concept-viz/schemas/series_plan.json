@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-viz.local/schemas/series_plan.json",
+  "title": "SeriesPlan",
+  "type": "object",
+  "required": [
+    "grain_id",
+    "primary_job",
+    "beats",
+    "able_to",
+    "retrieval"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "grain_id": { "type": "string" },
+    "primary_job": {
+      "enum": [
+        "structure",
+        "process",
+        "compare",
+        "quantity_in_concept",
+        "constraint",
+        "failure",
+        "transfer"
+      ]
+    },
+    "seed": { "type": ["string", "null"] },
+    "able_to": { "type": "string" },
+    "retrieval": { "$ref": "retrieval.json" },
+    "motion_used": { "type": "boolean" },
+    "motion_justification": { "type": ["string", "null"] },
+    "beats": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "required": ["n", "kind", "diagram_module"],
+        "properties": {
+          "n": { "type": "integer", "minimum": 1 },
+          "kind": { "enum": ["teach", "retrieval"] },
+          "novel_intros": { "type": "array", "items": { "type": "string" } },
+          "diagram_module": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

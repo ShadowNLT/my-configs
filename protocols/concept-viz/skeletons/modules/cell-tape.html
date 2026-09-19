@@ -1,0 +1,17 @@
+<div class="mod-cell-tape" data-diagram-module="cell-tape">
+  <style>
+    .mod-cell-tape { display: flex; flex-direction: column; gap: 0.25rem; overflow-x: auto; max-width: 100%; }
+    .mod-cell-tape .row { display: flex; gap: 0; }
+    .mod-cell-tape .cell { width: 3rem; min-width: 3rem; height: 3rem; border: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .mod-cell-tape .ix { width: 3rem; min-width: 3rem; text-align: center; font-size: 0.75rem; color: #5c574e; }
+  </style>
+  <div class="row" aria-hidden="true">
+    <div class="ix">0</div><div class="ix">1</div><div class="ix">2</div><div class="ix">3</div>
+  </div>
+  <div class="row" role="img" aria-label="indexed backing cells, not a call stack">
+    <div class="cell">{{C0}}</div>
+    <div class="cell">{{C1}}</div>
+    <div class="cell">{{C2}}</div>
+    <div class="cell">{{C3}}</div>
+  </div>
+</div>

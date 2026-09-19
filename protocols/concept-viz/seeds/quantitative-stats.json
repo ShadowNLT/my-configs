@@ -1,0 +1,22 @@
+{
+  "id": "quantitative-stats",
+  "title": "Quantitative statistics",
+  "metaphor_zoo": ["scale", "share", "sample"],
+  "preferred_archetypes": [
+    "magnitude-scale",
+    "distribution-strip",
+    "part-of-whole-share",
+    "shared-grid"
+  ],
+  "forbidden_patterns": [
+    "header boxes as magnitude",
+    "area or 3D as the quantity"
+  ],
+  "common_assumed_chunks": ["unit", "count", "compare"],
+  "common_missing_stairs": ["sample versus population", "share versus count"],
+  "interference_pairs": [
+    "mean versus median",
+    "bar versus distribution"
+  ],
+  "worked_example_skin": "one common scale, numbers on the marks"
+}

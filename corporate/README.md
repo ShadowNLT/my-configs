@@ -59,6 +59,10 @@ See `protocols/README.md`.
 `protocols/` **together with** `lieflat-charts-update` (never one without the other).
 See `protocols/README.md`.
 
+`concept-viz` is not in this folder. When the user wants it, seed it from
+`protocols/` **together with** `concept-viz-update` (never one without the other).
+See `protocols/README.md`.
+
 A personal harness never gets this folder's `commands/` dump or
 `corporate-agent.md`. Seed it from `personal/` and `protocols/` instead.
 

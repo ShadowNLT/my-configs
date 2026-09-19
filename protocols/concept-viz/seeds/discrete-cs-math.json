@@ -1,0 +1,27 @@
+{
+  "id": "discrete-cs-math",
+  "title": "Discrete and CS math",
+  "metaphor_zoo": ["set", "graph", "invariant"],
+  "preferred_archetypes": [
+    "node-link-graph",
+    "node-link-tree",
+    "state-steps",
+    "shared-grid",
+    "bound-region",
+    "analog-carry",
+    "part-whole-map",
+    "proof-steps",
+    "number-line"
+  ],
+  "forbidden_patterns": [
+    "CPA number-line as the only encoding for a graph",
+    "rooted tree as a general graph"
+  ],
+  "common_assumed_chunks": ["set", "function", "pair"],
+  "common_missing_stairs": ["relation versus function", "induction step"],
+  "interference_pairs": [
+    "graph versus tree",
+    "onto versus one-to-one"
+  ],
+  "worked_example_skin": "named nodes, edges, and one invariant callout"
+}

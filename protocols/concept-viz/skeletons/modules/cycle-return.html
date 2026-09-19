@@ -1,0 +1,28 @@
+<div class="mod-cycle-return" data-diagram-module="cycle-return">
+  <style>
+    .mod-cycle-return { max-width: 100%; }
+    .mod-cycle-return svg { width: 100%; height: auto; display: block; }
+  </style>
+  <svg viewBox="0 0 320 210" role="img" aria-label="cycle with a named return edge">
+    <rect x="118" y="12" width="84" height="36" rx="4" fill="#215c45"/>
+    <text x="160" y="35" text-anchor="middle" fill="#fff" font-size="12">{{S1}}</text>
+    <rect x="12" y="148" width="84" height="36" rx="4" fill="#fffdf8" stroke="#1c1c1c"/>
+    <text x="54" y="171" text-anchor="middle" font-size="12">{{S3}}</text>
+    <rect x="224" y="148" width="84" height="36" rx="4" fill="#fffdf8" stroke="#1c1c1c"/>
+    <text x="266" y="171" text-anchor="middle" font-size="12">{{S2}}</text>
+    <path d="M202 40 C 250 48, 266 90, 266 148" fill="none" stroke="#1c1c1c" stroke-width="2" marker-end="url(#mod-cy-arrow)"/>
+    <path d="M224 166 H96" fill="none" stroke="#1c1c1c" stroke-width="2" marker-end="url(#mod-cy-arrow)"/>
+    <path d="M54 148 C 54 90, 70 48, 118 40" fill="none" stroke="#215c45" stroke-width="3" marker-end="url(#mod-cy-return)"/>
+    <text x="248" y="88" font-size="11">{{E12}}</text>
+    <text x="160" y="158" text-anchor="middle" font-size="11">{{E23}}</text>
+    <text x="28" y="88" font-size="11" fill="#215c45" font-weight="700">{{RETURN}}</text>
+    <defs>
+      <marker id="mod-cy-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#1c1c1c"/>
+      </marker>
+      <marker id="mod-cy-return" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#215c45"/>
+      </marker>
+    </defs>
+  </svg>
+</div>

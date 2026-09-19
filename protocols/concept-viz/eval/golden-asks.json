@@ -1,0 +1,66 @@
+{
+  "asks": [
+    {
+      "id": "01",
+      "expect": "single_grain",
+      "ask": "How does hash table chaining store a collision?",
+      "note": "Intermediate. One goal. Priors (array, hash) are in the ask."
+    },
+    {
+      "id": "02",
+      "expect": "single_grain",
+      "ask": "Show stack LIFO with push and pop only.",
+      "note": "Novice. Four or fewer novel intros. Scope limiter."
+    },
+    {
+      "id": "03",
+      "expect": "single_grain",
+      "ask": "What does it mean that a mutex has an owner?",
+      "note": "Intermediate. One constraint grain."
+    },
+    {
+      "id": "04",
+      "expect": "must_split",
+      "reason": "multi_goal",
+      "ask": "Teach me the TCP handshake and also HTTP/2 multiplexing."
+    },
+    {
+      "id": "05",
+      "expect": "must_split",
+      "reason": "missing_stair",
+      "ask": "Explain CRDTs. I have not seen replication or concurrency."
+    },
+    {
+      "id": "06",
+      "expect": "must_split",
+      "reason": "high_interactivity",
+      "ask": "Walk me through a live debugger of a lock-free queue."
+    },
+    {
+      "id": "07",
+      "expect": "must_split",
+      "reason": "ambiguous_prior",
+      "ask": "Explain monads.",
+      "note": "Pre-probe gate. Empty of jargon."
+    },
+    {
+      "id": "08",
+      "expect": "boundary",
+      "ask": "Compare TCP and UDP delivery.",
+      "note": "Compare job. Passes if prior is packets and ports."
+    },
+    {
+      "id": "09",
+      "expect": "boundary",
+      "ask": "Expert Paxos prepare and accept, five new terms.",
+      "note": "Expert budget is 8. Passes if fan-in stays at or under 4."
+    },
+    {
+      "id": "10",
+      "expect": "must_split",
+      "reason": "missing_stair",
+      "ask": "Novice hash tables: slot, collision, chain, walk, load factor, resize.",
+      "note": "Six novel intros over a novice budget of 4."
+    }
+  ]
+}

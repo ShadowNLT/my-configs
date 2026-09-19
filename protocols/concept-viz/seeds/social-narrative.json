@@ -1,0 +1,23 @@
+{
+  "id": "social-narrative",
+  "title": "Social narrative",
+  "metaphor_zoo": ["episode", "role", "map"],
+  "preferred_archetypes": [
+    "timeline",
+    "flow-sequence",
+    "analog-carry",
+    "side-by-side",
+    "before-after"
+  ],
+  "forbidden_patterns": [
+    "unordered collage as a history",
+    "analogy without named cross-map edges"
+  ],
+  "common_assumed_chunks": ["actor", "event", "order"],
+  "common_missing_stairs": ["cause versus sequence", "role versus person"],
+  "interference_pairs": [
+    "order versus duration",
+    "analogy versus mere likeness"
+  ],
+  "worked_example_skin": "named events on one axis, or two panels with maps"
+}

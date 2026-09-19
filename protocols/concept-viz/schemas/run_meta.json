@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-viz.local/schemas/run_meta.json",
+  "title": "RunMeta",
+  "type": "object",
+  "required": [
+    "run_id",
+    "pid",
+    "bind",
+    "port",
+    "started_at",
+    "expires_at",
+    "html_entry",
+    "url",
+    "marker",
+    "status"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "pid": { "type": "integer", "minimum": 1 },
+    "bind": { "const": "127.0.0.1" },
+    "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+    "started_at": { "type": "string" },
+    "expires_at": { "type": "string" },
+    "html_entry": { "type": "string" },
+    "url": { "type": "string" },
+    "marker": { "type": "string" },
+    "status": { "type": "string" },
+    "html_path": { "type": "string" }
+  }
+}

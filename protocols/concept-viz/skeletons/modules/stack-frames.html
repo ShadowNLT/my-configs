@@ -1,0 +1,32 @@
+<div class="mod-stack-frames" data-diagram-module="stack-frames">
+  <style>
+    .mod-stack-frames { display: flex; gap: 0.75rem; align-items: stretch; max-width: 100%; }
+    .mod-stack-frames .grow { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.75rem; color: #215c45; font-weight: 700; letter-spacing: 0.06em; }
+    .mod-stack-frames ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column-reverse; gap: 0.35rem; flex: 1; }
+    .mod-stack-frames li { border: 2px solid #1c1c1c; background: #fffdf8; padding: 0.45rem 0.6rem; }
+    .mod-stack-frames li[data-tos] { border-color: #215c45; background: #e8f2ed; }
+    .mod-stack-frames .fn { font-weight: 700; }
+    .mod-stack-frames .slot { font-size: 0.8rem; color: #5c574e; }
+    .mod-stack-frames .tos { font-size: 0.75rem; color: #215c45; font-weight: 700; }
+    @media (max-width: 40rem) {
+      .mod-stack-frames { flex-direction: column; }
+      .mod-stack-frames .grow { writing-mode: horizontal-tb; transform: none; }
+    }
+  </style>
+  <div class="grow">push →</div>
+  <ol aria-label="call stack, top of stack last drawn on top">
+    <li>
+      <div class="fn">{{F_BASE}}</div>
+      <div class="slot">{{S_BASE}}</div>
+    </li>
+    <li>
+      <div class="fn">{{F_MID}}</div>
+      <div class="slot">{{S_MID}}</div>
+    </li>
+    <li data-tos>
+      <div class="tos">top of stack</div>
+      <div class="fn">{{F_TOS}}</div>
+      <div class="slot">{{S_TOS}}</div>
+    </li>
+  </ol>
+</div>

@@ -1,0 +1,16 @@
+<ol class="mod-flow-sequence" data-diagram-module="flow-sequence">
+  <style>
+    .mod-flow-sequence { display: flex; list-style: none; margin: 0; padding: 0; align-items: stretch; gap: 0; overflow-x: auto; max-width: 100%; }
+    .mod-flow-sequence li { background: #215c45; color: #fff; padding: 0.7rem 1.6rem 0.7rem 1rem; clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 50%, calc(100% - 0.8rem) 100%, 0 100%, 0.8rem 50%); flex: 1 1 auto; min-width: 6rem; }
+    .mod-flow-sequence li:first-child { clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 50%, calc(100% - 0.8rem) 100%, 0 100%); }
+    .mod-flow-sequence .n { display: block; font-size: 0.75rem; opacity: 0.85; }
+    @media (max-width: 40rem) {
+      .mod-flow-sequence { flex-direction: column; overflow-x: visible; }
+      .mod-flow-sequence li { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.6rem), 50% 100%, 0 calc(100% - 0.6rem)); padding: 0.7rem 1rem 1.1rem; }
+      .mod-flow-sequence li:first-child { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.6rem), 50% 100%, 0 calc(100% - 0.6rem)); }
+    }
+  </style>
+  <li><span class="n">1</span>{{STEP1}}</li>
+  <li><span class="n">2</span>{{STEP2}}</li>
+  <li><span class="n">3</span>{{STEP3}}</li>
+</ol>

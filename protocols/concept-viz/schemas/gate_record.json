@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-viz.local/schemas/gate_record.json",
+  "title": "GateRecord",
+  "type": "object",
+  "required": [
+    "ask",
+    "expertise",
+    "prior_source",
+    "grain",
+    "verdict",
+    "show_graph",
+    "novel_budget"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ask": { "type": "string" },
+    "expertise": { "enum": ["novice", "intermediate", "expert"] },
+    "prior_source": { "enum": ["inferred", "probed", "default_novice"] },
+    "verdict": { "enum": ["single_grain", "must_split"] },
+    "show_graph": { "type": "boolean" },
+    "novel_budget": { "type": "integer", "minimum": 1 },
+    "reject_reasons": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "missing_stair",
+          "multi_goal",
+          "high_interactivity",
+          "ambiguous_prior"
+        ]
+      }
+    },
+    "probe": {
+      "type": ["object", "null"],
+      "required": ["questions", "word_count"],
+      "properties": {
+        "questions": { "type": "array", "maxItems": 3, "items": { "type": "string" } },
+        "word_count": { "type": "integer", "maximum": 80 },
+        "turns": { "type": "integer", "maximum": 1 }
+      }
+    },
+    "footer": {
+      "type": ["object", "null"],
+      "required": ["assumes", "teaching", "exit"],
+      "properties": {
+        "assumes": { "type": "string" },
+        "teaching": { "type": "string" },
+        "exit": { "type": "string" },
+        "rendered": { "type": "string" }
+      }
+    },
+    "split": {
+      "type": ["object", "null"],
+      "required": ["reason", "children", "offer"],
+      "properties": {
+        "reason": {
+          "enum": [
+            "missing_stair",
+            "multi_goal",
+            "high_interactivity",
+            "ambiguous_prior"
+          ]
+        },
+        "offer": { "type": "string" },
+        "children": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["id", "teaching", "assumed"],
+            "properties": {
+              "id": { "type": "string" },
+              "teaching": { "type": "string" },
+              "assumed": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "grain": {
+      "type": "object",
+      "required": [
+        "id",
+        "teaching",
+        "assumed_priors",
+        "novel_intros",
+        "hardest_beat_relations",
+        "fan_in",
+        "expertise",
+        "goals"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "teaching": { "type": "string" },
+        "assumed_priors": { "type": "array", "items": { "type": "string" } },
+        "novel_intros": { "type": "array", "items": { "type": "string" } },
+        "hardest_beat_relations": { "type": "integer", "minimum": 0 },
+        "fan_in": { "type": "integer", "minimum": 0 },
+        "expertise": { "enum": ["novice", "intermediate", "expert"] },
+        "goals": { "type": "array", "items": { "type": "string" } },
+        "high_interactivity": { "type": "boolean" },
+        "prior_confidence": { "enum": ["high", "low"] },
+        "missing_priors": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

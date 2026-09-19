@@ -1,0 +1,36 @@
+<div class="mod-matrix-grid" data-diagram-module="matrix-grid">
+  <style>
+    .mod-matrix-grid { overflow-x: auto; max-width: 100%; }
+    .mod-matrix-grid table { border-collapse: collapse; width: 100%; min-width: 16rem; }
+    .mod-matrix-grid th, .mod-matrix-grid td { border: 1px solid #1c1c1c; padding: 0.45rem 0.55rem; text-align: center; }
+    .mod-matrix-grid thead th { background: #215c45; color: #fff; font-weight: 700; }
+    .mod-matrix-grid tbody th { background: #f3efe6; text-align: left; font-weight: 700; }
+    .mod-matrix-grid td[data-empty] { color: #5c574e; font-style: italic; background: #fffdf8; }
+    .mod-matrix-grid caption { caption-side: bottom; font-size: 0.8rem; color: #5c574e; text-align: left; padding-top: 0.35rem; }
+  </style>
+  <table>
+    <caption>Empty cells are claims, not decoration.</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{CORNER}}</th>
+        <th scope="col">{{COL1}}</th>
+        <th scope="col">{{COL2}}</th>
+        <th scope="col">{{COL3}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ROW1}}</th>
+        <td>{{R1C1}}</td>
+        <td>{{R1C2}}</td>
+        <td data-empty>{{R1C3}}</td>
+      </tr>
+      <tr>
+        <th scope="row">{{ROW2}}</th>
+        <td>{{R2C1}}</td>
+        <td>{{R2C2}}</td>
+        <td>{{R2C3}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

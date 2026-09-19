@@ -1,0 +1,20 @@
+<div class="mod-before-after-panels" data-diagram-module="before-after-panels">
+  <style>
+    .mod-before-after-panels { display: flex; flex-direction: column; gap: 0.75rem; max-width: 100%; }
+    .mod-before-after-panels .panel { border: 1px solid #c9c2b4; border-radius: 0.4rem; overflow: hidden; }
+    .mod-before-after-panels .banner { background: #215c45; color: #fff; font-weight: 700; padding: 0.3rem 0.6rem; }
+    .mod-before-after-panels .body { padding: 0.75rem; min-height: 4rem; }
+    @media (min-width: 40rem) {
+      .mod-before-after-panels { flex-direction: row; }
+      .mod-before-after-panels .panel { flex: 1; }
+    }
+  </style>
+  <section class="panel">
+    <div class="banner">Before</div>
+    <div class="body">{{BEFORE}}</div>
+  </section>
+  <section class="panel">
+    <div class="banner">After</div>
+    <div class="body">{{AFTER}}</div>
+  </section>
+</div>

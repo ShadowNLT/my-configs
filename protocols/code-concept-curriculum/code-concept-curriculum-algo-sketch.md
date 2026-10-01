@@ -1,0 +1,484 @@
+# Algo Sketch — equivalent of code-concept-curriculum.md
+
+```text
+# Build and teach a code-concept curriculum from exhaustive code facts
+
+// seam map
+//   [name concept] → [discover facts] → [build graph] → [converge + adversary]
+//   → [chunk] → [teach] → [stuck revisit or close]
+
+
+// --- piece 1: shapes ---
+
+record ExploredRegion
+    description    // string; grows during discovery and adversary hunt; audit only; never teaching prose
+
+record Concept
+    name           // string; logical name; not a file path
+
+record NamedHold
+    name           // string
+    closerNodeId   // string; node that must resolve this hold
+
+record Node
+    id             // string
+    claim          // string; one logical fact
+    definitions    // list of string
+    synonyms       // list of string; each item marks an explicit synonym pair in words
+    cases          // list of string; complete case set, or blank list if not applicable
+    holdsOpened    // list of NamedHold
+    holdsResolved  // list of string; hold names closed here
+    predecessors   // list of string; node ids; empty only if initial
+    followers      // list of string; node ids; empty only if final
+
+record Edge
+    fromId         // string
+    toId           // string
+    kind           // "prerequisite" or "elaborates" or "case-of" or "hold-target"
+
+record UseCheck
+    mode           // "apply" or "distinguish" or "predict"
+    prompt         // string
+    expectedUse    // string; what correct use looks like (not a restatement)
+
+record ChunkHolds
+    opens          // list of string
+    resolves       // list of string
+
+record Chunk
+    id             // string
+    claim          // string
+    useCheck       // UseCheck
+    holds          // ChunkHolds
+    nodeIds        // list of string
+    predChunkIds   // list of string; predecessor chunks; empty iff initial
+    definitionsRequired  // list of string
+    sanityByPred   // map predChunkId → string; required key for every predChunkId
+    correctivePrompt // string; UC5 — on fail, still demands use
+
+record Graph
+    nodes          // list of Node
+    edges          // list of Edge
+
+record Curriculum
+    concept            // Concept
+    exploredRegion     // ExploredRegion
+    graph              // Graph
+    chunks             // list of Chunk
+    discoveryStatus    // "pending" or "clear" or "escalated"
+    convergenceStatus  // "pending" or "converged" or "escalated"
+    adversaryStatus    // "pending" or "clear"
+    openCodeQuestions  // list of string
+    uncoveredBranches  // list of string
+    discoveryChecklist // list of ChecklistRow (DC1–DC6)
+
+record ChecklistRow
+    id             // "DC1" .. "DC6"
+    satisfied      // true/false
+    evidence       // string; fact ids + explored_region citations; empty ⇒ fail closed
+
+record ProofEntry
+    attack         // string
+    outcome        // "killed" or "fixed" or "escalated" or "named-limitation" or "killed-limitation"
+    note           // string
+
+record RunState
+    curriculum     // Curriculum
+    proofBacklog   // list of ProofEntry
+    retryCount     // number ≥ 0
+    maxRetries     // number ≥ 1
+    stuckRevisits  // number ≥ 0
+    maxStuckRevisits  // number ≥ 1; default 1
+    invariant: retryCount ≤ maxRetries
+    invariant: stuckRevisits ≤ maxStuckRevisits
+
+
+// --- piece 2: name concept + discovery ---
+
+module Discovery
+    function nameConcept(conceptName)   // → Concept
+        if conceptName = null or conceptName = ""
+            error "concept name missing"
+        concept ← blank Concept
+        concept.name ← conceptName
+        return concept
+
+    function checklistSatisfied(rows)   // rows: list of ChecklistRow → true/false
+        // DC1–DC6 must all be present, satisfied, and evidence non-empty.
+        required ← ["DC1", "DC2", "DC3", "DC4", "DC5", "DC6"]
+        for each id in required
+            row ← find rows where row.id = id
+            if row = null
+                return false
+            if row.satisfied = false
+                return false
+            if row.evidence = ""
+                return false
+        return true
+
+    function discoveryComplete(curriculum)
+        if curriculum.openCodeQuestions ≠ blank list
+            return false
+        if curriculum.uncoveredBranches ≠ blank list
+            return false
+        if not Discovery.checklistSatisfied(curriculum.discoveryChecklist)
+            return false
+        return true
+
+    function discoverFacts(concept, maxExpansions)   // → Curriculum fragment fields
+        // No scope freeze. Expand explored region until B6 or budget.
+        explored ← blank ExploredRegion
+        explored.description ← ""
+        facts ← blank list
+        openCodeQuestions ← blank list
+        uncoveredBranches ← blank list
+        expansions ← 0
+        checklist ← blank list   // fill DC1–DC5 evidence as facts grow; DC6 after adversary
+        while true
+            // Read more related code; append facts; update explored.description
+            // Missing fact → append openCodeQuestions; never invent
+            // New branch → append uncoveredBranches until case or named hold
+            // Update checklist rows with evidence citations; empty evidence never counts as satisfied
+            cur ← blank Curriculum
+            cur.openCodeQuestions ← openCodeQuestions
+            cur.uncoveredBranches ← uncoveredBranches
+            cur.discoveryChecklist ← checklist
+            // DC6 may stay unsatisfied until Phase E; discovery "clear" for converge needs DC1–DC5;
+            // full discovery_status clear for teach requires DC6 after adversaryClear.
+            if openCodeQuestions = blank list and uncoveredBranches = blank list and Discovery.checklistSatisfied(filter checklist where id ≠ "DC6") 
+                return facts, explored, openCodeQuestions, uncoveredBranches, checklist, "clear-pending-adversary"
+            expansions ← expansions + 1
+            if expansions > maxExpansions
+                return facts, explored, openCodeQuestions, uncoveredBranches, checklist, "escalated"
+            // if concept name ambiguous → error "clarify concept with user"
+
+
+// --- piece 3: build graph ---
+
+module Graph
+    function hasPrerequisiteCycle(edges)   // edges: list of Edge → true/false
+        // REQUIRED: real cycle detect on kind = "prerequisite" only.
+        // Forbidden: return false without checking (that was the old happy-path lie).
+        prereq ← filter edges where kind = "prerequisite"
+        return detectDirectedCycle(prereq)   // standard DFS/topo; must be real in repo draft
+
+    function hasSoftHole(nodes)   // nodes: list of Node → true/false
+        for each node in nodes
+            for each hold in node.holdsOpened
+                if hold.name = "" or hold.closerNodeId = ""
+                    return true
+        return false
+
+    function buildGraph(facts)   // facts: list of string → Graph
+        graph ← blank Graph
+        graph.nodes ← blank list
+        graph.edges ← blank list
+        // Create one node per atomic fact; add definitions, synonyms, cases, holds.
+        // Add edges; every deferred case must be a NamedHold with hold-target edge.
+        if Graph.hasPrerequisiteCycle(graph.edges)
+            error "prerequisite cycle"
+        if Graph.hasSoftHole(graph.nodes)
+            error "soft hole: deferred case without named hold and closer"
+        // Set predecessors/followers from edges.
+        return graph
+
+
+// --- piece 4: converge + adversary ---
+
+module Validation
+    function substanceEqual(a, b)   // a, b: Curriculum → true/false
+        // Unique code-forced fact set (L3 killed). Packaging may differ only under merge/split map.
+        // Every clause must run; if any clause cannot be evaluated, return false.
+        if not sameFactSetUnderEquivalenceMap(a.graph, b.graph)
+            return false
+        if not sameCaseSets(a.graph, b.graph)
+            return false
+        if not sameNamedHoldsAndClosers(a.graph, b.graph)
+            return false
+        if not prerequisitesPreservedUnderMap(a.graph, b.graph)
+            return false
+        return true
+
+    function converge(concept, maxRetries)   // → Curriculum
+        retryCount ← 0
+        while retryCount ≤ maxRetries
+            facts1, explored1, oq1, ub1, cl1, dstat1 ← Discovery.discoverFacts(concept, maxRetries)
+            facts2, explored2, oq2, ub2, cl2, dstat2 ← Discovery.discoverFacts(concept, maxRetries)
+            if dstat1 = "escalated" or dstat2 = "escalated"
+                error "discovery escalated; present failing checklist rows to user; do not teach"
+            graph1 ← Graph.buildGraph(facts1)
+            graph2 ← Graph.buildGraph(facts2)
+            c1 ← blank Curriculum
+            c1.concept ← concept
+            c1.exploredRegion ← explored1
+            c1.graph ← graph1
+            c1.openCodeQuestions ← oq1
+            c1.uncoveredBranches ← ub1
+            c1.discoveryChecklist ← cl1
+            c1.discoveryStatus ← dstat1
+            c1.convergenceStatus ← "pending"
+            c1.adversaryStatus ← "pending"
+            c2 ← blank Curriculum
+            c2.concept ← concept
+            c2.exploredRegion ← explored2
+            c2.graph ← graph2
+            c2.openCodeQuestions ← oq2
+            c2.uncoveredBranches ← ub2
+            c2.discoveryChecklist ← cl2
+            c2.discoveryStatus ← dstat2
+            c2.convergenceStatus ← "pending"
+            c2.adversaryStatus ← "pending"
+            if Validation.substanceEqual(c1, c2)
+                c1.convergenceStatus ← "converged"
+                // Union explored regions for adversary window (both agents' reads)
+                c1.exploredRegion.description ← explored1.description + "\n" + explored2.description
+                return c1
+            retryCount ← retryCount + 1
+            // Re-enter discovery on disputed region only; do not average away.
+        error "agents failed to converge; escalate to user; do not teach"
+
+    function adversaryClear(curriculum, proofBacklog)   // → Curriculum, list of ProofEntry
+        // Adversary may read any code needed to attack claims (not limited to exploredRegion).
+        // New reads append to exploredRegion (audit). Outside-world attacks are ghosts.
+        append(proofBacklog, ProofEntry("L1 adversary blindness", "killed",
+            "adversary seeks disproof in any code; miss forces discovery expand"))
+        realHoleFound ← false
+        // Hunt + mandatory probes: hold sync, cycles, use-checks, sanityByPred, stranded risk, soft holes,
+        // and contradicting code outside the prior explored window.
+        // For each attack: append ProofEntry; if real hole, set realHoleFound.
+        if realHoleFound
+            error "adversary found a real hole; expand discovery, return to converge"
+        // Mark DC6 satisfied with proof backlog citations; then discovery may be fully clear.
+        setChecklistRow(curriculum.discoveryChecklist, "DC6", true, proofBacklogEvidence)
+        curriculum.adversaryStatus ← "clear"
+        if Discovery.checklistSatisfied(curriculum.discoveryChecklist)
+            curriculum.discoveryStatus ← "clear"
+        return curriculum, proofBacklog
+
+
+// --- piece 5: chunk + teach + stuck ---
+
+module Teaching
+    function isRestatement(answer, claim)   // answer, claim: string → true/false
+        // Minimal fail-closed rule (repo draft may strengthen, not weaken):
+        if answer = "" 
+            return true
+        if normalize(answer) = normalize(claim)
+            return true
+        // If a stronger grader is not available, treat uncertain answers as restatement
+        // when they share no apply/distinguish/predict move markers — never auto-pass.
+        return false   // only after normalize inequality; useCheckPasses still needs expectedUse match
+
+    function useCheckChecklistOk(chunk, proofBacklog)   // → true/false  (§2d UC1–UC5)
+        uc ← chunk.useCheck
+        if uc.mode ≠ "apply" and uc.mode ≠ "distinguish" and uc.mode ≠ "predict"
+            return false                                    // UC1
+        if uc.prompt = "" or promptIsRestateOnly(uc.prompt)
+            return false                                    // UC2
+        if uc.expectedUse = "" or isParaphrase(uc.expectedUse, chunk.claim)
+            return false                                    // UC3
+        // UC4: adversary pure restatement must fail
+        if Teaching.useCheckPasses(chunk, chunk.claim) = true
+            return false
+        if Teaching.useCheckPasses(chunk, paraphrase(chunk.claim)) = true
+            return false
+        if chunk.correctivePrompt = "" or promptIsRestateOnly(chunk.correctivePrompt)
+            return false                                    // UC5
+        return true
+
+    function useCheckPasses(chunk, answer)   // chunk: Chunk, answer: string → true/false
+        if chunk.useCheck.expectedUse = ""
+            return false
+        if Teaching.isRestatement(answer, chunk.claim)
+            return false
+        // Compare answer to chunk.useCheck.expectedUse for the stated mode.
+        return true
+
+    function sanityOk(chunk)   // → true/false
+        for each predId in chunk.predChunkIds
+            if chunk.sanityByPred[predId] = null or chunk.sanityByPred[predId] = ""
+                return false
+        return true
+
+    function holdsSynced(curriculum)   // → true/false
+        nodeOpen ← blank list
+        nodeClose ← blank map   // hold name → closerNodeId
+        for each node in curriculum.graph.nodes
+            for each hold in node.holdsOpened
+                append(nodeOpen, hold.name)
+                nodeClose[hold.name] ← hold.closerNodeId
+            for each name in node.holdsResolved
+                // resolved names must have been opened somewhere
+                if not belongsTo(name, nodeOpen) and not earlier open
+                    return false
+        chunkOpen ← blank list
+        chunkResolve ← blank list
+        closerCovered ← blank list
+        for each chunk in curriculum.chunks
+            for each name in chunk.holds.opens
+                append(chunkOpen, name)
+            for each name in chunk.holds.resolves
+                append(chunkResolve, name)
+                closerId ← nodeClose[name]
+                if closerId = null
+                    return false
+                if not belongsTo(closerId, chunk.nodeIds)
+                    // closer may be on another chunk that resolves this name — check any chunk
+                    covered ← false
+                    for each c2 in curriculum.chunks
+                        if belongsTo(closerId, c2.nodeIds) and belongsTo(name, c2.holds.resolves)
+                            covered ← true
+                    if covered = false
+                        return false
+        for each name in nodeOpen
+            if not belongsTo(name, chunkOpen)
+                return false
+            if not belongsTo(name, chunkResolve)
+                return false
+        for each name in chunkOpen
+            if not belongsTo(name, nodeOpen)
+                return false
+        return true
+
+    function chunkGraph(curriculum)   // → Curriculum
+        // Split nodes into chunks; predChunkIds from prerequisite edges (DAG).
+        for each chunk in curriculum.chunks
+            if not Teaching.sanityOk(chunk)
+                error "sanity_by_pred missing for a predecessor"
+            if not Teaching.useCheckChecklistOk(chunk, null)
+                error "use-check checklist UC1–UC5 failed"
+        if not Teaching.holdsSynced(curriculum)
+            error "hold sync invariant breached"
+        return curriculum
+
+    function readySet(curriculum, passedIds)   // → list of Chunk
+        ready ← blank list
+        for each chunk in curriculum.chunks
+            if belongsTo(chunk.id, passedIds)
+                continue
+            allPredPassed ← true
+            for each predId in chunk.predChunkIds
+                if not belongsTo(predId, passedIds)
+                    allPredPassed ← false
+            if allPredPassed
+                append(ready, chunk)
+        return ready
+
+    function allChunksPassed(curriculum, passedIds)   // → true/false
+        for each chunk in curriculum.chunks
+            if not belongsTo(chunk.id, passedIds)
+                return false
+        return true
+
+    function suggestCandidate(ready)   // ready: list of Chunk → Chunk
+        // Deterministic suggestion: shallowest depth, then stable id.
+        best ← ready[0]
+        for each chunk in ready
+            if chunk is better than best by depth then id
+                best ← chunk
+        return best
+
+    function pickRuleX(ready)   // ready: non-empty list of Chunk → Chunk
+        // Inked X + G2e: learner picks order among ready; all remain required.
+        if length(ready) = 1
+            return ready[0]
+        if length(ready) > 1
+            choice ← learnerPickAmong(ready)
+            if not belongsTo(choice, ready)
+                error "pick outside ready set"
+            return choice
+        error "pickRuleX called with empty ready set"
+
+    function forkSurfaceOk(options, suggestion)   // → true/false
+        for each opt in options
+            if opt shows use-check answer or later-hold resolution
+                return false
+            if opt.claimHeadline = ""
+                return false
+            // must not imply optional / skippable siblings (G2e)
+        if suggestion ≠ null and suggestion presented as only path
+            return false
+        return true
+
+    function allHoldsResolved(curriculum)   // → true/false
+        opened ← blank list
+        resolved ← blank list
+        for each chunk in curriculum.chunks
+            for each name in chunk.holds.opens
+                append(opened, name)
+            for each name in chunk.holds.resolves
+                append(resolved, name)
+        for each name in opened
+            if not belongsTo(name, resolved)
+                return false
+        return true
+
+    function holdsVisibleInProse(chunk, prose)   // → true/false
+        for each name in chunk.holds.opens
+            if name = ""
+                return false
+            // real run: require name appears in prose as deliberate hold
+        for each name in chunk.holds.resolves
+            if name = ""
+                return false
+        return true
+
+    function teach(curriculum)   // → "complete" or "stuck"
+        passedIds ← blank list
+        while true
+            ready ← Teaching.readySet(curriculum, passedIds)
+            if ready = blank list
+                if not Teaching.allChunksPassed(curriculum, passedIds)
+                    error "stranded chunks: ready empty but unpassed remain (G11)"
+                if not Teaching.allHoldsResolved(curriculum)
+                    error "named hold still open at end"
+                return "complete"
+            // Fork: show forkSurfaceOk options; optional suggestCandidate as suggestion only
+            chunk ← Teaching.pickRuleX(ready)
+            if not Teaching.holdsVisibleInProse(chunk, prose)
+                error "soft hole: hold not named in prose"
+            // Run use-check; restatement or unimplemented grader → fail; stuck → return "stuck"
+            // On pass:
+            append(passedIds, chunk.id)
+
+    function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits)   // → Curriculum, number
+        if stuckRevisits ≥ maxStuckRevisits
+            error "stuck after revisit budget; escalate to user"
+        // Re-run Discovery on region, Graph.buildGraph, Validation.converge,
+        // Validation.adversaryClear, Teaching.chunkGraph.
+        // Drop passes that depended on changed chunks.
+        // Do not invent a bridge outside the graph.
+        return curriculum, stuckRevisits + 1
+
+
+// --- piece 6: top-level run ---
+
+function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
+    if maxStuckRevisits = null
+        maxStuckRevisits ← 1
+    concept ← Discovery.nameConcept(conceptName)
+    // Teaching Standard off default path. No code-scope freeze.
+    curriculum ← Validation.converge(concept, maxRetries)
+    proofBacklog ← blank list
+    curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
+    curriculum ← Teaching.chunkGraph(curriculum)
+    curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
+    stuckRevisits ← 0
+    result ← Teaching.teach(curriculum)
+    if result = "stuck"
+        curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits)
+        result ← Teaching.teach(curriculum)
+        if result = "stuck"
+            error "stuck after revisit budget; escalate to user"
+    if curriculum.discoveryStatus ≠ "clear"
+        error "cannot close without discovery clear (checklist DC1–DC6)"
+    if not Discovery.checklistSatisfied(curriculum.discoveryChecklist)
+        error "cannot close with incomplete discovery checklist"
+    if curriculum.convergenceStatus ≠ "converged"
+        error "cannot close without converge"
+    if curriculum.adversaryStatus ≠ "clear"
+        error "cannot close without adversary clear"
+    if not Teaching.allChunksPassed(curriculum, /* final passedIds from teach */)
+        error "cannot close with unpassed chunks"
+    return curriculum, proofBacklog
+```

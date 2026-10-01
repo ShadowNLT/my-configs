@@ -1,6 +1,6 @@
 ---
 type: teaching-meta
-version: 5 — 2026-09-20
+version: 6 — 2026-10-01
 repo-canonical: true
 ---
 
@@ -49,9 +49,9 @@ teaching command inlines a compact trigger** at each firing site — a terse, na
 code"* — and this file holds the full rationale. The trigger is the reflex; this doc is the
 reference.
 
-**Load-bearing moments** (always run §Procedure — never free-hand):
-- The **0→100 picture** (issue-work root cause, feature state-of-affairs)
-- The **code-review picture** (4b: what the diff does and why, scaled — not the full 0→100 map)
+**Load-bearing moments** (always run §Procedure — never free-hand), except picture/code-fact discovery on work sessions (coverage footnote below):
+- The **0→100 picture** on `start-work` / `resume-work` (issue-work root cause, feature state-of-affairs): code-fact discovery cites Code Concept Curriculum, not §Procedure. §Procedure still covers the solution delta and a reveal that is not a missing code fact.
+- The **code-review picture** (4b): when discovery is needed, Code Concept Curriculum in the command's three-step order. The verdict gate stays TS-6.
 - The **solution presentation** (intended approach before editing)
 - A **reveal** after a failed gate round
 - Any **multi-layer concept** the learner must hold to proceed
@@ -148,7 +148,7 @@ delivered output (see that file's P5-mode output rule). A prose summary with no 
 chain is a §Procedure failure, not TS-1 compliance.
 
 **Hybrid modality — Algo Sketch for mechanisms (opt-in per command; required in
-`start-work` 4a/4c/4d picture + solution):** when the command's compact trigger says
+`start-work` 4a/4c/4d solution delta, not picture/code-fact discovery):** when the command's compact trigger says
 **P5 hybrid**, split P4 nodes by kind and deliver both forms in one teaching moment:
 
 1. **Vocab / conceptual nodes** (what a term *means*): short
@@ -157,7 +157,8 @@ chain is a §Procedure failure, not TS-1 compliance.
    **Algo Sketch** — read `{{AGENT_COMMANDS_DIR}}/algo-sketch.md` and execute it
    inline (same rule as other inlines: read the file, do not rely on slash invoke).
    The sketch is the mechanism/solution **delivery form**, not the durable gate
-   object (Gates quiz the P4 map + learner-produced derived claims — see TS-6).
+   object (Gates quiz the picture graph + learner-produced derived claims — see TS-6).
+   Picture/code-fact discovery on work sessions cites Code Concept Curriculum, not this hybrid.
 3. **No language-flavored code** in this teaching moment: no real-language operators,
    no production snippets, no diff dumps as the lesson. Pointers to where the mechanism
    *lives* are fine (see TS-2 sketch-phase). Real code appears only when the command
@@ -269,10 +270,13 @@ The **`/end-work` sandbox** is stricter: the user always writes the fix; no esca
   reveal → offer `/pause-work`.
 
 **Work-gate object** (`start-work` / `resume-work` 4a/4c/4d only — not 4b, not `/end-work`
-lesson quizzes, not `new-session` graded mastery): pass = visible P4 map + **learner-produced
-derived claims** + why/how that uses those claims. **Sketch narration or node-title lists alone
-are a miss**, even if accurate. Completing hybrid P5 (sketch-complete delivery) does **not**
-pass the gate. Commands inline the operational bars; this clause is the doctrine pointer.
+lesson quizzes, not `new-session` graded mastery): pass = visible picture graph + **learner-produced
+derived claims** + why/how that uses those claims. When the picture came from Code Concept
+Curriculum, those claims are derived from that graph. The gate stays this TS-6 ladder; it is not
+CCC Phase G / use-checks. **Block `gate1: passed` while that item's `discovery_status` is not
+`clear`.** **Sketch narration or node-title lists alone are a miss**, even if accurate. Completing
+hybrid P5 (sketch-complete delivery) does **not** pass the gate. Commands inline the operational
+bars; this clause is the doctrine pointer.
 
 **Ungraded** work-tutorial ladder. `new-session` curriculum quizzes use **graded mastery** per
 Module Hat — TS-6 does not govern those.
@@ -284,25 +288,27 @@ still-open gate material before running the gate (presentation is not durably ch
 Passed gates are not re-run.
 
 For `start-work` / `resume-work` 4a/4c/4d work gates: when the Pedagogy row carries a `claims:`
-sibling and `procedure: complete`, re-present of still-open material **is short P5 on that
-item's stored claims** (rebuild each claim's TS-1 derivation this session) — not a floor P1
-from ordinary-adult, and not reading the sibling aloud as the lesson. Absent `claims:` does
-not invent a presentation (see `resume-work.md`).
+sibling and `procedure: complete`, and `discovery_status` is `clear` or absent, re-present of
+still-open material **is short P5 on that item's stored claims** (rebuild each claim's TS-1
+derivation this session) — not a floor P1 from ordinary-adult, and not reading the sibling aloud
+as the lesson. A `discovery_status` of `pending` or `escalated` re-enters Code Concept Curriculum
+instead of that short P5. Absent `claims:` does not invent a presentation (see `resume-work.md`).
 
-**Enforcement rides the edit-gate:** fixing an issue whose §Procedure + presentation has not run
-this session is blocked — the edit requires go-ahead, and go-ahead requires teach-first.
+**Enforcement rides the edit-gate:** fixing an issue whose picture (CCC discovery clear, when
+that slice ran) and solution (§Procedure) have not been presented this session is blocked — the
+edit requires go-ahead, and go-ahead requires teach-first.
 
 **Scope:** wherever a gate exists — `start-work` Phases 1–3, resumed gates, `/end-work` sandbox —
 not "until PR merges."
 
-**New issue mid-session:** stop; offer **work now** (→ its own §Procedure + gates) or **park**
+**New issue mid-session:** stop; offer **work now** (→ its own picture via Code Concept Curriculum, then TS-6 gates) or **park**
 (→ create `Parking-Lot/<repo>/<slug>.md` and add a row to the flat `Parking-Lot/INDEX.md`; no
 teaching). Never fold a materially-different issue into current work ungated. Per-item `"just fix
 it"` bypasses teaching for that item only.
 
-**`procedure:` on Pedagogy rows (compliance receipt, not presentation):** when a work-session gate
+**`procedure:` on Pedagogy rows (compliance receipt, not presentation and not discovery):** when a work-session gate
 passes under the new schema, record `procedure: complete` (or `partial(…)` / `none` if §Procedure
-was skipped or defective). A `none` or `partial` value **blocks recording the gate as passed**.
+was skipped or defective). Picture/code-fact discovery is `discovery_status` on the same row. Do not store it in `procedure:`. A `none` or `partial` value **blocks recording the gate as passed**.
 Absent `procedure:` on legacy rows = `unrecorded` — do not invalidate an existing `gate1:
 passed`. `procedure: complete` does **not** satisfy TS-7's re-present requirement on resume — it
 only records that §Procedure ran when the gate was first taught this session.
@@ -327,9 +333,9 @@ only. Say so in one line when they flip on.
 
 | Command | §Procedure | TS-1 | TS-2 | TS-3 | TS-4 | TS-5 | TS-6 | TS-7 |
 |---|---|---|---|---|---|---|---|---|
-| `start-work` | ✓ **P5 hybrid** (vocab prose + Algo Sketch **delivery**; gates quiz map + claims; real code only after Gate 2 / Phase 4) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `start-work` | ✓ solution delta, gates, Phase 4, reveals. Picture/code-fact discovery (and 4b when discovery is needed) cites CCC, not §Procedure — see footnote | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `end-work` | ✓ (lesson, sandbox README, reveals) | ✓ | ✓ | ✓† | ✓ | ✓‡ | ✓ | ✓ |
-| `resume-work` | ✓ (re-present; same hybrid as start-work when resuming 4a/4c/4d) | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `resume-work` | ✓ re-present when discovery is `clear`. `pending` / `escalated` re-enters CCC, not §Procedure — see footnote | ✓ | sketch-phase → full in Phase 4 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `learn` | ✓ (scaled to JIT depth; default P5 prose unless command later opts in) | ✓ | ✓ | when editing | ✓ | when editing | —§ | —§ |
 | `new-session` | ✓ (module teaching; default P5 prose) | ✓ | ✓ | N/A | ✓ | N/A | —¶ | N/A |
 | `explain-first-principles` | ✓ (= P2+P5 default / hybrid vocab nodes) | ✓ | ✓ | N/A | ✓ | N/A | N/A | N/A |
@@ -341,6 +347,8 @@ only. Say so in one line when they flip on.
 § `/learn` Step 5 confirm-by-application is its own gate (apply until it works), not TS-6's ladder
 ¶ graded mastery quiz per Module Hat, not TS-6
 ‖ clarity pass only (P6); not a teaching command
+
+**Picture / code-fact discovery (footnote).** For `start-work` and `resume-work`, picture and code-fact discovery — including code-review `4b` when discovery is needed for the reviewer to understand — **cites Code Concept Curriculum** (Phases A→E until `discovery_status: clear`), **not** §Procedure. Teaching Standard stays off on that discovery slice. **TS-6 and TS-7 gates remain:** Gate 1–2 are still the TS-6 ladder on learner claims derived from the CCC graph (not CCC Phase G / use-checks), and TS-7 still requires the picture to be presented this session before the gate. `gate1: passed` is blocked while `discovery_status` is not `clear`. Solution delta, Phase 4, `/end-work` lesson, and sandbox stay on §Procedure. `/learn` and `/new-session` are unchanged.
 
 **Excluded** (no live teaching): `end-session` (records only), `dream`, `switch-track`,
 `sync-core`, `code-pi`, `ponytail`.
@@ -364,8 +372,10 @@ copy as source of truth.
 **Load-bearing teach (default prose P5):**
 `Teaching Standard §Procedure + P5 completion test + TS-1 derived + TS-2 cite path in visible prose (Cursor widget headers do not count) + TS-4 plain hints`
 
-**Load-bearing teach (`start-work` hybrid P5):**
+**Load-bearing teach (`start-work` hybrid P5) — solution delta, not the picture:**
 `Teaching Standard §Procedure + P5 hybrid (explain-first-principles for vocab nodes; algo-sketch for mechanism/solution delivery; no language snippets until Phase 4) + P5 completion test (delivery completeness ≠ gate pass) + TS-1 + TS-2 sketch-phase pointers + TS-4`
+
+Picture/code-fact discovery on `start-work` / `resume-work` does not use that hybrid trigger. It cites Code Concept Curriculum (coverage footnote). The hybrid trigger remains the solution-delta delivery form.
 
 **Gate:**
 `Teaching Standard TS-6 ladder (work gates: map + derived claims, not sketch narration) + TS-7 teach-before-gate (short P5 on claims: when present) + TS-4 plain hints`

@@ -18,6 +18,7 @@ Run this when the user wants one named code concept taught as a knowledge-graph 
 ## Hard non-goals
 
 - Not Teaching Standard §Procedure. Teaching Standard is off this process's default path. Do not run it, and do not treat it as a dependency.
+- Does not own session pairing, the sandbox, `/learn`, `/new-session`, or Gate 1. `/start-work` and `/resume-work` cite Phases A→E for picture/code-fact discovery only (Teaching Standard off on that slice). Gate 1–2 stay Teaching Standard TS-6 on claims from the graph. Phase G / use-checks do not replace Gate 1.
 - Not `/learn` (mid-work JIT unblock against a vault).
 - Not `/explain-first-principles` (that form may cite paths). Teaching prose here names no code file.
 - Do not invent a learner teach UI or a fork-pick surface. Fork behavior stays in the process text: ready set, claim headlines only, order only (pick rule X). A later wireframe may add a surface; this protocol does not.

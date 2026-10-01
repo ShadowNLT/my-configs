@@ -6,6 +6,11 @@
 // seam map
 //   [name concept] → [discover facts] → [build graph] → [converge + adversary]
 //   → [chunk] → [teach] → [stuck revisit or close]
+//
+// Work-session discovery slice: /start-work and /resume-work cite Phases A–E
+// (name through adversary clear) for picture/code-fact discovery.
+// This process does not own session pairing, sandbox, /learn, /new-session, or Gate 1.
+// Gate 1 stays Teaching Standard TS-6. Phase G use-checks do not replace it.
 
 
 // --- piece 1: shapes ---

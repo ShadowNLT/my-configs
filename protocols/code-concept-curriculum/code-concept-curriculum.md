@@ -225,7 +225,7 @@ I3. Hand control back. State completion without claiming repository changes. Com
 
 - It does not edit the target code repository.
 - It does not write my-configs until the user co-signs and orders a write.
-- It does not change start-work, session pairing, or sandbox rules (deferred).
+- Work-session picture/code-fact discovery (`/start-work`, `/resume-work`, including code review when discovery is needed) cites this process for Phases A→E until `discovery_status: clear`. That wiring does not make this process own session pairing, the sandbox, `/learn`, `/new-session`, or Gate 1. Gate 1–2 stay Teaching Standard TS-6 on claims derived from the graph. Phase G / use-checks do not replace Gate 1. Teaching Standard stays off on the discovery slice only.
 - It does not use Teaching Standard as the runner.
 - It does not replace /learn for mid-work JIT unblocks.
 - It does not claim omniscience; it requires the discovery-completion checklist with evidence plus an unbounded-in-code adversary hunt.

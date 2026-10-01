@@ -74,6 +74,7 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | `write-tests` | `references.md` |
 | `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
 | `proof-duel` | `lens-catalog.md`, `lens-cast.md`, `cast-lenses.sh` |
+| `code-concept-curriculum` | `code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md` (README optional) |
 
 `system-atlas` and `system-atlas-update` are a pair. Whenever you install
 `system-atlas`, also copy `protocols/system-atlas-update/command.md` to
@@ -99,7 +100,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 (and copy `SKILL.md` only if a skills dir was requested). That includes
 `algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
-`proof-duel` is **not** markdown-only — use the sidecar install block below.
+`proof-duel` and `code-concept-curriculum` are **not** markdown-only — use the sidecar install block below.
 
 Command-form install after the user has named `$COMMANDS_DIR` and `$CONFIG_DIR`:
 
@@ -148,6 +149,13 @@ mkdir -p "$CONFIG_DIR/proof-duel"
 cp protocols/proof-duel/lens-catalog.md protocols/proof-duel/lens-cast.md \
   protocols/proof-duel/cast-lenses.sh "$CONFIG_DIR/proof-duel/"
 chmod +x "$CONFIG_DIR/proof-duel/cast-lenses.sh"
+
+# code-concept-curriculum (process twins; Teaching Standard stays a separate sidecar)
+cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curriculum.md"
+mkdir -p "$CONFIG_DIR/code-concept-curriculum"
+cp protocols/code-concept-curriculum/code-concept-curriculum.md \
+  protocols/code-concept-curriculum/code-concept-curriculum-algo-sketch.md \
+  "$CONFIG_DIR/code-concept-curriculum/"
 ```
 
 If `layman-terms` was already seeded from `corporate/commands/`

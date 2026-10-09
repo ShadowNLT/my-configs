@@ -127,10 +127,11 @@ record RunState
     proofBacklog   // list of ProofEntry
     retryCount     // number ≥ 0
     maxRetries     // number ≥ 1
-    stuckRevisits  // number ≥ 0
+    stuckRevisits  // map side → number ≥ 0 ("picture", "solution"); saved across pause as
+                   // stuck_revisits: picture N, solution N; restored on resume (G0, H7), never reset
     maxStuckRevisits  // number ≥ 1; default 1
     invariant: retryCount ≤ maxRetries
-    invariant: stuckRevisits ≤ maxStuckRevisits
+    invariant: stuckRevisits[side] ≤ maxStuckRevisits for each side
 
 
 // --- piece 2: name concept + discovery ---
@@ -451,12 +452,21 @@ module Teaching
         // teach-first line, pre-flight and confirm lines, resume recap and plain "what's next" line,
         // the code walkthrough (each step's reason and instructions), the end-of-session message.
         // Text shown before any chunk passed (restated goal): everyday words or inline definitions only.
-        // A cited path <repo>/<path>:line is a name, not a term; the words around it must pass.
-        text ← apply layman-terms denylist pass (replace each hit with its plain equivalent)
-        text ← apply INTERNAL_WORDS pass (§2e: replace each internal word and each chunk/fact id)
+        // A name shown in code formatting (cited path <repo>/<path>:line, branch, note file, folder,
+        // command) is not a term; the words around it must pass, and a word from a name used as a
+        // word must pass on its own (a name teaches nothing).
+        if not Teaching.numbersCheck(text)
+            return "number mismatch (G2h)"          // blocked
+        // 1) Check internal words BEFORE any replacement, so the check can fire (§2e).
         for each term in termsOf(text)
             if (belongsTo(term, INTERNAL_WORDS) and namesProcessPart(term, text)) or isChunkOrFactId(term)
-                return term                           // blocked even if a chunk "defined" it
+                return term                           // blocked: rewrite with the plain replacement, then re-check
+        // 2) Then the layman-terms denylist pass. Internal words in the code's own subject
+        //    (the §2e exception, e.g. a "hold" on an account) are left as they are.
+        text ← apply layman-terms denylist pass (replace each hit with its plain equivalent)
+        for each term in termsOf(text)
+            if isShownAsName(term, text)             // code-formatted name: exempt as a name only
+                continue
             if isCodeWord(term) and not definedEarlierIn(text, term) and not definedInPassedChunk(term, passedIds, curriculum)
                 return term                           // code words are not everyday words
             if isEverydayWord(term)
@@ -473,11 +483,25 @@ module Teaching
         if prose is a table or a node/claim list or the graph or the checklist
             error "not teaching prose (G2g)"
         // must not add a claim that is not in the chunk
+        for each paragraph in prose
+            if wordCount(paragraph) > ~90 or newTermsDefinedIn(paragraph) > 3
+                error "too dense (G2g); split the paragraph or the chunk"
+        for each quantity in quantitiesAskedIn(chunk.useCheck.prompt)
+            if not namedIn(chunk.useCheck.prompt, quantity) or not taughtIn(prose, quantity)
+                error "question asks about an unnamed or untaught quantity (G2g)"
+        if not Teaching.numbersCheck(prose + chunk.useCheck.prompt)
+            error "number does not match the file or test output (G2h)"
         result ← Teaching.termCheck(prose + chunk.useCheck.prompt, chunk, passedIds, curriculum)
         if result ≠ "ok"
             // Block: define inline, or add a prerequisite node + chunk (Phase C, then F) and teach it first
             error "term check failed: " + result + "; define inline or add prerequisite chunk"
         return prose
+
+    function numbersCheck(text)   // → true/false   (G2h; runs on every learner-facing text)
+        for each number in lineNumbersCountsAndListSizesIn(text)
+            if number does not match the actual file or test output
+                return false   // blocks the text; fix and re-check
+        return true
 
     function allHoldsResolved(curriculum)   // → true/false
         opened ← blank list
@@ -514,6 +538,7 @@ module Teaching
             if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
                 error "recap failed term check (G0, G2f)"
             // show recap; do not rebuild or show the graph; do not re-teach passed chunks
+            // restore saved stuckRevisits per side (H7); never reset to 0
         while true
             ready ← Teaching.readySet(curriculum, passedIds)
             if ready = blank list
@@ -533,6 +558,7 @@ module Teaching
             //   must pass Teaching.termCheck (G4, G2f).
             // Stuck trigger (G6): learner says stuck / "I don't know" → return "stuck";
             //   wrongAfterHint counts wrong answers after the first hint; wrongAfterHint = 2 → return "stuck".
+            //   The count is per chunk and does not reset when the chunk is re-asked after stuckRevisit.
             // On pass:
             append(passedIds, chunk.id)
             taughtAgain ← lessonLog has an entry with chunkId = chunk.id   // pass was dropped by H5
@@ -540,12 +566,12 @@ module Teaching
 
     function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits, side)   // → Curriculum, number
         // side: "picture" or "solution" — the teach run that got stuck; each run has its own budget (H7)
-        if stuckRevisits ≥ maxStuckRevisits
+        if stuckRevisits[side] ≥ maxStuckRevisits
             error "stuck after revisit budget; escalate to user"
         // Stuck = missing or wrong prerequisite (H1). Never re-serve the same chunk reworded.
         if side = "solution"
             // H8: stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
-            if gap is a missing code fact
+            if gap is a missing code fact or not clearly a reasoning step   // incl. a bare "I don't know" (fail closed)
                 // S4 → Discovery on region; new fact node; Graph.buildGraph
             else   // gap is a reasoning step (e.g. why waiting helps): no new code fact (H2 exception)
                 // new node: kind ← "solution", citesFactIds ← facts + ticket text it rests on (S2)
@@ -559,8 +585,10 @@ module Teaching
         // Drop passes that depended on changed chunks (H5); their re-pass is a new taughtAgain LessonEntry.
         // Do not invent a bridge outside the graph.
         // Tell the learner in one line that a piece is missing; teach the new chunk first,
-        // then re-ask the chunk where the learner got stuck (H6b).
-        return curriculum, stuckRevisits + 1
+        // then re-ask the chunk where the learner got stuck (H6b): repeat chunk.useCheck.prompt only,
+        // not the prose; its wrongAfterHint count does not reset.
+        stuckRevisits[side] ← stuckRevisits[side] + 1   // persisted by the caller (stuck_revisits)
+        return curriculum, stuckRevisits
 
 
 // --- piece 7: solution extension (work sessions only, Phase S) ---
@@ -594,7 +622,7 @@ function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
     curriculum ← Teaching.chunkGraph(curriculum)
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
-    stuckRevisits ← 0
+    stuckRevisits ← {picture: 0, solution: 0}   // on resume: the saved stuck_revisits instead (G0, H7)
     lessonLog ← blank list
     result ← Teaching.teach(curriculum, null, lessonLog, "fresh")
     if result = "stuck"

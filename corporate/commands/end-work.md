@@ -6,6 +6,7 @@ argument-hint: (no arguments needed)
 # End Work
 
 Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
+Code Concept Curriculum: `{{CODE_CONCEPT_CURRICULUM_DIR}}` — everything said to the learner here (the step-6 confirm and any question) passes the term check (CCC G2f, with the internal-word denylist, CCC §2e), as defined in `start-work.md`: no chunk ids or internal words, and code words only if a lesson taught them or the line defines them.
 
 1. Determine the current repo (`git rev-parse --show-toplevel`, basename it). Then find the session note to close, matching on *this agent session*, not on recency:
    - Read the session identifier exposed by the current harness. Do not guess another harness's variable. If this harness exposes no session identifier, leave `agent_id` blank and match the work note by its stable `session_uid`.
@@ -23,7 +24,7 @@ Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
    - `## Files Touched`: real file list from git, not a guess.
    - `## Decisions`: notable choices made and why (skip if genuinely nothing decision-worthy happened).
    - `## Follow-ups`: anything left open, deferred, or discovered but out of scope — be concrete, this is what future-you or a teammate reads to know what's unfinished.
-   - Leave `## Lessons` exactly as it is (it is the session's teaching record). If a chunk passed and is missing from it, append it per the Lessons rule in `start-work.md` step 8.
+   - Leave `## Lessons` exactly as it is (it is the session's teaching record). If a chunk passed and is missing from it, append it per the Lessons rule in `start-work.md` step 8. Leave `## Pedagogy` as it is too, except to mark finished items `status: done`.
    - Append a closing `## Log` line with a short outcome summary.
 
 4. If a legacy `Work/<repo>/Handoff.md` sidecar exists (from before the pause/resume split), fold its content into this note's Decisions/Follow-ups as relevant, then delete it — no dangling handoff should remain. The note's own `## Handoff` section can stay as-is; it's part of the session's record.
@@ -43,4 +44,4 @@ Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
 6. **Restore the local dev DB, then confirm.**
    *DB restore (runs at every close):* if the session note's `db_baseline` is `captured`, restore the local dev DB to that baseline now, from the snapshot recorded in `## DB Baseline` (see the DB Baseline Protocol in `start-work.md`). This reverts **all** local dev-DB state created this session — the env-setup seeds/fixtures/flags — returning it to its start-of-session baseline; it is blunt by design (it also discards any unrelated dev data added this session, and any deliverable migration's *local* effects, which re-apply from the repo). Then set `db_baseline: restored` and append a `## DB Baseline` line with the restore + `date`.
    - **Guards.** Re-confirm the target is the local/disposable DB the baseline names before running — **never restore shared/staging/remote infra.** If the snapshot is absent (a cross-machine close — it lives on the machine that captured it) or the restore command errors, do **not** silently pass: record the failure in `## Follow-ups` (what didn't restore, the DB target, the error) and surface it in the confirm, so leftover state is visible. If `db_baseline` is `none` (no local DB, an ephemeral DB, or a shared-DB skip), there is nothing to restore — skip silently.
-   *Confirm* to the user in 2-3 sentences: what got done, what's left, and the session note path. Then add one line naming the durable facts persisted in step 5 and where they went (which `Concepts/`/`Learning/` notes created vs updated, any `Agent/Patterns` entry), and **one line on the DB restore** (restored to baseline, nothing to restore, or a restore that failed — name the leftover state). If any fact failed to persist, call it out explicitly. Do not ask the user to re-explain what happened — derive it from git, the Journal, and the conversation.
+   *Confirm* to the user in 2-3 plain, term-checked sentences: what got done, what's left, and the session note path. Then add one line naming the durable facts persisted in step 5 and where they went (which `Concepts/`/`Learning/` notes created vs updated, any `Agent/Patterns` entry), and **one line on the DB restore** (restored to baseline, nothing to restore, or a restore that failed — name the leftover state). If any fact failed to persist, call it out explicitly. Do not ask the user to re-explain what happened — derive it from git, the Journal, and the conversation.

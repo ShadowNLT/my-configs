@@ -68,7 +68,10 @@ record Chunk
     headline       // string; short plain headline; the only way learner-facing text names a passed chunk (§2e)
 
 record LessonEntry   // G5b — one record per pass; work sessions append it to the note's Lessons
-    chunkId        // string
+    // Rendered heading: "### " + headline [+ " — added because you were stuck"] [+ " — taught again"]
+    //   + " <!-- " + chunkId + " -->"   — the id is hidden; visible text passes termCheck (§2e)
+    chunkId        // string; hidden link to passed_chunks — only inside the trailing HTML comment
+    headline       // string; chunk.headline; the visible heading
     prose          // string; exactly as shown
     question       // string; exactly as asked
     answer         // string; learner's passing answer, verbatim
@@ -533,7 +536,7 @@ module Teaching
             // On pass:
             append(passedIds, chunk.id)
             taughtAgain ← lessonLog has an entry with chunkId = chunk.id   // pass was dropped by H5
-            append(lessonLog, LessonEntry(chunk.id, prose, chunk.useCheck.prompt, answer, chunk.stuckAdded, taughtAgain))   // G5b; never rewrite old entries
+            append(lessonLog, LessonEntry(chunk.id, chunk.headline, prose, chunk.useCheck.prompt, answer, chunk.stuckAdded, taughtAgain))   // G5b; never rewrite old entries
 
     function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits, side)   // → Curriculum, number
         // side: "picture" or "solution" — the teach run that got stuck; each run has its own budget (H7)

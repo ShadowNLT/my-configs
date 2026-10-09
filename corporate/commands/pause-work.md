@@ -21,7 +21,7 @@ Schema reference: `Work/00-How-Work-Tracking-Works.md` in that vault.
 
 3. Update the session note in place:
    - Set `paused_at: <timestamp>` in the frontmatter (add the field if absent). Leave `status: in-progress` — a paused session is still logically open; `paused_at` being set is what marks it parked. Leave `ended_at` blank.
-   - **Leave `## Lessons` exactly as it is** — it is the learner's teaching record. If a chunk passed this session and is missing from it, append it now per the Lessons rule in `start-work.md` step 8; never rewrite or drop an entry.
+   - **Leave `## Lessons` exactly as it is** — it is the learner's teaching record. If a chunk passed this session and is missing from it, append it now per the Lessons rule in `start-work.md` step 8 (plain headline, chunk id only in the trailing `<!-- -->` comment); never rewrite or drop an entry.
    - Overwrite (create if absent) a `## Handoff` section with these subsections, written so a fresh session with no memory of this conversation can act immediately:
      - `### What we were doing` — plain-language restatement of the current task.
      - `### Current state` — branch, uncommitted changes (`git status` summary), last meaningful command, confirmed working vs. not yet verified. **If `db_baseline: captured`, note that a local dev-DB baseline snapshot exists and lives on *this* machine** — a resume on another machine cannot restore from it (see the DB Baseline Protocol in `start-work.md`).

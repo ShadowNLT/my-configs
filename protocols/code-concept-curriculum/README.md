@@ -2,7 +2,7 @@
 
 Teach one code concept as a knowledge-graph curriculum. The procedure is the two process twins in this folder. `command.md` and `SKILL.md` only point at them.
 
-Teaching Standard is **off** this process's default path. Do not run Teaching Standard §Procedure as this process. Installing this protocol must not overwrite `protocols/teaching-standard/` or an installed `$CONFIG_DIR/teaching-standard/` sidecar.
+This process is self-contained: it depends on no other teaching protocol. Its term check (G2f) reads the layman-terms denylist, so install `protocols/layman-terms/` too. Installing this protocol copies only its own files and must not overwrite any other protocol's folder or installed `$CONFIG_DIR/` sidecar.
 
 ## Files
 

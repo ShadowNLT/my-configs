@@ -6,11 +6,12 @@
 // seam map
 //   [name concept] → [discover facts] → [build graph] → [converge + adversary]
 //   → [chunk] → [teach] → [stuck revisit or close]
+//   → (work sessions) [solution extension] → [chunk] → [teach] → [close]
 //
-// Work-session discovery slice: /start-work and /resume-work cite Phases A–E
-// (name through adversary clear) for picture/code-fact discovery.
-// This process does not own session pairing, sandbox, /learn, /new-session, or Gate 1.
-// Gate 1 stays Teaching Standard TS-6. Phase G use-checks do not replace it.
+// Work sessions: /start-work and /resume-work run Phases A–I for the picture,
+// then the solution extension (piece 7, Phase S) for the solution delta.
+// Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
+// This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
 
 
 // --- piece 1: shapes ---
@@ -28,6 +29,8 @@ record NamedHold
 record Node
     id             // string
     claim          // string; one logical fact
+    kind           // "fact" or "solution"; solution nodes are proposals (piece 7, S2)
+    citesFactIds   // list of string; required when kind = "solution"
     definitions    // list of string
     synonyms       // list of string; each item marks an explicit synonym pair in words
     cases          // list of string; complete case set, or blank list if not applicable
@@ -59,7 +62,15 @@ record Chunk
     predChunkIds   // list of string; predecessor chunks; empty iff initial
     definitionsRequired  // list of string
     sanityByPred   // map predChunkId → string; required key for every predChunkId
-    correctivePrompt // string; UC5 — on fail, still demands use
+    correctivePrompt // string; UC5 — on fail, still demands use; plain hint, never the answer (G4)
+    stuckAdded     // true/false; true when stuckRevisit added this chunk (H6b)
+
+record LessonEntry   // G5b — one record per pass; work sessions append it to the note's Lessons
+    chunkId        // string
+    prose          // string; exactly as shown
+    question       // string; exactly as asked
+    answer         // string; learner's passing answer, verbatim
+    stuckAdded     // true/false
 
 record Graph
     nodes          // list of Node
@@ -375,35 +386,63 @@ module Teaching
                 return false
         return true
 
-    function suggestCandidate(ready)   // ready: list of Chunk → Chunk
-        // Deterministic suggestion: shallowest depth, then stable id.
+    function graphOrderNext(ready)   // ready: list of Chunk → Chunk
+        // Graph order: shallowest depth, then stable id.
         best ← ready[0]
         for each chunk in ready
             if chunk is better than best by depth then id
                 best ← chunk
         return best
 
-    function pickRuleX(ready)   // ready: non-empty list of Chunk → Chunk
-        // Inked X + G2e: learner picks order among ready; all remain required.
+    function pickRuleX(ready, learnerAsked)   // ready: non-empty list of Chunk → Chunk
+        // Inked X + G2c + G2e: graph order by default; no prompt to pick; all remain required.
+        if length(ready) = 0
+            error "pickRuleX called with empty ready set"
         if length(ready) = 1
             return ready[0]
-        if length(ready) > 1
-            choice ← learnerPickAmong(ready)
-            if not belongsTo(choice, ready)
-                error "pick outside ready set"
-            return choice
-        error "pickRuleX called with empty ready set"
+        if learnerAsked = null
+            return Teaching.graphOrderNext(ready)   // do not ask the learner
+        // Learner asked to change the order (G2d surface applies)
+        choice ← learnerAsked
+        if not belongsTo(choice, ready)
+            error "pick outside ready set"
+        return choice
 
-    function forkSurfaceOk(options, suggestion)   // → true/false
+    function forkSurfaceOk(options, defaultChunk)   // → true/false; only when learner asks to reorder
         for each opt in options
             if opt shows use-check answer or later-hold resolution
                 return false
             if opt.claimHeadline = ""
                 return false
             // must not imply optional / skippable siblings (G2e)
-        if suggestion ≠ null and suggestion presented as only path
+        if defaultChunk presented as only path
             return false
         return true
+
+    function termCheck(text, chunk, passedIds, curriculum)   // → "ok" or blocked term   (G2f)
+        // Applies to: chunk prose, use-check question, corrective prompt / hint, recap (G0),
+        // stuck-added chunks, solution chunks.
+        text ← apply layman-terms denylist pass (replace each hit with its plain equivalent)
+        for each term in termsOf(text)
+            if isEverydayWord(term)
+                continue
+            if definedEarlierIn(text, term)          // inline definition of a few words counts
+                continue
+            if definedInPassedChunk(term, passedIds, curriculum)
+                continue
+            return term                               // blocked
+        return "ok"
+
+    function render(chunk, passedIds, curriculum)   // → string prose  (G2g + G2f)
+        prose ← chunk.claim, definitions, and holds as short full sentences; root first
+        if prose is a table or a node/claim list or the graph or the checklist
+            error "not teaching prose (G2g)"
+        // must not add a claim that is not in the chunk
+        result ← Teaching.termCheck(prose + chunk.useCheck.prompt, chunk, passedIds, curriculum)
+        if result ≠ "ok"
+            // Block: define inline, or add a prerequisite node + chunk (Phase C, then F) and teach it first
+            error "term check failed: " + result + "; define inline or add prerequisite chunk"
+        return prose
 
     function allHoldsResolved(curriculum)   // → true/false
         opened ← blank list
@@ -428,8 +467,15 @@ module Teaching
                 return false
         return true
 
-    function teach(curriculum)   // → "complete" or "stuck"
-        passedIds ← blank list
+    function teach(curriculum, passedIds, lessonLog)   // → "complete" or "stuck"
+        // passedIds: blank list on a fresh run; saved passed_chunks on resume (G0)
+        if passedIds = null
+            passedIds ← blank list
+        else
+            recap ← plain recap of passed chunks (no question)
+            if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
+                error "recap failed term check (G0, G2f)"
+            // show recap; do not rebuild or show the graph; do not re-teach passed chunks
         while true
             ready ← Teaching.readySet(curriculum, passedIds)
             if ready = blank list
@@ -438,22 +484,48 @@ module Teaching
                 if not Teaching.allHoldsResolved(curriculum)
                     error "named hold still open at end"
                 return "complete"
-            // Fork: show forkSurfaceOk options; optional suggestCandidate as suggestion only
-            chunk ← Teaching.pickRuleX(ready)
+            // Fork: graph order unless the learner asked to reorder (G2c)
+            chunk ← Teaching.pickRuleX(ready, learnerReorderRequest())
+            prose ← Teaching.render(chunk, passedIds, curriculum)
             if not Teaching.holdsVisibleInProse(chunk, prose)
                 error "soft hole: hold not named in prose"
-            // Run use-check; restatement or unimplemented grader → fail; stuck → return "stuck"
+            // Show prose; ask chunk.useCheck.prompt as one plain question; wait for the answer (G2g).
+            // Run use-check; restatement or unimplemented grader → fail.
+            // On fail: corrective prompt = plain hint naming the missing piece; never the answer;
+            //   must pass Teaching.termCheck (G4, G2f). Stuck → return "stuck".
             // On pass:
             append(passedIds, chunk.id)
+            append(lessonLog, LessonEntry(chunk.id, prose, chunk.useCheck.prompt, answer, chunk.stuckAdded))   // G5b
 
     function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits)   // → Curriculum, number
         if stuckRevisits ≥ maxStuckRevisits
             error "stuck after revisit budget; escalate to user"
+        // Stuck = missing or wrong prerequisite (H1). Never re-serve the same chunk reworded.
         // Re-run Discovery on region, Graph.buildGraph, Validation.converge,
         // Validation.adversaryClear, Teaching.chunkGraph.
+        // New prerequisite chunk: stuckAdded ← true; it passes termCheck like any chunk (H6b).
         // Drop passes that depended on changed chunks.
         // Do not invent a bridge outside the graph.
+        // Tell the learner in one line that a piece is missing; teach the new chunk first,
+        // then re-ask the chunk where the learner got stuck (H6b).
         return curriculum, stuckRevisits + 1
+
+
+// --- piece 7: solution extension (work sessions only, Phase S) ---
+
+module Solution
+    function extend(curriculum, solutionNodes, ticketText)   // → Curriculum
+        // S1: runs only after the picture chunks close (Phase I)
+        for each node in solutionNodes
+            if node.kind ≠ "solution" or node.citesFactIds = blank list
+                error "solution node must cite fact ids (S2)"
+            for each factId in node.citesFactIds
+                if factId not in curriculum facts
+                    error "missing code fact; return to Phase B (S4)"
+        // S3: Graph.buildGraph on picture + delta; Validation.adversaryClear on delta only;
+        //     no converge for solution nodes; Teaching.chunkGraph on delta;
+        //     then Teaching.teach with the picture passes kept in passedIds
+        return curriculum
 
 
 // --- piece 6: top-level run ---
@@ -462,17 +534,18 @@ function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
     if maxStuckRevisits = null
         maxStuckRevisits ← 1
     concept ← Discovery.nameConcept(conceptName)
-    // Teaching Standard off default path. No code-scope freeze.
+    // No code-scope freeze.
     curriculum ← Validation.converge(concept, maxRetries)
     proofBacklog ← blank list
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
     curriculum ← Teaching.chunkGraph(curriculum)
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
     stuckRevisits ← 0
-    result ← Teaching.teach(curriculum)
+    lessonLog ← blank list
+    result ← Teaching.teach(curriculum, null, lessonLog)
     if result = "stuck"
         curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits)
-        result ← Teaching.teach(curriculum)
+        result ← Teaching.teach(curriculum, /* passedIds kept per H5 */, lessonLog)
         if result = "stuck"
             error "stuck after revisit budget; escalate to user"
     if curriculum.discoveryStatus ≠ "clear"

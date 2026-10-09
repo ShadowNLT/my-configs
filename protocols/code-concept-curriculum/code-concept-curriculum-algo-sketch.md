@@ -12,6 +12,11 @@
 // then the solution extension (piece 7, Phase S) for the solution delta.
 // Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
 // This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
+// The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
+// (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
+// solution (per step: one plain sentence naming the lesson it applies + 2-3 key lines with location;
+// supporting edits as one line; full diff only on request), then tests run, then "Done" only after
+// they pass. "just fix it" skips the replay, not the tests. Replay text goes through termCheck.
 
 
 // --- piece 1: shapes ---
@@ -450,7 +455,8 @@ module Teaching
         // Applies to: chunk prose, use-check question, corrective prompt / hint, recap (G0),
         // stuck-added chunks, solution chunks. In a work session also: restated goal and the
         // teach-first line, pre-flight and confirm lines, resume recap and plain "what's next" line,
-        // the code walkthrough (each step's reason and instructions), the end-of-session message.
+        // the code walkthrough (each step's reason and instructions, each replay of an agent-typed
+        // change, each "Done" line), the end-of-session message.
         // Text shown before any chunk passed (restated goal): everyday words or inline definitions only.
         // A name shown in code formatting (cited path <repo>/<path>:line, branch, note file, folder,
         // command) is not a term; the words around it must pass, and a word from a name used as a

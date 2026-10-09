@@ -17,7 +17,12 @@ Mode: Simplified Technical English (pragmatic). This text is not ASD dictionary-
 - **Converge:** two or more agents produce curricula that match on the same code-forced fact set for the concept (same facts, same case coverage, same named holds and closers). Wording may differ. Node/chunk packaging may differ only when an explicit merge/split equivalence map shows the same fact set. If substance does not match after the retry budget, escalate to the user and do not teach. Because the code is finite, the target fact set is unique; mismatch means discovery missed something.
 - **Logical adversary:** a review that tries to refute the curriculum with real code facts and logic. The adversary may read any code needed to attack the claims; it is not limited to discovery’s explored_region. If the attack finds code discovery missed, that is a real hole: expand discovery and re-enter. The adversary does not invent outside-world counterexamples. Adversary clear means: no real hole found after that hunt.
 - **Ready set:** every chunk whose predecessors are all passed (initial chunks start ready). At a fork the ready set may contain more than one chunk.
-- **Teaching order:** Math-academy-style unlock. Never teach a chunk before its predecessors. Branching is live on the learner surface: multiple unlocks may be ready at once. A fork chooses order only; every chunk must still receive a pass before close. Advance by pick rule X (see Phase G). Stop when every chunk has a pass and all named holds are resolved.
+- **Teaching order:** Math-academy-style unlock. Never teach a chunk before its predecessors. Multiple unlocks may be ready at once. A fork chooses order only; every chunk must still receive a pass before close. Advance by pick rule X (see Phase G): graph order by default; the learner may ask for a different ready chunk. Stop when every chunk has a pass and all named holds are resolved.
+- **Term check:** a check on every text the learner sees. Each term must be an everyday word, or defined in that text, or defined in a chunk the learner already passed. No internal word (§2e) may appear (see G2f).
+- **Learner-facing text:** any text that the learner sees during a session. In a work session this is every line, not only the teaching prose (see G2f for the list).
+- **Internal word:** a word that names a part of this process, such as chunk, node, or gate. §2e lists them. Internal words stay in internal records. They never appear in learner-facing text.
+- **Stuck:** the learner says that they are stuck or that they do not know, or the learner answers wrong two times after the plain hint (G6).
+- **Stuck-added chunk:** a prerequisite chunk that Phase H adds because the learner was stuck.
 - **Named limitation:** a known bound the process states in the open. Named limitations are not soft holes. Soft holes hide gaps. Named limitations name gaps that logic cannot close.
 
 ## 1. Purpose
@@ -39,8 +44,6 @@ G8. Each chunk ends with a use-check that passes the use-check checklist (§2d, 
 G9. If a learner passed every predecessor of a chunk, that chunk must be understandable from those predecessors alone. If not, the graph is wrong. Sanity is checked per prerequisite edge in the chunk DAG, not against a single linear playlist.
 G10. If the learner is stuck, reopen discovery on missing prerequisites. Apply G1–G9 again. Do not patch with a vague explanation.
 G11. Teaching must not report complete while any chunk lacks a pass, or while any named hold remains open. An empty ready set with stranded unpassed chunks is a graph defect, not completion.
-
-Teaching Standard is not a default dependency. Do not run Teaching Standard §Procedure as this process.
 
 ## 2b. Named limitations (inked)
 
@@ -80,6 +83,25 @@ Before teach, every chunk’s use-check must pass every row. Empty or failing ro
 | UC5 | fail-path corrective prompt still demands use |
 
 A pair that clears UC1–UC5 and still grades wrong at runtime is an integrity residual (like forged discovery citations), not a standing named limitation.
+
+## 2e. Internal-word denylist (inked)
+
+These words name parts of this process. They are for internal records only. The term check (G2f) blocks each of them in learner-facing text. Replace each hit with its plain replacement. Do not define the internal word for the learner instead; the learner never needs it. Exception: when the code's own subject uses one of these words with its own meaning (for example, a "hold" on a bank account), the word may stay in that meaning, defined like any other term. It must never name a part of this process.
+
+| Internal word | Plain replacement |
+|---|---|
+| chunk | "part" or "step of the lesson", or say what it taught ("the part about <its headline>") |
+| node | "fact" or "idea" |
+| graph | "the lesson plan" (better: leave it out) |
+| gate (Gate 1, Gate 2) | "before we change any code" or "before you write the fix" |
+| claim | "point" or "what we learned" |
+| hold (named hold) | "a question we keep open for later" |
+| phase (Phase A–I, Phase S, Phase 1–4) | "stage", or say what happens ("now you write the code") |
+| use-check | "question" |
+| ready set | "what comes next" |
+| a chunk id or fact id (P1, S3, F2, N2b, G1, G2) | the plain headline of what that part taught, in words |
+
+Code words are a different case. A code word (for example test, loop, catch, function, request, server-side, scaffolding) is not an everyday word. It may appear in learner-facing text only after a passed chunk defines it, or after the same text defines it in one short sentence.
 
 ## 3. Artifacts
 
@@ -138,7 +160,6 @@ Breach of this invariant is a soft-hole-class defect: fail before teach.
 A1. Name the code concept in one sentence.
 A2. Do not freeze a code scope. Discovery will expand the explored region until the concept is clear or the budget forces escalate.
 A3. If the concept name is ambiguous, stop and ask the user. Do not guess the concept. Do not guess facts.
-A4. Record that Teaching Standard is off the default path for this run.
 
 ### Phase B — Exhaustive discovery (no scope freeze)
 
@@ -192,28 +213,35 @@ F8. Re-run Phase E on the chunked curriculum. If a real hole appears, fix and re
 
 ### Phase G — Teach
 
+G0. Resume. If a saved chunk list and a saved passed-chunk list exist, do not rebuild the graph, do not show it, and do not re-teach passed chunks. First give a short recap of the passed chunks in plain prose, with no question. The recap covers passed chunks only. It names them by their plain headlines, never by id, and it never previews an unpassed chunk. The recap passes the term check (G2f). G0 applies only to a resume after a pause. Moving from the picture chunks to the solution chunks (Phase S) is not a resume. Restore the saved stuck revisit counts for each run (H7). Then rebuild the ready set from the saved lists and continue at G1. If discovery_status is not clear, return to Phase B first.
 G1. Start with the ready set (all initial chunks). At each step, if the ready set has one chunk, serve it. If the ready set has more than one chunk (a fork), apply pick rule X (locked below). Never serve a chunk outside the ready set.
 G2. Deliver only teaching prose that obeys G5–G7.
 G2b. If the chunk's holds.opens list is not empty, the teaching prose must name each open hold as a deliberate "comes later" hold. If holds.resolves is not empty, the teaching prose must name what just closed. If both lists are empty, say nothing about holds. An open hold that stays only in the chunk fields and never appears in prose is a soft hole. Soft holes are forbidden.
-G2c. Pick rule X (fork): **inked.** When more than one chunk is ready, the learner picks among the ready set. The agent may suggest one candidate (shallowest depth, then stable id) but must never auto-advance when multiple are ready. When exactly one chunk is ready, serve it.
-G2d. Fork surface gates: each ready option shows a short claim headline only. Do not show the use-check answer. Do not resolve or spoil holds that open later. If the agent shows a suggestion, label it as a suggestion. Never present the suggestion as the only path.
+G2c. Pick rule X (fork): **inked.** When more than one chunk is ready, serve the next chunk in graph order (shallowest depth, then stable id). Do not ask the learner to pick. Change the order only when the learner asks for a different ready chunk; then serve the chunk they ask for. When exactly one chunk is ready, serve it.
+G2d. Fork surface gates (only when the learner asks to change the order): each ready option shows a short claim headline only. Do not show the use-check answer. Do not resolve or spoil holds that open later. Label the graph-order chunk as the default. Never present it as the only path.
 G2e. Fork means order only: every chunk in the curriculum must still receive a pass before close (G11 / I1). Choosing one ready chunk does not abandon the other ready chunks. They remain required and return to the ready set until passed.
+G2f. Term check (every learner-facing text). Before you show any text to the learner, check every term in it. This applies to a teaching chunk, its use-check question, a corrective prompt or hint, a recap (G0), a chunk that Phase H added, and a solution chunk (Phase S). In a work session it also applies to every other line that the learner sees: the restated goal and the line that says teaching comes first, the pre-flight line and the confirm lines, the resume recap and the plain "what's next" line, the code walkthrough (each step's reason and instructions, each replay of a change the agent typed with its closing question, and each "Done" line), and the end-of-session message. Text shown before the first chunk passes (for example the restated goal) can use only everyday words and terms that it defines itself. A name is not a term when the text shows it as a name in code formatting: a file path cited as `<repo>/<path>:line`, a branch name, a note file name, a folder name, or a command name. The words around it must pass. A name does not teach the words inside it: if the text uses a word from a name as a word, that word must pass on its own. A term passes only when one of these is true: (a) it is an everyday word that an adult with no background in this code knows; (b) the same text defines it before it is used; (c) a chunk that the learner already passed defines it. Run the layman-terms denylist pass on the text (`denylist.txt` in the layman-terms protocol): replace each hit with its plain equivalent. Then run the internal-word denylist pass (§2e): replace each internal word and each chunk or fact id with its plain replacement. An internal word never passes, even when a chunk defined it. If a technical term must stay, define it inline in a few words at its first use. If a term still fails, block the text. Then do one of two things: define the term inline, or add a prerequisite node and chunk for the term (Phase C, then Phase F) and teach that chunk first. Do not show a blocked text. The check must not add a claim that is not in the chunk. This is the prose-level check. G5, DC1, C2, and E3 are the graph-level checks; both levels apply.
+G2g. Chunk form. Deliver one chunk per turn as short full prose: short sentences, one idea each, active voice, named subjects, root chunks first. A table, a node list, a claim list, the graph, or the discovery checklist is never teaching prose. They are internal records; do not show them as the lesson. Keep each paragraph to about 90 words or fewer, and define at most 3 new terms in one paragraph; split a longer chunk into paragraphs, or into more chunks. End the turn with exactly one question: the use-check prompt, in plain words. The question names every quantity that it asks about (for example a total, a count, or a time), and the chunk taught that quantity before the question. A question that needs a quantity the chunk did not teach is blocked like a failed term. Then wait for the answer.
+G2h. Fact check on numbers. Before you show a line number, a count, or a list size, check it against the actual file or test output. A mismatch blocks the text (for example, "six tests" with five listed, or two line numbers for one place that do not agree). Fix it, then check again.
 G3. After each chunk, run the use-check.
-G4. If the learner restates the claim, mark fail. Give a corrective prompt that still demands use. Do not advance. If restatement detection is unimplemented, do not mark pass.
+G4. If the learner restates the claim or answers wrong, mark fail. Give a corrective prompt that still demands use. The corrective prompt is a plain hint: it names the specific missing piece in plain words. It is never cryptic. It never gives the answer, and it never gives a hint before the first attempt. It passes the term check (G2f). Do not advance. If restatement detection is unimplemented, do not mark pass.
 G5. If the learner uses the claim correctly, mark pass and advance the ready set.
-G6. If the learner is stuck (cannot use the claim after corrective attempts, or cannot follow a newly unlocked chunk despite prior passes), stop teaching. Enter Phase H.
+G5b. Record each pass for the caller: the chunk prose exactly as shown, the question exactly as asked, the learner's passing answer verbatim, the stuck-added marker when Phase H added the chunk, and the taught-again marker when H5 taught the chunk again. A work session appends this record to the session note's Lessons section. The learner rereads that section, so the record's visible heading is the chunk's plain headline plus the markers in plain words ("added because you were stuck", "taught again"). The chunk id goes only in a hidden comment at the end of the heading line (`<!-- P1 -->`), which links the record to the saved passed-chunk list. The visible text passes the term check, including the internal-word pass (§2e). A record is never rewritten. A second pass of the same chunk is a new record.
+G6. Stuck trigger. The learner is stuck when one of these is true: (a) the learner says that they are stuck or that they do not know; (b) the learner answers wrong two times after the plain hint (G4); (c) the learner cannot follow a newly unlocked chunk despite prior passes. The first wrong answer gets the plain hint. A wrong answer after the hint gets the hint again in more direct words, still without the answer. The second wrong answer after the hint is stuck. When the learner is stuck, stop teaching. Enter Phase H.
 G7. Do not mention code files in teaching prose.
 G8. After each pass, if ready is empty: if any chunk is still unpassed, error (stranded chunks / G11). If all chunks passed and all holds resolved, go to Phase I.
 
 ### Phase H — Stuck revisit
 
-H1. Treat stuck as evidence of a missing or wrong prerequisite.
-H2. Re-open discovery on the stuck region (Phase B) under G1–G11.
+H1. Treat stuck as evidence of a missing or wrong prerequisite. Do not repeat the same chunk in other words.
+H2. Re-open discovery on the stuck region (Phase B) under G1–G11. Exception: when the learner is stuck on a solution chunk and the gap is a reasoning step, not a missing code fact (for example, why waiting before a new try helps), no new code fact is needed. Add a solution-side prerequisite node (H8).
 H3. Re-run converge (Phase D) and adversary (Phase E) on the changed subgraph.
 H4. Rebuild affected chunks (Phase F).
-H5. Resume teaching at the earliest chunk that changed (drop passes that depended on changed chunks).
-H6. Do not invent a bridging explanation that is not in the graph.
-H7. Stuck revisit budget: default max_stuck_revisits = 1 per teach run (same fail-closed spirit as converge). If still stuck after that budget, escalate to the user. Do not loop forever.
+H5. Resume teaching at the earliest chunk that changed (drop passes that depended on changed chunks). When a chunk whose pass was dropped passes again, record the new pass as a new Lessons record with the taught-again marker in plain words (G5b). Do not rewrite or remove the old record.
+H6. Do not invent a bridging explanation that is not in the graph. A solution-side prerequisite node that H8 adds is in the graph; it is not an invented bridge.
+H6b. Tell the learner in one line that a piece is missing. Teach the new prerequisite chunk first. It is a stuck-added chunk: it passes the term check (G2f) like any chunk, and its pass is recorded with the stuck-added marker (G5b). Then re-ask the chunk where the learner got stuck: repeat its question only, word for word. Do not show its prose again. Its wrong-answer count (G6) does not reset.
+H7. Stuck revisit budget: default max_stuck_revisits = 1 per teach run (same fail-closed spirit as converge). The picture and the solution are separate teach runs. Each run allows one stuck revisit. The caller saves the count used in each run across a pause (a work session saves it as `stuck_revisits: picture N, solution N`). A resume (G0) restores the saved counts. It never resets them to zero. If still stuck after that budget, escalate to the user. Do not loop forever.
+H8. Stuck during the solution chunks (Phase S). The revisit stays under the solution close (Gate 2). It does not reopen the picture close (Gate 1), and it does not drop picture passes. If the gap is a missing code fact, return to Phase B (S4), add the fact as a prerequisite node, and teach it as a stuck-added chunk that belongs to the solution chunk set. If the gap is a reasoning step, add a solution-side prerequisite node: mark its kind as solution, cite the fact ids and the ticket text that it rests on (S2), and run Phase E on it (delta only). Teach it as a stuck-added chunk that belongs to the solution chunk set. In both cases, its pass counts toward the solution close. If the learner only says that they do not know, and the gap is not clearly a reasoning step, take the missing-code-fact branch (Phase B first, fail closed).
 
 ### Phase I — Close
 
@@ -221,12 +249,18 @@ I1. Teaching is complete when every chunk has a pass, and every named hold opene
 I2. If any named hold remains open at the end, the curriculum fails. Return to Phase C.
 I3. Hand control back. State completion without claiming repository changes. Completion means this curriculum covers the unique code-forced fact set for the concept (packaging may vary under an equivalence map).
 
+### Phase S — Solution extension (work sessions only)
+
+S1. After the picture chunks pass (Phase I), a work session adds solution nodes on top of the same graph.
+S2. A solution node is a proposed change, not a code fact. Mark its kind as solution. Each solution node cites the fact ids it depends on and the ticket text that asks for it. G2 still binds every fact node and every fact that a solution node cites.
+S3. Run Phases C, E (on the delta only), F, G, H, and I on the solution nodes. Phase D is not required for solution nodes, because more than one valid change can exist. The user owns that choice. Passed picture chunks stay passed; they are the floor for the solution chunks. Starting the solution chunks is not a resume: give no recap (G0) at that point. A learner who is stuck on a solution chunk follows H8.
+S4. If a solution node needs a code fact that the graph does not hold, return to Phase B.
+
 ## 5. What this process does not do
 
 - It does not edit the target code repository.
 - It does not write my-configs until the user co-signs and orders a write.
-- Work-session picture/code-fact discovery (`/start-work`, `/resume-work`, including code review when discovery is needed) cites this process for Phases A→E until `discovery_status: clear`. That wiring does not make this process own session pairing, the sandbox, `/learn`, `/new-session`, or Gate 1. Gate 1–2 stay Teaching Standard TS-6 on claims derived from the graph. Phase G / use-checks do not replace Gate 1. Teaching Standard stays off on the discovery slice only.
-- It does not use Teaching Standard as the runner.
+- Work sessions (`/start-work`, `/resume-work`) run this whole process, Phases A→I, for the picture, then Phase S for the solution delta. Gate 1 is Phase I on the picture chunks. Gate 2 is Phase I on the solution chunks. This process does not own session pairing, the edit walkthrough, `/learn`, or `/new-session`. The edit walkthrough is `/start-work` Phase 4: after the solution is agreed, the learner chooses for each step whether to type the change or have the agent type it, and can switch at any step. A change the agent typed is replayed against the agreed solution: one plain sentence per step that names the lesson it applies, plus the 2–3 key lines with their location; small supporting changes get one line; the full set of changed lines only on request. The replay ends the agent's turn with "Does this match what we agreed?" and the agent waits. Only after the learner answers do the tests run, and the agent says "Done" only after they pass. "Just fix it" skips the replay and the wait, not the tests. The replay sentences pass G2f and G2h.
 - It does not replace /learn for mid-work JIT unblocks.
 - It does not claim omniscience; it requires the discovery-completion checklist with evidence plus an unbounded-in-code adversary hunt.
 

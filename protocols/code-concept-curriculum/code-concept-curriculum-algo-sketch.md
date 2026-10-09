@@ -6,11 +6,19 @@
 // seam map
 //   [name concept] → [discover facts] → [build graph] → [converge + adversary]
 //   → [chunk] → [teach] → [stuck revisit or close]
+//   → (work sessions) [solution extension] → [chunk] → [teach] → [close]
 //
-// Work-session discovery slice: /start-work and /resume-work cite Phases A–E
-// (name through adversary clear) for picture/code-fact discovery.
-// This process does not own session pairing, sandbox, /learn, /new-session, or Gate 1.
-// Gate 1 stays Teaching Standard TS-6. Phase G use-checks do not replace it.
+// Work sessions: /start-work and /resume-work run Phases A–I for the picture,
+// then the solution extension (piece 7, Phase S) for the solution delta.
+// Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
+// This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
+// The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
+// (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
+// solution (per step: one plain sentence naming the lesson it applies + 2-3 key lines with location;
+// supporting edits as one line; full diff only on request). The replay ends the turn with
+// "Does this match what we agreed?" and waits; only after the learner's answer (yes, or corrections
+// applied and re-replayed) do tests run, then "Done" only after they pass. "just fix it" skips the
+// replay and the wait, not the tests. Replay text goes through termCheck.
 
 
 // --- piece 1: shapes ---
@@ -28,6 +36,8 @@ record NamedHold
 record Node
     id             // string
     claim          // string; one logical fact
+    kind           // "fact" or "solution"; solution nodes are proposals (piece 7, S2)
+    citesFactIds   // list of string; required when kind = "solution"
     definitions    // list of string
     synonyms       // list of string; each item marks an explicit synonym pair in words
     cases          // list of string; complete case set, or blank list if not applicable
@@ -59,7 +69,39 @@ record Chunk
     predChunkIds   // list of string; predecessor chunks; empty iff initial
     definitionsRequired  // list of string
     sanityByPred   // map predChunkId → string; required key for every predChunkId
-    correctivePrompt // string; UC5 — on fail, still demands use
+    correctivePrompt // string; UC5 — on fail, still demands use; plain hint, never the answer (G4)
+    stuckAdded     // true/false; true when stuckRevisit added this chunk (H6b)
+    side           // "picture" or "solution"; a stuck-added chunk takes the side of the run that added it (H8)
+    headline       // string; short plain headline; the only way learner-facing text names a passed chunk (§2e)
+
+record LessonEntry   // G5b — one record per pass; work sessions append it to the note's Lessons
+    // Rendered heading: "### " + headline [+ " — added because you were stuck"] [+ " — taught again"]
+    //   + " <!-- " + chunkId + " -->"   — the id is hidden; visible text passes termCheck (§2e)
+    chunkId        // string; hidden link to passed_chunks — only inside the trailing HTML comment
+    headline       // string; chunk.headline; the visible heading
+    prose          // string; exactly as shown
+    question       // string; exactly as asked
+    answer         // string; learner's passing answer, verbatim
+    stuckAdded     // true/false
+    taughtAgain    // true/false; true when H5 dropped an earlier pass and this is the new pass.
+                   // A LessonEntry is append-only: never rewrite or remove an earlier entry (G5b, H5).
+
+// §2e internal-word denylist: never in learner-facing text; replace with the plain word.
+constant INTERNAL_WORDS ← map
+    "chunk"     → "part" / "step of the lesson" / what it taught
+    "node"      → "fact" / "idea"
+    "graph"     → "the lesson plan" (better: leave it out)
+    "gate"      → "before we change any code" / "before you write the fix"
+    "claim"     → "point" / "what we learned"
+    "hold"      → "a question we keep open for later"
+    "phase"     → "stage" / what happens now
+    "use-check" → "question"
+    "ready set" → "what comes next"
+    <chunk or fact id, e.g. P1, S3, F2, N2b, G1> → the plain headline of what that part taught
+// Exception: the code's own subject may use one of these words in its own meaning (e.g. a "hold" on an
+// account); it stays, defined like any term, and never names a part of this process.
+// Code words (test, loop, catch, function, request, server-side, scaffolding, ...) are NOT everyday
+// words: allowed only once a passed chunk or the same text defines them (G2f).
 
 record Graph
     nodes          // list of Node
@@ -92,10 +134,11 @@ record RunState
     proofBacklog   // list of ProofEntry
     retryCount     // number ≥ 0
     maxRetries     // number ≥ 1
-    stuckRevisits  // number ≥ 0
+    stuckRevisits  // map side → number ≥ 0 ("picture", "solution"); saved across pause as
+                   // stuck_revisits: picture N, solution N; restored on resume (G0, H7), never reset
     maxStuckRevisits  // number ≥ 1; default 1
     invariant: retryCount ≤ maxRetries
-    invariant: stuckRevisits ≤ maxStuckRevisits
+    invariant: stuckRevisits[side] ≤ maxStuckRevisits for each side
 
 
 // --- piece 2: name concept + discovery ---
@@ -264,7 +307,7 @@ module Validation
 // --- piece 5: chunk + teach + stuck ---
 
 module Teaching
-    function isRestatement(answer, claim)   // answer, claim: string → true/false
+    function isRestatement(answer, claim, mode)   // answer, claim: string; mode: UseCheck.mode → true/false
         // Minimal fail-closed rule (repo draft may strengthen, not weaken):
         if answer = "" 
             return true
@@ -272,7 +315,9 @@ module Teaching
             return true
         // If a stronger grader is not available, treat uncertain answers as restatement
         // when they share no apply/distinguish/predict move markers — never auto-pass.
-        return false   // only after normalize inequality; useCheckPasses still needs expectedUse match
+        if not hasMoveMarker(answer, mode)   // uncertain → restatement (fail closed)
+            return true
+        return false   // a move marker is present; useCheckPasses still needs expectedUse match
 
     function useCheckChecklistOk(chunk, proofBacklog)   // → true/false  (§2d UC1–UC5)
         uc ← chunk.useCheck
@@ -294,7 +339,7 @@ module Teaching
     function useCheckPasses(chunk, answer)   // chunk: Chunk, answer: string → true/false
         if chunk.useCheck.expectedUse = ""
             return false
-        if Teaching.isRestatement(answer, chunk.claim)
+        if Teaching.isRestatement(answer, chunk.claim, chunk.useCheck.mode)
             return false
         // Compare answer to chunk.useCheck.expectedUse for the stated mode.
         return true
@@ -375,34 +420,95 @@ module Teaching
                 return false
         return true
 
-    function suggestCandidate(ready)   // ready: list of Chunk → Chunk
-        // Deterministic suggestion: shallowest depth, then stable id.
+    function graphOrderNext(ready)   // ready: list of Chunk → Chunk
+        // Graph order: shallowest depth, then stable id.
         best ← ready[0]
         for each chunk in ready
             if chunk is better than best by depth then id
                 best ← chunk
         return best
 
-    function pickRuleX(ready)   // ready: non-empty list of Chunk → Chunk
-        // Inked X + G2e: learner picks order among ready; all remain required.
+    function pickRuleX(ready, learnerAsked)   // ready: non-empty list of Chunk → Chunk
+        // Inked X + G2c + G2e: graph order by default; no prompt to pick; all remain required.
+        if length(ready) = 0
+            error "pickRuleX called with empty ready set"
         if length(ready) = 1
             return ready[0]
-        if length(ready) > 1
-            choice ← learnerPickAmong(ready)
-            if not belongsTo(choice, ready)
-                error "pick outside ready set"
-            return choice
-        error "pickRuleX called with empty ready set"
+        if learnerAsked = null
+            return Teaching.graphOrderNext(ready)   // do not ask the learner
+        // Learner asked to change the order (G2d surface applies)
+        choice ← learnerAsked
+        if not belongsTo(choice, ready)
+            error "pick outside ready set"
+        return choice
 
-    function forkSurfaceOk(options, suggestion)   // → true/false
+    function forkSurfaceOk(options, defaultChunk)   // → true/false; only when learner asks to reorder
         for each opt in options
             if opt shows use-check answer or later-hold resolution
                 return false
             if opt.claimHeadline = ""
                 return false
             // must not imply optional / skippable siblings (G2e)
-        if suggestion ≠ null and suggestion presented as only path
+        if defaultChunk presented as only path
             return false
+        return true
+
+    function termCheck(text, chunk, passedIds, curriculum)   // → "ok" or blocked term   (G2f)
+        // Applies to: chunk prose, use-check question, corrective prompt / hint, recap (G0),
+        // stuck-added chunks, solution chunks. In a work session also: restated goal and the
+        // teach-first line, pre-flight and confirm lines, resume recap and plain "what's next" line,
+        // the code walkthrough (each step's reason and instructions, each replay of an agent-typed
+        // change, each "Done" line), the end-of-session message.
+        // Text shown before any chunk passed (restated goal): everyday words or inline definitions only.
+        // A name shown in code formatting (cited path <repo>/<path>:line, branch, note file, folder,
+        // command) is not a term; the words around it must pass, and a word from a name used as a
+        // word must pass on its own (a name teaches nothing).
+        if not Teaching.numbersCheck(text)
+            return "number mismatch (G2h)"          // blocked
+        // 1) Check internal words BEFORE any replacement, so the check can fire (§2e).
+        for each term in termsOf(text)
+            if (belongsTo(term, INTERNAL_WORDS) and namesProcessPart(term, text)) or isChunkOrFactId(term)
+                return term                           // blocked: rewrite with the plain replacement, then re-check
+        // 2) Then the layman-terms denylist pass. Internal words in the code's own subject
+        //    (the §2e exception, e.g. a "hold" on an account) are left as they are.
+        text ← apply layman-terms denylist pass (replace each hit with its plain equivalent)
+        for each term in termsOf(text)
+            if isShownAsName(term, text)             // code-formatted name: exempt as a name only
+                continue
+            if isCodeWord(term) and not definedEarlierIn(text, term) and not definedInPassedChunk(term, passedIds, curriculum)
+                return term                           // code words are not everyday words
+            if isEverydayWord(term)
+                continue
+            if definedEarlierIn(text, term)          // inline definition of a few words counts
+                continue
+            if definedInPassedChunk(term, passedIds, curriculum)
+                continue
+            return term                               // blocked
+        return "ok"
+
+    function render(chunk, passedIds, curriculum)   // → string prose  (G2g + G2f)
+        prose ← chunk.claim, definitions, and holds as short full sentences; root first
+        if prose is a table or a node/claim list or the graph or the checklist
+            error "not teaching prose (G2g)"
+        // must not add a claim that is not in the chunk
+        for each paragraph in prose
+            if wordCount(paragraph) > ~90 or newTermsDefinedIn(paragraph) > 3
+                error "too dense (G2g); split the paragraph or the chunk"
+        for each quantity in quantitiesAskedIn(chunk.useCheck.prompt)
+            if not namedIn(chunk.useCheck.prompt, quantity) or not taughtIn(prose, quantity)
+                error "question asks about an unnamed or untaught quantity (G2g)"
+        if not Teaching.numbersCheck(prose + chunk.useCheck.prompt)
+            error "number does not match the file or test output (G2h)"
+        result ← Teaching.termCheck(prose + chunk.useCheck.prompt, chunk, passedIds, curriculum)
+        if result ≠ "ok"
+            // Block: define inline, or add a prerequisite node + chunk (Phase C, then F) and teach it first
+            error "term check failed: " + result + "; define inline or add prerequisite chunk"
+        return prose
+
+    function numbersCheck(text)   // → true/false   (G2h; runs on every learner-facing text)
+        for each number in lineNumbersCountsAndListSizesIn(text)
+            if number does not match the actual file or test output
+                return false   // blocks the text; fix and re-check
         return true
 
     function allHoldsResolved(curriculum)   // → true/false
@@ -428,8 +534,19 @@ module Teaching
                 return false
         return true
 
-    function teach(curriculum)   // → "complete" or "stuck"
-        passedIds ← blank list
+    function teach(curriculum, passedIds, lessonLog, entry)   // → "complete" or "stuck"
+        // entry: "fresh" | "resume" | "solution"
+        //   fresh    — new run (passedIds blank), or the same run continuing after stuckRevisit (no recap)
+        //   resume   — G0: saved passed_chunks from a pause; recap first
+        //   solution — Phase S: picture passes kept in passedIds as the floor; NOT a resume, no recap (S3)
+        if passedIds = null
+            passedIds ← blank list
+        if entry = "resume"
+            recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
+            if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
+                error "recap failed term check (G0, G2f)"
+            // show recap; do not rebuild or show the graph; do not re-teach passed chunks
+            // restore saved stuckRevisits per side (H7); never reset to 0
         while true
             ready ← Teaching.readySet(curriculum, passedIds)
             if ready = blank list
@@ -438,22 +555,67 @@ module Teaching
                 if not Teaching.allHoldsResolved(curriculum)
                     error "named hold still open at end"
                 return "complete"
-            // Fork: show forkSurfaceOk options; optional suggestCandidate as suggestion only
-            chunk ← Teaching.pickRuleX(ready)
+            // Fork: graph order unless the learner asked to reorder (G2c)
+            chunk ← Teaching.pickRuleX(ready, learnerReorderRequest())
+            prose ← Teaching.render(chunk, passedIds, curriculum)
             if not Teaching.holdsVisibleInProse(chunk, prose)
                 error "soft hole: hold not named in prose"
-            // Run use-check; restatement or unimplemented grader → fail; stuck → return "stuck"
+            // Show prose; ask chunk.useCheck.prompt as one plain question; wait for the answer (G2g).
+            // Run use-check; restatement or unimplemented grader → fail.
+            // On fail: corrective prompt = plain hint naming the missing piece; never the answer;
+            //   must pass Teaching.termCheck (G4, G2f).
+            // Stuck trigger (G6): learner says stuck / "I don't know" → return "stuck";
+            //   wrongAfterHint counts wrong answers after the first hint; wrongAfterHint = 2 → return "stuck".
+            //   The count is per chunk and does not reset when the chunk is re-asked after stuckRevisit.
             // On pass:
             append(passedIds, chunk.id)
+            taughtAgain ← lessonLog has an entry with chunkId = chunk.id   // pass was dropped by H5
+            append(lessonLog, LessonEntry(chunk.id, chunk.headline, prose, chunk.useCheck.prompt, answer, chunk.stuckAdded, taughtAgain))   // G5b; never rewrite old entries
 
-    function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits)   // → Curriculum, number
-        if stuckRevisits ≥ maxStuckRevisits
+    function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits, side)   // → Curriculum, number
+        // side: "picture" or "solution" — the teach run that got stuck; each run has its own budget (H7)
+        if stuckRevisits[side] ≥ maxStuckRevisits
             error "stuck after revisit budget; escalate to user"
-        // Re-run Discovery on region, Graph.buildGraph, Validation.converge,
-        // Validation.adversaryClear, Teaching.chunkGraph.
-        // Drop passes that depended on changed chunks.
+        // Stuck = missing or wrong prerequisite (H1). Never re-serve the same chunk reworded.
+        if side = "solution"
+            // H8: stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
+            if gap is a missing code fact or not clearly a reasoning step   // incl. a bare "I don't know" (fail closed)
+                // S4 → Discovery on region; new fact node; Graph.buildGraph
+            else   // gap is a reasoning step (e.g. why waiting helps): no new code fact (H2 exception)
+                // new node: kind ← "solution", citesFactIds ← facts + ticket text it rests on (S2)
+            // Validation.adversaryClear on the delta only; Teaching.chunkGraph on the delta
+            // New chunk: stuckAdded ← true, side ← "solution"; its pass counts toward the solution close.
+        else
+            // Re-run Discovery on region, Graph.buildGraph, Validation.converge,
+            // Validation.adversaryClear, Teaching.chunkGraph.
+            // New chunk: stuckAdded ← true, side ← "picture".
+        // The new prerequisite chunk passes termCheck like any chunk (H6b).
+        // Drop passes that depended on changed chunks (H5); their re-pass is a new taughtAgain LessonEntry.
         // Do not invent a bridge outside the graph.
-        return curriculum, stuckRevisits + 1
+        // Tell the learner in one line that a piece is missing; teach the new chunk first,
+        // then re-ask the chunk where the learner got stuck (H6b): repeat chunk.useCheck.prompt only,
+        // not the prose; its wrongAfterHint count does not reset.
+        stuckRevisits[side] ← stuckRevisits[side] + 1   // persisted by the caller (stuck_revisits)
+        return curriculum, stuckRevisits
+
+
+// --- piece 7: solution extension (work sessions only, Phase S) ---
+
+module Solution
+    function extend(curriculum, solutionNodes, ticketText)   // → Curriculum
+        // S1: runs only after the picture chunks close (Phase I)
+        for each node in solutionNodes
+            if node.kind ≠ "solution" or node.citesFactIds = blank list
+                error "solution node must cite fact ids (S2)"
+            for each factId in node.citesFactIds
+                if factId not in curriculum facts
+                    error "missing code fact; return to Phase B (S4)"
+        // S3: Graph.buildGraph on picture + delta; Validation.adversaryClear on delta only;
+        //     no converge for solution nodes; Teaching.chunkGraph on delta;
+        //     then Teaching.teach(curriculum, picturePassedIds, lessonLog, "solution")
+        //     — picture passes kept as the floor; entry "solution" gives no recap (not a resume).
+        //     A separate teach run: its own stuck budget (H7); stuck → Teaching.stuckRevisit(..., "solution") (H8).
+        return curriculum
 
 
 // --- piece 6: top-level run ---
@@ -462,17 +624,18 @@ function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
     if maxStuckRevisits = null
         maxStuckRevisits ← 1
     concept ← Discovery.nameConcept(conceptName)
-    // Teaching Standard off default path. No code-scope freeze.
+    // No code-scope freeze.
     curriculum ← Validation.converge(concept, maxRetries)
     proofBacklog ← blank list
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
     curriculum ← Teaching.chunkGraph(curriculum)
     curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
-    stuckRevisits ← 0
-    result ← Teaching.teach(curriculum)
+    stuckRevisits ← {picture: 0, solution: 0}   // on resume: the saved stuck_revisits instead (G0, H7)
+    lessonLog ← blank list
+    result ← Teaching.teach(curriculum, null, lessonLog, "fresh")
     if result = "stuck"
-        curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits)
-        result ← Teaching.teach(curriculum)
+        curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits, "picture")
+        result ← Teaching.teach(curriculum, /* passedIds kept per H5 */, lessonLog, "fresh")   // continues the same run; no recap
         if result = "stuck"
             error "stuck after revisit budget; escalate to user"
     if curriculum.discoveryStatus ≠ "clear"

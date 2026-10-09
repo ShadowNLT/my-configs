@@ -15,8 +15,10 @@
 // The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
 // (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
 // solution (per step: one plain sentence naming the lesson it applies + 2-3 key lines with location;
-// supporting edits as one line; full diff only on request), then tests run, then "Done" only after
-// they pass. "just fix it" skips the replay, not the tests. Replay text goes through termCheck.
+// supporting edits as one line; full diff only on request). The replay ends the turn with
+// "Does this match what we agreed?" and waits; only after the learner's answer (yes, or corrections
+// applied and re-replayed) do tests run, then "Done" only after they pass. "just fix it" skips the
+// replay and the wait, not the tests. Replay text goes through termCheck.
 
 
 // --- piece 1: shapes ---

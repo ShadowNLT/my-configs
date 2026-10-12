@@ -342,6 +342,19 @@ list risks and journeys first, then map each to a size. Do not start by listing 
 
 ### Write mode
 
+Before creating any new test file, pick where each test goes:
+
+1. Look first at the test file the repo's own naming pattern points to for the code under test
+   (for example `foo_test.go` for `foo.go`, `Foo.test.ts` for `Foo.ts`), then at other existing
+   test files for the same code.
+2. An existing file **fits** when all three hold: it tests the same code, it uses the same test
+   size, and its setup can be extended (a helper, a fixture) without changing any existing test.
+3. If a file fits, add the test there. Do not create a new file to keep things tidy.
+4. Create a new test file only when no existing file fits. Say why in one line, naming the
+   closest file you considered and which check it failed, for example: "New file
+   `order_unit_test.go`: closest is `order_test.go`, but its setup needs a database; this test
+   is Small."
+
 - Tests (or a patch) that pass the decision order.
 - Size of each test (Small / Medium / Large) and why.
 - Any production seam you had to add (injection, fake, wrapper) called out in one sentence.

@@ -172,8 +172,44 @@ module Graph
         // Set predecessors/followers from edges.
         return graph
 
+    function replaceNode(graph, node)   // Graph, Node → Node
+        // A fixed node replaces the node with the same id. A new id is appended.
+        for each i in graph.nodes
+            if graph.nodes[i].id = node.id
+                graph.nodes[i] ← node
+                return graph.nodes[i]
+        append(graph.nodes, node)
+        return node
+
+    function replaceEdges(graph, node)   // keep this node's edges; replace them when they changed
+        kept ← blank list
+        for each edge in graph.edges
+            if edge.fromId ≠ node.id and edge.toId ≠ node.id
+                append(kept, edge)
+        graph.edges ← kept
+        for each predId in node.predecessors
+            edge ← blank Edge
+            edge.fromId ← predId
+            edge.toId ← node.id
+            edge.kind ← "prerequisite"
+            append(graph.edges, edge)
+        for each followerId in node.followers
+            edge ← blank Edge
+            edge.fromId ← node.id
+            edge.toId ← followerId
+            edge.kind ← "prerequisite"
+            append(graph.edges, edge)
+        for each hold in node.holdsOpened
+            if hold.closerNodeId ≠ ""
+                edge ← blank Edge
+                edge.fromId ← node.id
+                edge.toId ← hold.closerNodeId
+                edge.kind ← "hold-target"
+                append(graph.edges, edge)
+        return graph
+
     function mergeGraphs(base, addition)   // Graph, Graph → Graph
-        // Keep every node and edge already in base. Append only nodes and edges from addition that are not already there.
+        // Keep every node and edge already in base. Replace a node when its id already exists, and replace its edges when they changed.
         if base = null
             base ← blank Graph
             base.nodes ← blank list
@@ -181,41 +217,57 @@ module Graph
         if addition = null
             return base
         for each node in addition.nodes
-            if no node in base.nodes has id = node.id
-                append(base.nodes, node)
+            Graph.replaceNode(base, node)
+            kept ← blank list
+            for each edge in base.edges
+                if edge.fromId ≠ node.id and edge.toId ≠ node.id
+                    append(kept, edge)
+            base.edges ← kept
+            for each edge in addition.edges
+                if edge.fromId = node.id or edge.toId = node.id
+                    append(base.edges, edge)
         for each edge in addition.edges
             if edge not in base.edges
                 append(base.edges, edge)
         return base
 
     function mergeNodes(graph, nodes)   // Graph, list of Node → Graph
-        // Caller-made nodes join the existing graph. They do not replace it.
+        // Caller-made nodes join the existing graph. An existing id is replaced, not dropped. Edges stay, then Phase C runs.
         if graph = null
             graph ← blank Graph
             graph.nodes ← blank list
             graph.edges ← blank list
         for each node in nodes
-            if no node in graph.nodes has id = node.id
-                append(graph.nodes, node)
-        // C5. Fail closed on a prerequisite cycle. C6. Fail closed on a soft hole. C7. Predecessors and followers stay from the edges.
-        if Graph.hasPrerequisiteCycle(graph.edges)
-            error "prerequisite cycle"
-        if Graph.hasSoftHole(graph.nodes)
-            error "soft hole: deferred case without named hold and closer"
-        return graph
+            Graph.replaceNode(graph, node)
+        return Graph.phaseCOnRegion(graph, nodes)
 
     function phaseCOnRegion(graph, regionNodes)   // Graph, nodes or node ids → Graph
         // Phase C for those nodes, inside the existing graph. Do not return a graph of only the region's nodes.
+        // A plain node id is looked up and still gets Phase C. It is not skipped.
         if graph = null
             graph ← blank Graph
             graph.nodes ← blank list
             graph.edges ← blank list
-        for each node in regionNodes
-            if node is an id
-                continue
-            if no node in graph.nodes has id = node.id
-                append(graph.nodes, node)
-        // C2. Prerequisite edges so no node needs an undefined term. C5. C6. C7.
+        for each item in regionNodes
+            if item is an id
+                node ← find graph.nodes where node.id = item
+                if node = null
+                    error "region node id is not in the graph"
+            else
+                node ← Graph.replaceNode(graph, item)
+                Graph.replaceEdges(graph, node)
+            // C2. Prerequisite edges so this node needs no undefined term.
+            for each predId in node.predecessors
+                if no prerequisite edge predId → node.id is in graph.edges
+                    edge ← blank Edge
+                    edge.fromId ← predId
+                    edge.toId ← node.id
+                    edge.kind ← "prerequisite"
+                    append(graph.edges, edge)
+            // C7. Predecessors and followers come from the edges that touch this node.
+            node.predecessors ← fromIds of prerequisite edges whose toId = node.id
+            node.followers ← toIds of prerequisite edges whose fromId = node.id
+        // C5. Fail closed on a prerequisite cycle. C6. Fail closed on a soft hole.
         if Graph.hasPrerequisiteCycle(graph.edges)
             error "prerequisite cycle"
         if Graph.hasSoftHole(graph.nodes)
@@ -316,21 +368,72 @@ module Validation
             setChecklistRow(base.discoveryChecklist, row.id, row.satisfied, row.evidence)
         return base
 
-    function convergeSaved(saved, maxRetries)   // → DiscoveryRecord
-        // Phase D over the saved graph. Do not call discoverFacts. Do not start from a blank concept.
-        // D1. Both agents read this saved graph. D2 and D6 compare it. D4 sets converged when the fact set matches and DC1–DC5 are ready.
-        // D5. If substance cannot be evaluated, return this same record escalated. Do not return a blank record.
-        left ← saved
-        right ← saved
-        if not Validation.substanceEqual(left, right)
-            saved.result ← "escalated"
-            saved.reason ← "D5"
-            saved.convergenceStatus ← "escalated"
-            return saved
-        saved.convergenceStatus ← "converged"
-        saved.result ← "clear"
-        saved.reason ← ""
-        return saved
+    function copyRecord(saved)   // → DiscoveryRecord
+        // A real copy. Later merges must not alias the saved graph.
+        copy ← blank DiscoveryRecord
+        copy.concept ← saved.concept
+        copy.graph ← blank Graph
+        copy.graph.nodes ← a copy of saved.graph.nodes
+        copy.graph.edges ← a copy of saved.graph.edges
+        copy.exploredRegion ← saved.exploredRegion
+        copy.openCodeQuestions ← a copy of saved.openCodeQuestions
+        copy.uncoveredBranches ← a copy of saved.uncoveredBranches
+        copy.discoveryChecklist ← a copy of saved.discoveryChecklist
+        copy.proofEntries ← a copy of saved.proofEntries
+        copy.discoveryStatus ← saved.discoveryStatus
+        copy.convergenceStatus ← saved.convergenceStatus
+        copy.adversaryStatus ← saved.adversaryStatus
+        return copy
+
+    function convergeSaved(saved, maxRetries, region)   // → DiscoveryRecord
+        // Phase D over the saved graph. Two fresh reads. Do not start from a blank concept, and do not return a fresh graph.
+        // region null: the code the saved graph covers. region set: that region only.
+        // D1. Two independent discoverFacts calls. They are not copies of saved and not the same call.
+        // D2 and D6. Check each read against saved and against the other read.
+        // D3. When the two reads agree and differ from saved, merge that agreed region and read again. When they disagree, do not merge them. Do not average and do not replace saved.
+        // D4. Match, and DC1–DC5 ready: convergenceStatus converged, result clear.
+        // D5. Budget spent: return this same saved record escalated.
+        if region = null
+            region ← saved.graph
+        retryCount ← 0
+        current ← saved
+        while retryCount ≤ maxRetries
+            facts1, explored1, oq1, ub1, cl1, dstat1, reason1 ← Discovery.discoverFacts(current.concept, maxRetries, region)
+            facts2, explored2, oq2, ub2, cl2, dstat2, reason2 ← Discovery.discoverFacts(current.concept, maxRetries, region)
+            if dstat1 = "escalated" or dstat2 = "escalated"
+                if dstat1 = "escalated"
+                    current ← Validation.mergePartial(current, facts1, explored1, oq1, ub1, cl1)
+                    current.reason ← reason1
+                else
+                    current ← Validation.mergePartial(current, facts2, explored2, oq2, ub2, cl2)
+                    current.reason ← reason2
+                current.result ← "escalated"
+                current.discoveryStatus ← "escalated"
+                return current
+            left ← Validation.mergePartial(Validation.copyRecord(current), facts1, explored1, oq1, ub1, cl1)
+            right ← Validation.mergePartial(Validation.copyRecord(current), facts2, explored2, oq2, ub2, cl2)
+            // D4. DC1–DC5 ready. DC6 is the later graph pass, so it is not required here.
+            ready ← every DC1–DC5 row on left and on right is satisfied and has evidence
+            if Validation.substanceEqual(left, right) and Validation.substanceEqual(left, current) and Validation.substanceEqual(right, current) and ready
+                // Merge into the saved graph so a fixed node replaces the old one. Return current, not left or right.
+                current ← Validation.mergePartial(current, facts1, explored1, oq1, ub1, cl1)
+                current ← Validation.mergePartial(current, facts2, explored2, oq2, ub2, cl2)
+                current.convergenceStatus ← "converged"
+                current.result ← "clear"
+                current.reason ← ""
+                return current
+            disputed ← nodes where left, right, or current differ
+            if Validation.substanceEqual(left, right) and ready
+                // The two reads agree and differ from saved. Merge that agreed region. Do not average two different reads.
+                current ← Validation.mergePartial(current, facts1, explored1, oq1, ub1, cl1)
+                current ← Validation.mergePartial(current, facts2, explored2, oq2, ub2, cl2)
+            // D3. Next reads stay on the disputed region. Two reads that disagree are not merged.
+            region ← disputed
+            retryCount ← retryCount + 1
+        current.result ← "escalated"
+        current.reason ← "D5"
+        current.convergenceStatus ← "escalated"
+        return current
 
     function adversaryClear(curriculum, proofBacklog, expandCount, maxRetries, onlyNode)   // → DiscoveryRecord, list of ProofEntry
         if expandCount = null
@@ -372,15 +475,21 @@ module Validation
                     return curriculum, proofBacklog
                 curriculum ← Validation.mergePartial(curriculum, facts, explored, oq, ub, checklist)
                 return Validation.adversaryClear(curriculum, proofBacklog, expandCount, maxRetries, onlyNode)
-            again ← Validation.converge(curriculum.concept, maxRetries)
-            if again.result = "escalated"
-                return again, proofBacklog
-            return Validation.adversaryClear(again, proofBacklog, expandCount, maxRetries, null)
-        // DC6. Set only by this graph hunt. E4. adversaryStatus clear for the graph pass.
-        setChecklistRow(curriculum.discoveryChecklist, "DC6", true, proofBacklogEvidence)
-        curriculum.adversaryStatus ← "clear"
-        if Discovery.checklistSatisfied(curriculum.discoveryChecklist)
-            curriculum.discoveryStatus ← "clear"
+            // No single node named. Converge over the hole's region and the existing graph, then merge.
+            // Do not call converge on the whole concept. Do not return a fresh graph.
+            holeRegion ← the nodes in curriculum.graph that the hole touches
+            curriculum ← Validation.convergeSaved(curriculum, maxRetries, holeRegion)
+            if curriculum.result = "escalated"
+                return curriculum, proofBacklog
+            return Validation.adversaryClear(curriculum, proofBacklog, expandCount, maxRetries, null)
+        // DC6 and the clear statuses are for a whole-graph pass only.
+        // A review of named nodes leaves DC6, adversaryStatus, and discoveryStatus unchanged.
+        if onlyNode = null
+            // DC6. Set only by this graph hunt. E4. adversaryStatus clear for the graph pass.
+            setChecklistRow(curriculum.discoveryChecklist, "DC6", true, proofBacklogEvidence)
+            curriculum.adversaryStatus ← "clear"
+            if Discovery.checklistSatisfied(curriculum.discoveryChecklist)
+                curriculum.discoveryStatus ← "clear"
         return curriculum, proofBacklog
 
 // --- piece 5: entry ---
@@ -433,17 +542,11 @@ function run(concept, targetCode, mode, delta, maxRetries)
     if delta = null or delta.existing = null
         error "delta requires the caller's graph"
     if convergeFlag = "on"
-        // Converge on. Phase B on the region only. Merge into the existing graph.
-        // Then Phase D and the graph pass over the region and the existing graph. Not the whole concept.
+        // Converge on. Phase B on the region only, as two independent reads inside Phase D.
+        // Merge into the existing graph (Phase C on the merged nodes). The graph pass then covers
+        // the region and the existing graph. Not one discoverFacts call, and not the whole concept.
         base ← delta.existing
-        facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries, delta.region)
-        base ← Validation.mergePartial(base, facts, explored, oq, ub, checklist)
-        if dstat = "escalated"
-            base.result ← "escalated"
-            base.reason ← reason
-            base.discoveryStatus ← "escalated"
-            return base
-        base ← Validation.convergeSaved(base, maxRetries)
+        base ← Validation.convergeSaved(base, maxRetries, delta.region)
         if base.result = "escalated"
             return base
         prior ← base.proofEntries
@@ -453,15 +556,15 @@ function run(concept, targetCode, mode, delta, maxRetries)
         base ← addProof(base, proof)
         return base
     if adversaryOnly
-        // Adversary-only. Merge the caller-made node into the existing graph, then review that node only.
+        // Adversary-only. Merge the caller-made nodes into the existing graph, then review that list only.
         base ← delta.existing
-        if delta.callerNodes ≠ null
-            base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
-        node ← delta.callerNodes[0]
+        if delta.callerNodes = null or length(delta.callerNodes) = 0
+            error "adversary-only requires caller-made nodes; do no work"
+        base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
         prior ← base.proofEntries
         if prior = null
             prior ← blank list
-        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, node)
+        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, delta.callerNodes)
         base ← addProof(base, proof)
         return base
     if delta.callerNodes ≠ null

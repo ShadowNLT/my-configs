@@ -272,6 +272,7 @@ module Teaching
         if realHole = "code"
             // F8 hole test. Call code-discovery-machine (delta, region = the hole, converge on).
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=hole, converge="on")
+            proofBacklog ← addProof(proofBacklog, record)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -376,7 +377,7 @@ module Teaching
             return term                               // blocked
         return "ok"
 
-    function render(chunk, passedIds, curriculum)   // → prose or "teach-prerequisite-first", Curriculum  (G2g + G2f)
+    function render(chunk, passedIds, curriculum, proofBacklog)   // → prose or "teach-prerequisite-first", Curriculum  (G2g + G2f)
         prose ← chunk.claim, definitions, and holds as short full sentences; root first
         if prose is a table or a node/claim list or the graph or the checklist
             error "not teaching prose (G2g)"
@@ -397,6 +398,7 @@ module Teaching
             // escalated: do not teach. Budget spent, concept still ambiguous, or agents failed to converge.
             newNode ← the new prerequisite node for the blocked term result
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=newNode, converge="off")
+            proofBacklog ← addProof(proofBacklog, record)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -434,35 +436,41 @@ module Teaching
                 return false
         return true
 
-    function teach(curriculum, passedIds, lessonLog, entry)   // → "complete" or "stuck"
+    function teach(curriculum, passedIds, lessonLog, entry, proofBacklog)   // → "complete" or "stuck"
         // entry: "fresh" | "resume" | "solution"
         //   fresh    — new run (passedIds blank), or the same run continuing after stuckRevisit (no recap)
-        //   resume   — G0: saved passed_chunks from a pause; discovery re-run, then recap
+        //   resume   — G0: saved passed_chunks from a pause; recap, then the discovery call
         //   solution — Phase S: picture passes kept in passedIds as the floor; NOT a resume, no recap (S3)
         if passedIds = null
             passedIds ← blank list
         if entry = "resume"
-            // Step G0. If discoveryStatus is not clear, call code-discovery-machine
-            // in full mode, seeded with the saved graph. Converge and the adversary
-            // re-run over the whole graph, not only the new parts.
-            if curriculum.discoveryStatus ≠ "clear"
-                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "full", seed=curriculum)
-                if record.result = "escalated"
-                    error "escalated; present the record to the learner; do not teach"
-                apply record onto curriculum
+            // Step G0. Recap first. If discoveryStatus is not clear, call code-discovery-machine
+            // in full mode, seeded with the saved graph.
             recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
             if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
                 error "recap failed term check (G0, G2f)"
             // show recap; do not rebuild or show the graph; do not re-teach passed chunks
             // restore saved stuckRevisits per side (H7); never reset to 0
+            if curriculum.discoveryStatus ≠ "clear"
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "full", existing=curriculum, seed=curriculum)
+                proofBacklog ← addProof(proofBacklog, record)
+                if record.result = "escalated"
+                    error "escalated; present the record to the learner; do not teach"
+                apply record onto curriculum
         while true
             ready ← Teaching.readySet(curriculum, passedIds)
             if ready = blank list
                 if not Teaching.allChunksPassed(curriculum, passedIds)
                     error "stranded chunks: ready empty but unpassed remain (G11)"
                 if not Teaching.allHoldsResolved(curriculum)
-                    // I2. Call code-discovery-machine (delta, region = the hold's region, converge off). It runs Phase C.
-                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=openHolds, converge="off")
+                    // I2. Call code-discovery-machine (delta, region = the node ids that carry the open holds, converge off). It runs Phase C.
+                    holdNodeIds ← blank list
+                    for each node in curriculum.graph.nodes
+                        for each hold in node.holdsOpened
+                            if hold.name is still open
+                                append(holdNodeIds, node.id)
+                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=holdNodeIds, converge="off")
+                    proofBacklog ← addProof(proofBacklog, record)
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
@@ -472,7 +480,7 @@ module Teaching
                 return "complete"
             // Fork: graph order unless the learner asked to reorder (G2c)
             chunk ← Teaching.pickRuleX(ready, learnerReorderRequest())
-            prose, curriculum ← Teaching.render(chunk, passedIds, curriculum)
+            prose, curriculum ← Teaching.render(chunk, passedIds, curriculum, proofBacklog)
             if prose = "teach-prerequisite-first"
                 continue
             if not Teaching.holdsVisibleInProse(chunk, prose)
@@ -492,7 +500,7 @@ module Teaching
             taughtAgain ← lessonLog has an entry with chunkId = chunk.id   // pass was dropped by H5
             append(lessonLog, LessonEntry(chunk.id, chunk.headline, prose, chunk.useCheck.prompt, answer, chunk.stuckAdded, taughtAgain))   // G5b; never rewrite old entries
 
-    function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits, side)   // → Curriculum, number
+    function stuckRevisit(curriculum, stuckRegion, maxStuckRevisits, stuckRevisits, side, proofBacklog)   // → Curriculum, number
         // side: "picture" or "solution" — the teach run that got stuck; each run has its own budget (H7)
         if stuckRevisits[side] ≥ maxStuckRevisits
             error "stuck after revisit budget; escalate to user"
@@ -507,7 +515,8 @@ module Teaching
             else   // reasoning step (H2 exception): no new code fact
                 // Caller-made node: kind ← "solution", citesFactIds ← facts + ticket text (S2).
                 // code-discovery-machine delta, adversary only, converge off.
-                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", callerNodes=[reasoningNode], converge="off", adversaryOnly=true)
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=[reasoningNode], converge="off", adversaryOnly=true)
+            proofBacklog ← addProof(proofBacklog, record)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -517,7 +526,8 @@ module Teaching
         else
             // H2 and H3 are one call: delta, region = the stuck region, converge on.
             // That call runs over the region and the existing graph.
-            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=stuckRegion, converge="on")
+            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=stuckRegion, converge="on")
+            proofBacklog ← addProof(proofBacklog, record)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -537,7 +547,7 @@ module Teaching
 // --- piece 7: solution extension (work sessions only, Phase S) ---
 
 module Solution
-    function extend(curriculum, solutionNodes, ticketText)   // → Curriculum
+    function extend(curriculum, solutionNodes, ticketText, proofBacklog)   // → Curriculum
         // S1: runs only after the picture chunks close (Phase I)
         // S2. Caller-made solution nodes. Gate G2 still binds every fact a solution node cites.
         for each node in solutionNodes
@@ -548,12 +558,14 @@ module Solution
                     // S4. code-discovery-machine delta, region = the missing fact, converge off.
                     // Phase B on that fact only, then merge into the existing graph.
                     record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=factId, converge="off", regionIsMissingFact=true)
+                    proofBacklog ← addProof(proofBacklog, record)
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
         // S3. code-discovery-machine delta, caller-made nodes, converge off.
         //     Merge those nodes into the existing graph, then Phase C and the graph adversary on those nodes. No Phase D.
-        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", callerNodes=solutionNodes, converge="off")
+        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=solutionNodes, converge="off")
+        proofBacklog ← addProof(proofBacklog, record)
         if record.result = "escalated"
             error "escalated; present the record to the learner; do not teach"
         apply record onto curriculum
@@ -564,6 +576,17 @@ module Solution
 
 
 // --- piece 6: top-level run ---
+
+function addProof(proofBacklog, record)
+    // Append the proof entries the call returned. Do not replace the backlog.
+    if proofBacklog = null
+        proofBacklog ← blank list
+    if record = null or record.proofEntries = null
+        return proofBacklog
+    for each entry in record.proofEntries
+        if entry not in proofBacklog
+            append(proofBacklog, entry)
+    return proofBacklog
 
 function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
     // One call. The saved record is code-discovery-machine's. This function does not restate its rules.
@@ -581,6 +604,7 @@ function runTeachConcept(conceptName, maxStuckRevisits)
         maxStuckRevisits ← 1
     concept ← Discovery.nameConcept(conceptName)
     // A2. No code-scope freeze. The budget stays inside code-discovery-machine.
+    // Full, with no saved graph. There is no existing graph on this call.
     record ← callCodeDiscoveryMachine(concept, targetCode, "full", null)
     if record.result = "escalated"
         // Present the record and do not teach.
@@ -591,15 +615,17 @@ function runTeachConcept(conceptName, maxStuckRevisits)
     curriculum ← blank Curriculum
     curriculum.concept ← concept
     apply record onto curriculum
-    proofBacklog ← record.proofEntries
+    proofBacklog ← addProof(blank list, record)
     curriculum ← Teaching.chunkGraph(curriculum)
     curriculum, proofBacklog ← Teaching.chunkAdversary(curriculum, proofBacklog)
+    if curriculum.adversaryStatus = "pending"
+        error "second hunt still found a hole; escalate; do not teach"
     stuckRevisits ← {picture: 0, solution: 0}   // on resume: the saved stuck_revisits instead (G0, H7)
     lessonLog ← blank list
-    result ← Teaching.teach(curriculum, null, lessonLog, "fresh")
+    result ← Teaching.teach(curriculum, null, lessonLog, "fresh", proofBacklog)
     if result = "stuck"
-        curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits, "picture")
-        result ← Teaching.teach(curriculum, /* passedIds kept per H5 */, lessonLog, "fresh")   // continues the same run; no recap
+        curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits, "picture", proofBacklog)
+        result ← Teaching.teach(curriculum, /* passedIds kept per H5 */, lessonLog, "fresh", proofBacklog)   // continues the same run; no recap
         if result = "stuck"
             error "stuck after revisit budget; escalate to user"
     if curriculum.discoveryStatus ≠ "clear"

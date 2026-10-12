@@ -134,7 +134,7 @@ D6. Substance checklist (minimum): same fact ids (or merge/split-equivalent); sa
 
 E1. Run a logical adversary against the converged graph. This is the graph pass. The pass after chunking belongs to the caller.
 E2. The adversary may use any code in the repository (or relevant worktree) plus logic. It must actively seek facts that disprove the curriculum. It may not use outside-world facts unrelated to the code. When it reads new code, append that code to explored_region (audit trail).
-E3. If the adversary finds a real graph hole (missing case, undefined term, false claim, soft hole, broken prerequisite, or contradicting code discovery missed), expand discovery as needed, fix the graph, and return to Phase D. That return is an internal loop, not a caller call. A chunk hole (hold sync breach, stranded chunk risk) is not fixed here. The caller sends it back as a delta call with converge on.
+E3. If the adversary finds a real graph hole (missing case, undefined term, false claim, soft hole, broken prerequisite, or contradicting code discovery missed), expand discovery as needed, fix the graph, and return to Phase D. That return is an internal loop, not a caller call. The re-entry converges over the hole's region and the existing graph and merges the result into the caller's graph. It does not return a fresh graph of the whole concept. A chunk hole (hold sync breach, stranded chunk risk) is not fixed here. The caller sends it back as a delta call with converge on.
 E4. Set adversary_status to clear only when the graph-pass hunt finds no real hole. Do not treat a narrow explored_region as a reason to skip reading. The caller sets adversary_status again after the chunk-level hunt.
 E5. Record each attack, kill, or fix in the proof backlog for this curriculum. Return those entries. The caller appends its chunk-hunt entries to the same backlog.
 E6. Mandatory graph probes (not optional) are the rows below. The chunk probes belong to the caller's chunk-level hunt. That hunt does not set DC6.
@@ -156,12 +156,14 @@ Inputs:
 full, with no saved graph: run Phases B, C, D, and the graph pass.
 full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first, then Phase C, Phase D, and the graph pass.
 
+Phase D over a saved graph is two independent reads of the code that graph covers. Each read is checked against the saved graph and against the other read. When the two reads agree and differ from the saved graph, merge that agreed region into the saved graph and read again on the disputed region. When the two reads disagree, do not merge them; read again on the disputed region only. The saved graph is not replaced.
+
 A delta call merges into the caller's graph. It never replaces that graph. A delta path that runs Phase B runs it on the region only and merges the result into the input graph. An escalated Phase B still returns that merged record.
 
-delta, converge on: run Phase B on the region only, merge the result into the existing graph, then Phase C, Phase D, and the graph pass over the region and the existing graph. Do not discover the whole concept.
-delta, converge off, adversary-only: merge the caller-made node into the existing graph, then run the graph pass on that node only. Do not review the rest of the record.
-delta, converge off, with caller-made nodes, not adversary-only: merge those nodes into the existing graph, then run Phase C and the graph pass on those nodes. Do not rebuild the graph from only those nodes. Do not run Phase D.
-delta, converge off, region is node ids: run Phase C on that region inside the existing graph. Do not keep only the region's nodes.
+delta, converge on: run Phase B on the region only as two independent reads inside Phase D, merge the result into the existing graph (Phase C on the merged nodes), then the graph pass over the region and the existing graph. Do not discover the whole concept.
+delta, converge off, adversary-only: merge the caller-made nodes and their edges into the existing graph, run Phase C on those nodes, then run the graph pass on that list only. Do not review the rest of the record. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
+delta, converge off, with caller-made nodes, not adversary-only: merge those nodes and their edges into the existing graph, then run Phase C and the graph pass on those nodes. Do not rebuild the graph from only those nodes. Do not run Phase D. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
+delta, converge off, region is node ids: run Phase C on those nodes inside the existing graph, including when the region is a list of node ids. Do not keep only the region's nodes. Do not skip a node id.
 delta, converge off, region is a missing fact: run Phase B on that fact only, merge the result into the existing graph, then Phase C. An escalated result returns that merged record.
 
 Proof backlog entries from a delta call are added to the entries already on the input record (E5). They do not replace them.

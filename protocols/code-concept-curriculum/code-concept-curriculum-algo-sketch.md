@@ -597,14 +597,19 @@ function addProof(proofBacklog, record)
     return proofBacklog
 
 function showPauseLine(record, curriculum, passedIds)
-    // After a delta result or an escalated result, before teaching resumes.
-    // One learner-facing line from record.changeList ("this is why I paused").
+    // Delta result: one learner-facing line from record.changeList ("this is why I paused"), before teaching resumes.
+    // Escalated result: one learner-facing line that says the lesson is stopping and lists what is still open, from record.changeList.
     // Run the term check (G2f) and §2e, then show the line.
+    // If the term check fails, define the term inline (G2f). Do not error.
     if passedIds = null
         passedIds ← blank list
-    pauseLine ← one line from record.changeList ("this is why I paused")
-    if Teaching.termCheck(pauseLine, null, passedIds, curriculum) ≠ "ok"
-        error "pause line failed term check (G2f, §2e)"
+    if record.result = "escalated"
+        pauseLine ← one line that says the lesson is stopping and lists what is still open, from record.changeList
+    else
+        pauseLine ← one line from record.changeList ("this is why I paused")
+    blocked ← Teaching.termCheck(pauseLine, null, passedIds, curriculum)
+    if blocked ≠ "ok"
+        pauseLine ← define the term inline (G2f)
     // show pauseLine to the learner
 
 function callCodeDiscoveryMachine(concept, targetCode, mode, delta)

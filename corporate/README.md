@@ -41,11 +41,12 @@ Required for corporate work harnesses:
 
 - `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault). Substitute `{{AGENT_COMMANDS_DIR}}` at seed time.
 - `code-concept-curriculum/` — process twins for picture/code-fact discovery on work sessions (`code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md`). Also copy the protocol command to `$COMMANDS_DIR/code-concept-curriculum.md`. See `protocols/README.md`.
+- `code-discovery-machine/` — discovery process CCC calls (`code-discovery-machine.md`, `code-discovery-machine-algo-sketch.md`). Install it with CCC, the same way the term check needs layman-terms. Also copy the protocol command to `$COMMANDS_DIR/code-discovery-machine.md`.
 - `layman-terms/denylist.txt`
 
 ```bash
 mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms" \
-  "$CONFIG_DIR/code-concept-curriculum"
+  "$CONFIG_DIR/code-concept-curriculum" "$CONFIG_DIR/code-discovery-machine"
 sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
   protocols/teaching-standard/Teaching-Standard.md \
   > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
@@ -54,6 +55,10 @@ cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curr
 cp protocols/code-concept-curriculum/code-concept-curriculum.md \
   protocols/code-concept-curriculum/code-concept-curriculum-algo-sketch.md \
   "$CONFIG_DIR/code-concept-curriculum/"
+cp protocols/code-discovery-machine/command.md "$COMMANDS_DIR/code-discovery-machine.md"
+cp protocols/code-discovery-machine/code-discovery-machine.md \
+  protocols/code-discovery-machine/code-discovery-machine-algo-sketch.md \
+  "$CONFIG_DIR/code-discovery-machine/"
 ```
 
 `write-tests` is not in this folder; seed it from `protocols/` when the user wants it.
@@ -107,7 +112,7 @@ sed \
    s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" \
   "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
 mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms" \
-  "$CONFIG_DIR/code-concept-curriculum"
+  "$CONFIG_DIR/code-concept-curriculum" "$CONFIG_DIR/code-discovery-machine"
 sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
   protocols/teaching-standard/Teaching-Standard.md \
   > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
@@ -116,6 +121,10 @@ cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curr
 cp protocols/code-concept-curriculum/code-concept-curriculum.md \
   protocols/code-concept-curriculum/code-concept-curriculum-algo-sketch.md \
   "$CONFIG_DIR/code-concept-curriculum/"
+cp protocols/code-discovery-machine/command.md "$COMMANDS_DIR/code-discovery-machine.md"
+cp protocols/code-discovery-machine/code-discovery-machine.md \
+  protocols/code-discovery-machine/code-discovery-machine-algo-sketch.md \
+  "$CONFIG_DIR/code-discovery-machine/"
 ```
 
 Repeat once per work harness the user named. Do not keep a per-product copy of

@@ -11,7 +11,7 @@ Run this when the user wants one named code concept taught as a knowledge-graph 
 
 ## Hard non-goals
 
-- Self-contained: this process depends on no other teaching protocol. Its only outside input is the layman-terms denylist used by the term check (G2f).
+- Needs `protocols/code-discovery-machine/` installed too. Its only other outside input is the layman-terms denylist used by the term check (G2f).
 - Does not own session pairing, the edit walkthrough, `/learn`, or `/new-session`. `/start-work` and `/resume-work` run Phases A→I for the picture and Phase S for the solution delta. Gate 1 and Gate 2 are Phase I on those two chunk sets.
 - Not `/learn` (mid-work JIT unblock against a vault).
 - Not `/explain-first-principles` (that form may cite paths). Teaching prose here names no code file.

@@ -4,13 +4,15 @@
 # Build and teach a code-concept curriculum from exhaustive code facts
 
 // seam map
-//   [name concept] → [discover facts] → [build graph] → [converge + adversary]
+//   [name concept] → [code-discovery-machine full] → [chunk] → [teach]
 //   → [chunk] → [teach] → [stuck revisit or close]
 //   → (work sessions) [solution extension] → [chunk] → [teach] → [close]
 //
 // Work sessions: /start-work and /resume-work run Phases A–I for the picture,
 // then the solution extension (piece 7, Phase S) for the solution delta.
 // Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
+// Phases B–D and the graph half of the adversary are code-discovery-machine.
+// This sketch calls that process. It does not copy those rules.
 // This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
 // The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
 // (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
@@ -23,33 +25,14 @@
 
 // --- piece 1: shapes ---
 
-record ExploredRegion
-    description    // string; grows during discovery and adversary hunt; audit only; never teaching prose
+// Node, Edge, Graph, NamedHold, ExploredRegion, ChecklistRow, ProofEntry,
+// and the discovery-record fields are defined in code-discovery-machine.
+// This sketch reads the saved record. It does not redefine those shapes.
+// L1, L2, and L3 are owned by code-discovery-machine.
 
 record Concept
+record Concept
     name           // string; logical name; not a file path
-
-record NamedHold
-    name           // string
-    closerNodeId   // string; node that must resolve this hold
-
-record Node
-    id             // string
-    claim          // string; one logical fact
-    kind           // "fact" or "solution"; solution nodes are proposals (piece 7, S2)
-    citesFactIds   // list of string; required when kind = "solution"
-    definitions    // list of string
-    synonyms       // list of string; each item marks an explicit synonym pair in words
-    cases          // list of string; complete case set, or blank list if not applicable
-    holdsOpened    // list of NamedHold
-    holdsResolved  // list of string; hold names closed here
-    predecessors   // list of string; node ids; empty only if initial
-    followers      // list of string; node ids; empty only if final
-
-record Edge
-    fromId         // string
-    toId           // string
-    kind           // "prerequisite" or "elaborates" or "case-of" or "hold-target"
 
 record UseCheck
     mode           // "apply" or "distinguish" or "predict"
@@ -103,41 +86,25 @@ constant INTERNAL_WORDS ← map
 // Code words (test, loop, catch, function, request, server-side, scaffolding, ...) are NOT everyday
 // words: allowed only once a passed chunk or the same text defines them (G2f).
 
-record Graph
-    nodes          // list of Node
-    edges          // list of Edge
-
 record Curriculum
-    concept            // Concept
-    exploredRegion     // ExploredRegion
-    graph              // Graph
+    concept            // Concept. Phase A. Input to code-discovery-machine.
     chunks             // list of Chunk
-    discoveryStatus    // "pending" or "clear" or "escalated"
-    convergenceStatus  // "pending" or "converged" or "escalated"
-    adversaryStatus    // "pending" or "clear"
-    openCodeQuestions  // list of string
-    uncoveredBranches  // list of string
-    discoveryChecklist // list of ChecklistRow (DC1–DC6)
-
-record ChecklistRow
-    id             // "DC1" .. "DC6"
-    satisfied      // true/false
-    evidence       // string; fact ids + explored_region citations; empty ⇒ fail closed
-
-record ProofEntry
-    attack         // string
-    outcome        // "killed" or "fixed" or "escalated" or "named-limitation" or "killed-limitation"
-    note           // string
+    // Read from the saved code-discovery-machine record. Contracts live there.
+    exploredRegion
+    graph
+    discoveryStatus
+    convergenceStatus
+    adversaryStatus
+    openCodeQuestions
+    uncoveredBranches
+    discoveryChecklist
 
 record RunState
     curriculum     // Curriculum
     proofBacklog   // list of ProofEntry
-    retryCount     // number ≥ 0
-    maxRetries     // number ≥ 1
     stuckRevisits  // map side → number ≥ 0 ("picture", "solution"); saved across pause as
                    // stuck_revisits: picture N, solution N; restored on resume (G0, H7), never reset
     maxStuckRevisits  // number ≥ 1; default 1
-    invariant: retryCount ≤ maxRetries
     invariant: stuckRevisits[side] ≤ maxStuckRevisits for each side
 
 
@@ -145,166 +112,14 @@ record RunState
 
 module Discovery
     function nameConcept(conceptName)   // → Concept
+        // A1. Name the code concept in one sentence. A logical name, not a file path.
+        // A2. Do not freeze a code scope. code-discovery-machine expands the explored region.
+        // A3. If the name is ambiguous, stop and ask. Do not guess the concept. Do not guess facts.
         if conceptName = null or conceptName = ""
             error "concept name missing"
         concept ← blank Concept
         concept.name ← conceptName
         return concept
-
-    function checklistSatisfied(rows)   // rows: list of ChecklistRow → true/false
-        // DC1–DC6 must all be present, satisfied, and evidence non-empty.
-        required ← ["DC1", "DC2", "DC3", "DC4", "DC5", "DC6"]
-        for each id in required
-            row ← find rows where row.id = id
-            if row = null
-                return false
-            if row.satisfied = false
-                return false
-            if row.evidence = ""
-                return false
-        return true
-
-    function discoveryComplete(curriculum)
-        if curriculum.openCodeQuestions ≠ blank list
-            return false
-        if curriculum.uncoveredBranches ≠ blank list
-            return false
-        if not Discovery.checklistSatisfied(curriculum.discoveryChecklist)
-            return false
-        return true
-
-    function discoverFacts(concept, maxExpansions)   // → Curriculum fragment fields
-        // No scope freeze. Expand explored region until B6 or budget.
-        explored ← blank ExploredRegion
-        explored.description ← ""
-        facts ← blank list
-        openCodeQuestions ← blank list
-        uncoveredBranches ← blank list
-        expansions ← 0
-        checklist ← blank list   // fill DC1–DC5 evidence as facts grow; DC6 after adversary
-        while true
-            // Read more related code; append facts; update explored.description
-            // Missing fact → append openCodeQuestions; never invent
-            // New branch → append uncoveredBranches until case or named hold
-            // Update checklist rows with evidence citations; empty evidence never counts as satisfied
-            cur ← blank Curriculum
-            cur.openCodeQuestions ← openCodeQuestions
-            cur.uncoveredBranches ← uncoveredBranches
-            cur.discoveryChecklist ← checklist
-            // DC6 may stay unsatisfied until Phase E; discovery "clear" for converge needs DC1–DC5;
-            // full discovery_status clear for teach requires DC6 after adversaryClear.
-            if openCodeQuestions = blank list and uncoveredBranches = blank list and Discovery.checklistSatisfied(filter checklist where id ≠ "DC6") 
-                return facts, explored, openCodeQuestions, uncoveredBranches, checklist, "clear-pending-adversary"
-            expansions ← expansions + 1
-            if expansions > maxExpansions
-                return facts, explored, openCodeQuestions, uncoveredBranches, checklist, "escalated"
-            // if concept name ambiguous → error "clarify concept with user"
-
-
-// --- piece 3: build graph ---
-
-module Graph
-    function hasPrerequisiteCycle(edges)   // edges: list of Edge → true/false
-        // REQUIRED: real cycle detect on kind = "prerequisite" only.
-        // Forbidden: return false without checking (that was the old happy-path lie).
-        prereq ← filter edges where kind = "prerequisite"
-        return detectDirectedCycle(prereq)   // standard DFS/topo; must be real in repo draft
-
-    function hasSoftHole(nodes)   // nodes: list of Node → true/false
-        for each node in nodes
-            for each hold in node.holdsOpened
-                if hold.name = "" or hold.closerNodeId = ""
-                    return true
-        return false
-
-    function buildGraph(facts)   // facts: list of string → Graph
-        graph ← blank Graph
-        graph.nodes ← blank list
-        graph.edges ← blank list
-        // Create one node per atomic fact; add definitions, synonyms, cases, holds.
-        // Add edges; every deferred case must be a NamedHold with hold-target edge.
-        if Graph.hasPrerequisiteCycle(graph.edges)
-            error "prerequisite cycle"
-        if Graph.hasSoftHole(graph.nodes)
-            error "soft hole: deferred case without named hold and closer"
-        // Set predecessors/followers from edges.
-        return graph
-
-
-// --- piece 4: converge + adversary ---
-
-module Validation
-    function substanceEqual(a, b)   // a, b: Curriculum → true/false
-        // Unique code-forced fact set (L3 killed). Packaging may differ only under merge/split map.
-        // Every clause must run; if any clause cannot be evaluated, return false.
-        if not sameFactSetUnderEquivalenceMap(a.graph, b.graph)
-            return false
-        if not sameCaseSets(a.graph, b.graph)
-            return false
-        if not sameNamedHoldsAndClosers(a.graph, b.graph)
-            return false
-        if not prerequisitesPreservedUnderMap(a.graph, b.graph)
-            return false
-        return true
-
-    function converge(concept, maxRetries)   // → Curriculum
-        retryCount ← 0
-        while retryCount ≤ maxRetries
-            facts1, explored1, oq1, ub1, cl1, dstat1 ← Discovery.discoverFacts(concept, maxRetries)
-            facts2, explored2, oq2, ub2, cl2, dstat2 ← Discovery.discoverFacts(concept, maxRetries)
-            if dstat1 = "escalated" or dstat2 = "escalated"
-                error "discovery escalated; present failing checklist rows to user; do not teach"
-            graph1 ← Graph.buildGraph(facts1)
-            graph2 ← Graph.buildGraph(facts2)
-            c1 ← blank Curriculum
-            c1.concept ← concept
-            c1.exploredRegion ← explored1
-            c1.graph ← graph1
-            c1.openCodeQuestions ← oq1
-            c1.uncoveredBranches ← ub1
-            c1.discoveryChecklist ← cl1
-            c1.discoveryStatus ← dstat1
-            c1.convergenceStatus ← "pending"
-            c1.adversaryStatus ← "pending"
-            c2 ← blank Curriculum
-            c2.concept ← concept
-            c2.exploredRegion ← explored2
-            c2.graph ← graph2
-            c2.openCodeQuestions ← oq2
-            c2.uncoveredBranches ← ub2
-            c2.discoveryChecklist ← cl2
-            c2.discoveryStatus ← dstat2
-            c2.convergenceStatus ← "pending"
-            c2.adversaryStatus ← "pending"
-            if Validation.substanceEqual(c1, c2)
-                c1.convergenceStatus ← "converged"
-                // Union explored regions for adversary window (both agents' reads)
-                c1.exploredRegion.description ← explored1.description + "\n" + explored2.description
-                return c1
-            retryCount ← retryCount + 1
-            // Re-enter discovery on disputed region only; do not average away.
-        error "agents failed to converge; escalate to user; do not teach"
-
-    function adversaryClear(curriculum, proofBacklog)   // → Curriculum, list of ProofEntry
-        // Adversary may read any code needed to attack claims (not limited to exploredRegion).
-        // New reads append to exploredRegion (audit). Outside-world attacks are ghosts.
-        append(proofBacklog, ProofEntry("L1 adversary blindness", "killed",
-            "adversary seeks disproof in any code; miss forces discovery expand"))
-        realHoleFound ← false
-        // Hunt + mandatory probes: hold sync, cycles, use-checks, sanityByPred, stranded risk, soft holes,
-        // and contradicting code outside the prior explored window.
-        // For each attack: append ProofEntry; if real hole, set realHoleFound.
-        if realHoleFound
-            error "adversary found a real hole; expand discovery, return to converge"
-        // Mark DC6 satisfied with proof backlog citations; then discovery may be fully clear.
-        setChecklistRow(curriculum.discoveryChecklist, "DC6", true, proofBacklogEvidence)
-        curriculum.adversaryStatus ← "clear"
-        if Discovery.checklistSatisfied(curriculum.discoveryChecklist)
-            curriculum.discoveryStatus ← "clear"
-        return curriculum, proofBacklog
-
-
-// --- piece 5: chunk + teach + stuck ---
 
 module Teaching
     function isRestatement(answer, claim, mode)   // answer, claim: string; mode: UseCheck.mode → true/false
@@ -391,6 +206,10 @@ module Teaching
         return true
 
     function chunkGraph(curriculum)   // → Curriculum
+        // F1. One chunk, one claim increment. F2. Prerequisite edges define unlocks.
+        // F3. claim, use_check, holds. F4. UC1–UC5. F5. sanity_by_pred. F6. Missing sanity fails.
+        // F7. Hold sync (§3.5). Gate G5. No term before its definition.
+        // Gate G9. Sanity is per prerequisite edge, not one playlist.
         // Split nodes into chunks; predChunkIds from prerequisite edges (DAG).
         for each chunk in curriculum.chunks
             if not Teaching.sanityOk(chunk)
@@ -501,8 +320,10 @@ module Teaching
             error "number does not match the file or test output (G2h)"
         result ← Teaching.termCheck(prose + chunk.useCheck.prompt, chunk, passedIds, curriculum)
         if result ≠ "ok"
-            // Block: define inline, or add a prerequisite node + chunk (Phase C, then F) and teach it first
-            error "term check failed: " + result + "; define inline or add prerequisite chunk"
+            // Step G2f. Block. Define inline, or call code-discovery-machine
+            // (delta, region = the new prerequisite node). It runs Phase C.
+            // Then chunkGraph (Phase F) and teach that chunk first.
+            error "term check failed: " + result + "; define inline or call code-discovery-machine"
         return prose
 
     function numbersCheck(text)   // → true/false   (G2h; runs on every learner-facing text)
@@ -525,6 +346,7 @@ module Teaching
         return true
 
     function holdsVisibleInProse(chunk, prose)   // → true/false
+        // G2b. An open hold is named in the prose, or it is a soft hole.
         for each name in chunk.holds.opens
             if name = ""
                 return false
@@ -542,6 +364,14 @@ module Teaching
         if passedIds = null
             passedIds ← blank list
         if entry = "resume"
+            // Step G0. If discoveryStatus is not clear, call code-discovery-machine
+            // in full mode, seeded with the saved graph. Converge and the adversary
+            // re-run over the whole graph, not only the new parts.
+            if curriculum.discoveryStatus ≠ "clear"
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "full", seed=curriculum)
+                if record.result = "escalated"
+                    error "escalated; present the record to the learner; do not teach"
+                apply record onto curriculum
             recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
             if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
                 error "recap failed term check (G0, G2f)"
@@ -553,13 +383,22 @@ module Teaching
                 if not Teaching.allChunksPassed(curriculum, passedIds)
                     error "stranded chunks: ready empty but unpassed remain (G11)"
                 if not Teaching.allHoldsResolved(curriculum)
-                    error "named hold still open at end"
+                    // I2. Call code-discovery-machine (delta, Phase C on the hold's region).
+                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=openHolds, converge="off", phaseCOnly=true)
+                    if record.result = "escalated"
+                        error "escalated; present the record to the learner; do not teach"
+                    apply record onto curriculum
+                    curriculum ← Teaching.chunkGraph(curriculum)
+                    if not Teaching.allHoldsResolved(curriculum)
+                        error "named hold still open at end"
                 return "complete"
             // Fork: graph order unless the learner asked to reorder (G2c)
             chunk ← Teaching.pickRuleX(ready, learnerReorderRequest())
             prose ← Teaching.render(chunk, passedIds, curriculum)
             if not Teaching.holdsVisibleInProse(chunk, prose)
                 error "soft hole: hold not named in prose"
+            // G1. Serve the ready set. G2. Teaching prose only. G3. Then the use-check.
+            // G7. Do not mention code files in teaching prose. Gate G8. The use-check must pass UC1–UC5.
             // Show prose; ask chunk.useCheck.prompt as one plain question; wait for the answer (G2g).
             // Run use-check; restatement or unimplemented grader → fail.
             // On fail: corrective prompt = plain hint naming the missing piece; never the answer;
@@ -567,6 +406,7 @@ module Teaching
             // Stuck trigger (G6): learner says stuck / "I don't know" → return "stuck";
             //   wrongAfterHint counts wrong answers after the first hint; wrongAfterHint = 2 → return "stuck".
             //   The count is per chunk and does not reset when the chunk is re-asked after stuckRevisit.
+            // G5. Correct use marks pass. G8. Empty ready with all passed and holds resolved goes to Phase I.
             // On pass:
             append(passedIds, chunk.id)
             taughtAgain ← lessonLog has an entry with chunkId = chunk.id   // pass was dropped by H5
@@ -577,21 +417,34 @@ module Teaching
         if stuckRevisits[side] ≥ maxStuckRevisits
             error "stuck after revisit budget; escalate to user"
         // Stuck = missing or wrong prerequisite (H1). Never re-serve the same chunk reworded.
+        // Gate G10. Stuck reopens discovery by a code-discovery-machine call.
         if side = "solution"
-            // H8: stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
+            // H8. Stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
             if gap is a missing code fact or not clearly a reasoning step   // incl. a bare "I don't know" (fail closed)
-                // S4 → Discovery on region; new fact node; Graph.buildGraph
-            else   // gap is a reasoning step (e.g. why waiting helps): no new code fact (H2 exception)
-                // new node: kind ← "solution", citesFactIds ← facts + ticket text it rests on (S2)
-            // Validation.adversaryClear on the delta only; Teaching.chunkGraph on the delta
+                // S4. code-discovery-machine delta, region = the missing fact.
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=missingFact, converge="off")
+            else   // reasoning step (H2 exception): no new code fact
+                // Caller-made node: kind ← "solution", citesFactIds ← facts + ticket text (S2).
+                // code-discovery-machine delta, adversary only, converge off.
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", callerNodes=[reasoningNode], converge="off", adversaryOnly=true)
+            if record.result = "escalated"
+                error "escalated; present the record to the learner; do not teach"
+            apply record onto curriculum
+            // H4. Rebuild affected chunks (Phase F).
+            curriculum ← Teaching.chunkGraph(curriculum)
             // New chunk: stuckAdded ← true, side ← "solution"; its pass counts toward the solution close.
         else
-            // Re-run Discovery on region, Graph.buildGraph, Validation.converge,
-            // Validation.adversaryClear, Teaching.chunkGraph.
+            // H2 and H3 are one call: delta, region = the stuck region, converge on.
+            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=stuckRegion, converge="on")
+            if record.result = "escalated"
+                error "escalated; present the record to the learner; do not teach"
+            apply record onto curriculum
+            // H4. Rebuild affected chunks (Phase F).
+            curriculum ← Teaching.chunkGraph(curriculum)
             // New chunk: stuckAdded ← true, side ← "picture".
         // The new prerequisite chunk passes termCheck like any chunk (H6b).
         // Drop passes that depended on changed chunks (H5); their re-pass is a new taughtAgain LessonEntry.
-        // Do not invent a bridge outside the graph.
+        // H6. Do not invent a bridge outside the graph.
         // Tell the learner in one line that a piece is missing; teach the new chunk first,
         // then re-ask the chunk where the learner got stuck (H6b): repeat chunk.useCheck.prompt only,
         // not the prose; its wrongAfterHint count does not reset.
@@ -604,32 +457,88 @@ module Teaching
 module Solution
     function extend(curriculum, solutionNodes, ticketText)   // → Curriculum
         // S1: runs only after the picture chunks close (Phase I)
+        // S2. Caller-made solution nodes. Gate G2 still binds every fact a solution node cites.
         for each node in solutionNodes
             if node.kind ≠ "solution" or node.citesFactIds = blank list
                 error "solution node must cite fact ids (S2)"
             for each factId in node.citesFactIds
                 if factId not in curriculum facts
-                    error "missing code fact; return to Phase B (S4)"
-        // S3: Graph.buildGraph on picture + delta; Validation.adversaryClear on delta only;
-        //     no converge for solution nodes; Teaching.chunkGraph on delta;
-        //     then Teaching.teach(curriculum, picturePassedIds, lessonLog, "solution")
-        //     — picture passes kept as the floor; entry "solution" gives no recap (not a resume).
-        //     A separate teach run: its own stuck budget (H7); stuck → Teaching.stuckRevisit(..., "solution") (H8).
+                    // S4. code-discovery-machine delta, region = the missing fact.
+                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=factId, converge="off")
+                    if record.result = "escalated"
+                        error "escalated; present the record to the learner; do not teach"
+                    apply record onto curriculum
+        // S3. code-discovery-machine delta, caller-made nodes, converge off
+        //     (Phase C and the graph adversary on the delta; no Phase D).
+        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", callerNodes=solutionNodes, converge="off")
+        if record.result = "escalated"
+            error "escalated; present the record to the learner; do not teach"
+        apply record onto curriculum
+        curriculum ← Teaching.chunkGraph(curriculum)
+        // Then teach. Picture passes stay the floor. Entry "solution" gives no recap (not a resume).
+        // A separate teach run: its own stuck budget (H7); stuck → Teaching.stuckRevisit(..., "solution") (H8).
         return curriculum
 
 
 // --- piece 6: top-level run ---
 
-function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
+function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
+    // One call. The saved record is code-discovery-machine's. This function does not restate its rules.
+    // Resolve it as protocols/code-discovery-machine/, or $CONFIG_DIR/code-discovery-machine/ after a command install.
+    // mode "full" or "delta". See that process for seed, region, caller-made nodes, converge, adversary-only.
+    return the saved record
+
+function chunkAdversary(curriculum, proofBacklog)
+    // F8. Chunk-level hunt after chunkGraph.
+    // E6b. Use-check checklist UC1–UC5, including pure restatement must fail.
+    // E6c. Hold sync (§3.5).
+    // E6e. Every sanityByPred entry is non-empty and claim-relevant.
+    // E6f. Stranded chunks: ready empty while unpassed chunks remain.
+    // This hunt does not set the adversary row of the discovery checklist.
+    // When no chunk hole remains, set adversaryStatus clear again.
+    // Append each attack to the same proof backlog.
+    // L4 killed: the use-check checklist replaces the grader shrug.
+    if not Teaching.holdsSynced(curriculum)
+        realHole ← "chunk"          // E6c
+    for each chunk in curriculum.chunks
+        if not Teaching.useCheckChecklistOk(chunk, proofBacklog)
+            realHole ← "chunk"      // E6b
+        if not Teaching.sanityOk(chunk)
+            realHole ← "chunk"      // E6e
+    if Teaching.readySet can be empty while an unpassed chunk remains
+        realHole ← "chunk"          // E6f
+    if realHole is a code/graph hole     // fixing it adds or changes a node or edge
+        // F8 hole test. Call code-discovery-machine (delta, region = the hole, converge on).
+        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=hole, converge="on")
+        if record.result = "escalated"
+            error "escalated; present the record to the learner; do not teach"
+        apply record onto curriculum
+        curriculum ← Teaching.chunkGraph(curriculum)
+    else if realHole = "chunk"
+        // Chunk hole. Re-run Phase F. Do not call code-discovery-machine.
+        curriculum ← Teaching.chunkGraph(curriculum)
+    else
+        curriculum.adversaryStatus ← "clear"
+    return curriculum, proofBacklog
+
+function runTeachConcept(conceptName, maxStuckRevisits)
     if maxStuckRevisits = null
         maxStuckRevisits ← 1
     concept ← Discovery.nameConcept(conceptName)
-    // No code-scope freeze.
-    curriculum ← Validation.converge(concept, maxRetries)
-    proofBacklog ← blank list
-    curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
+    // A2. No code-scope freeze. The budget stays inside code-discovery-machine.
+    record ← callCodeDiscoveryMachine(concept, targetCode, "full", null)
+    if record.result = "escalated"
+        // Present the record and do not teach.
+        // Discovery budget spent: failing checklist rows, open questions, uncovered branches.
+        // Concept still ambiguous: ask the learner to clarify the concept (A3).
+        // Agents failed to converge: present the conflict.
+        error "escalated; present the record to the learner; do not teach"
+    curriculum ← blank Curriculum
+    curriculum.concept ← concept
+    apply record onto curriculum
+    proofBacklog ← record.proofEntries
     curriculum ← Teaching.chunkGraph(curriculum)
-    curriculum, proofBacklog ← Validation.adversaryClear(curriculum, proofBacklog)
+    curriculum, proofBacklog ← Teaching.chunkAdversary(curriculum, proofBacklog)
     stuckRevisits ← {picture: 0, solution: 0}   // on resume: the saved stuck_revisits instead (G0, H7)
     lessonLog ← blank list
     result ← Teaching.teach(curriculum, null, lessonLog, "fresh")
@@ -639,14 +548,14 @@ function runTeachConcept(conceptName, maxRetries, maxStuckRevisits)
         if result = "stuck"
             error "stuck after revisit budget; escalate to user"
     if curriculum.discoveryStatus ≠ "clear"
-        error "cannot close without discovery clear (checklist DC1–DC6)"
-    if not Discovery.checklistSatisfied(curriculum.discoveryChecklist)
-        error "cannot close with incomplete discovery checklist"
+        error "cannot close without discovery clear (saved record)"
     if curriculum.convergenceStatus ≠ "converged"
         error "cannot close without converge"
     if curriculum.adversaryStatus ≠ "clear"
         error "cannot close without adversary clear"
     if not Teaching.allChunksPassed(curriculum, /* final passedIds from teach */)
+        // I1. Every chunk passed and every named hold resolved.
         error "cannot close with unpassed chunks"
+    // I3. Hand control back. State completion without claiming repository changes.
     return curriculum, proofBacklog
 ```

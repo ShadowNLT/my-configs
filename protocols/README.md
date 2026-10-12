@@ -75,6 +75,7 @@ the sidecar. Do not also install the skill unless the user asked for auto-discov
 | `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
 | `proof-duel` | `lens-catalog.md`, `lens-cast.md`, `cast-lenses.sh` |
 | `code-concept-curriculum` | `code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md` (README optional) |
+| `code-discovery-machine` | `code-discovery-machine.md`, `code-discovery-machine-algo-sketch.md` (README optional). Install this whenever you install `code-concept-curriculum` (CCC calls it for discovery), the same way the term check needs `layman-terms`. |
 
 `system-atlas` and `system-atlas-update` are a pair. Whenever you install
 `system-atlas`, also copy `protocols/system-atlas-update/command.md` to
@@ -100,7 +101,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 (and copy `SKILL.md` only if a skills dir was requested). That includes
 `algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
-`proof-duel` and `code-concept-curriculum` are **not** markdown-only — use the sidecar install block below.
+`proof-duel`, `code-concept-curriculum`, and `code-discovery-machine` are **not** markdown-only — use the sidecar install block below. `code-concept-curriculum` depends on `code-discovery-machine`. Install both, the same way the term check needs `layman-terms`.
 
 Command-form install after the user has named `$COMMANDS_DIR` and `$CONFIG_DIR`:
 
@@ -151,11 +152,19 @@ cp protocols/proof-duel/lens-catalog.md protocols/proof-duel/lens-cast.md \
 chmod +x "$CONFIG_DIR/proof-duel/cast-lenses.sh"
 
 # code-concept-curriculum (process twins; Teaching Standard stays a separate sidecar)
+# Also install code-discovery-machine. CCC calls it for discovery.
 cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curriculum.md"
 mkdir -p "$CONFIG_DIR/code-concept-curriculum"
 cp protocols/code-concept-curriculum/code-concept-curriculum.md \
   protocols/code-concept-curriculum/code-concept-curriculum-algo-sketch.md \
   "$CONFIG_DIR/code-concept-curriculum/"
+
+# code-discovery-machine (sidecar; CCC depends on it, like layman-terms)
+cp protocols/code-discovery-machine/command.md "$COMMANDS_DIR/code-discovery-machine.md"
+mkdir -p "$CONFIG_DIR/code-discovery-machine"
+cp protocols/code-discovery-machine/code-discovery-machine.md \
+  protocols/code-discovery-machine/code-discovery-machine-algo-sketch.md \
+  "$CONFIG_DIR/code-discovery-machine/"
 ```
 
 If `layman-terms` was already seeded from `corporate/commands/`

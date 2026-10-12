@@ -273,6 +273,7 @@ module Teaching
             // F8 hole test. Call code-discovery-machine (delta, region = the hole, converge on).
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=hole, converge="on")
             proofBacklog ← addProof(proofBacklog, record)
+            showPauseLine(record, curriculum, null)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -346,6 +347,7 @@ module Teaching
 
     function termCheck(text, chunk, passedIds, curriculum)   // → "ok" or blocked term   (G2f)
         // Applies to: chunk prose, use-check question, corrective prompt / hint, recap (G0),
+        // a pause line after a code-discovery-machine delta or escalated result,
         // stuck-added chunks, solution chunks. In a work session also: restated goal and the
         // teach-first line, pre-flight and confirm lines, resume recap and plain "what's next" line,
         // the code walkthrough (each step's reason and instructions, each replay of an agent-typed
@@ -399,6 +401,7 @@ module Teaching
             newNode ← the new prerequisite node for the blocked term result
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=newNode, converge="off")
             proofBacklog ← addProof(proofBacklog, record)
+            showPauseLine(record, curriculum, passedIds)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -450,6 +453,7 @@ module Teaching
                 record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "full", existing=curriculum, seed=curriculum)
                 proofBacklog ← addProof(proofBacklog, record)
                 if record.result = "escalated"
+                    showPauseLine(record, curriculum, passedIds)
                     error "escalated; present the record to the learner; do not teach"
                 apply record onto curriculum
             recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
@@ -470,6 +474,7 @@ module Teaching
                                 append(holdNodeIds, node.id)
                     record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=holdNodeIds, converge="off")
                     proofBacklog ← addProof(proofBacklog, record)
+                    showPauseLine(record, curriculum, passedIds)
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
@@ -516,6 +521,7 @@ module Teaching
                 // code-discovery-machine delta, adversary only, converge off.
                 record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=[reasoningNode], converge="off", adversaryOnly=true)
             proofBacklog ← addProof(proofBacklog, record)
+            showPauseLine(record, curriculum, passedIds)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -527,6 +533,7 @@ module Teaching
             // That call runs over the region and the existing graph.
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=stuckRegion, converge="on")
             proofBacklog ← addProof(proofBacklog, record)
+            showPauseLine(record, curriculum, passedIds)
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
             apply record onto curriculum
@@ -558,6 +565,7 @@ module Solution
                     // Phase B on that fact only, then merge into the existing graph.
                     record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=factId, converge="off", regionIsMissingFact=true)
                     proofBacklog ← addProof(proofBacklog, record)
+                    showPauseLine(record, curriculum, passedIds)
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
@@ -565,6 +573,7 @@ module Solution
         //     Merge those nodes into the existing graph, then Phase C and the graph adversary on those nodes. No Phase D.
         record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=solutionNodes, converge="off")
         proofBacklog ← addProof(proofBacklog, record)
+        showPauseLine(record, curriculum, passedIds)
         if record.result = "escalated"
             error "escalated; present the record to the learner; do not teach"
         apply record onto curriculum
@@ -587,6 +596,17 @@ function addProof(proofBacklog, record)
             append(proofBacklog, entry)
     return proofBacklog
 
+function showPauseLine(record, curriculum, passedIds)
+    // After a delta result or an escalated result, before teaching resumes.
+    // One learner-facing line from record.changeList ("this is why I paused").
+    // Run the term check (G2f) and §2e, then show the line.
+    if passedIds = null
+        passedIds ← blank list
+    pauseLine ← one line from record.changeList ("this is why I paused")
+    if Teaching.termCheck(pauseLine, null, passedIds, curriculum) ≠ "ok"
+        error "pause line failed term check (G2f, §2e)"
+    // show pauseLine to the learner
+
 function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
     // One call. The saved record is code-discovery-machine's. This function does not restate its rules.
     // Resolve it as protocols/code-discovery-machine/, or $CONFIG_DIR/code-discovery-machine/ after a command install.
@@ -606,6 +626,7 @@ function runTeachConcept(conceptName, maxStuckRevisits)
     // Full, with no saved graph. There is no existing graph on this call.
     record ← callCodeDiscoveryMachine(concept, targetCode, "full", null)
     if record.result = "escalated"
+        showPauseLine(record, null, null)
         // Present the record and do not teach.
         // Discovery budget spent: failing checklist rows, open questions, uncovered branches.
         // Concept still ambiguous: ask the learner to clarify the concept (A3).

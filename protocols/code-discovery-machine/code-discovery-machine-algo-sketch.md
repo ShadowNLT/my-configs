@@ -56,6 +56,7 @@ record DiscoveryRecord
     proofEntries      // list of ProofEntry (E5)
     result            // "clear" or "escalated"
     reason            // "" or "B7" or "B8" or "D5"
+    changeList        // plain words of what changed or what is open; returned with every delta result and every escalated result
 
 record ChecklistRow
     id             // "DC1" .. "DC6"
@@ -287,8 +288,6 @@ module Graph
                 edge.fromId ← node.id
                 edge.toId ← hold.closerNodeId
                 edge.kind ← "hold-target"
-                if Graph.edgeIsIn(edge, dropped)
-                    continue
                 graph, proofBacklog ← Graph.addEdgeIfEndsExist(graph, edge, proofBacklog)
         callerEdges ← blank list
         for each edge in graph.edges
@@ -641,6 +640,7 @@ function addProof(curriculum, proof)
 
 function run(concept, targetCode, mode, delta, maxRetries)
     // One entry point. Outputs are the DiscoveryRecord fields recorded today, saved as one file by the caller.
+    // Every delta result and every escalated result also returns changeList: plain words of what changed or what is open.
     // targetCode is the code the concept is about.
     if maxRetries = null
         maxRetries ← 3

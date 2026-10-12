@@ -47,11 +47,11 @@ Discovery may set discovery_status to clear only when every row below is true an
 
 | ID | Requirement | Evidence required |
 |----|-------------|-------------------|
-| DC1 | Every term used to explain the concept has a definition path to a fact node | term → node id → fact id |
+| DC1 | Every term used in a claim has a definition path to a fact node | term → node id → fact id |
 | DC2 | Every branching condition touched for the concept has a full case list or a named hold with closer | branch → cases or hold name + closer_node_id |
 | DC3 | open_code_questions is empty; each retired question has a recorded resolution fact | question → resolving fact id |
 | DC4 | uncovered_branches is empty (each branch discharged by DC2) | branch id → DC2 discharge |
-| DC5 | Every teaching claim in the graph cites at least one fact id | claim/node id → fact id(s) |
+| DC5 | Every claim in the graph cites at least one fact id | claim/node id → fact id(s) |
 | DC6 | Logical adversary has hunted on the graph against this checklist and either cleared or forced expand + re-entry. The caller's chunk-level hunt does not set this row | proof backlog entries for DC1–DC5 attacks |
 
 Fake or missing citations are a process breach: do not set discovery clear. Budget (B7) still returns escalated if the checklist cannot be completed. The caller talks to the learner.
@@ -105,7 +105,7 @@ Phase A (name the concept) belongs to the caller. This process starts at Phase B
 B1. Start from the concept. Read the code that the concept needs. Expand the explored region as new dependencies appear.
 B2. Extract facts that the code forces. Do not state guesses.
 B3. For every branching condition found while exploring, list every case the code distinguishes. Any branch not yet covered stays on uncovered_branches until it has a case or a named hold.
-B4. If a case is not taught in this node, open a named hold and point to a later node id (or mark the later node as to-be-created).
+B4. If a case is not covered by this node, open a named hold and point to a later node id (or mark the later node as to-be-created).
 B5. If a fact is missing, append an open code question and keep exploring related code until the fact is known or the budget ends. Do not invent a fact. Do not teach while calling the gap "unknown" without recording it.
 B6. Stop discovery with discovery_status clear only when every discovery-completion checklist row (DC1–DC6 in §2c) is true with evidence. Empty evidence fails closed.
 B7. Discovery budget: default max_discovery_expansions = maxRetries (same knob as converge, default 3 full expansion rounds after the first pass). If §2c is still unsatisfied when the budget is spent, set discovery_status to escalated and return result escalated with reason code B7. The record includes the failing checklist rows, open_code_questions, and uncovered_branches. Do not present them. The caller presents them and does not teach. Do not invent the concept. Do not invent facts.
@@ -174,6 +174,7 @@ Outputs are only the fields recorded today:
 - explored_region, discovery_status, convergence_status, adversary_status after the graph pass, open_code_questions, uncovered_branches, discovery_checklist (§3.1)
 - proof backlog entries (E5)
 - result: clear, or escalated with reason code B7, B8, or D5
+- change_list: plain words of what changed or what is open. Every delta result and every escalated result also returns this list.
 
 Do not talk to the learner. The caller presents an escalated result and does not teach.
 

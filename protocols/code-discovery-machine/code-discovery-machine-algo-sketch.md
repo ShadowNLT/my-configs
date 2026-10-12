@@ -99,9 +99,10 @@ module Discovery
             return false
         return true
 
-    function discoverFacts(concept, maxExpansions)   // → Curriculum fragment fields
+    function discoverFacts(concept, maxExpansions, region)   // → Curriculum fragment fields
+        // region null: the whole concept. region set: that region only. Do not widen a region call to the whole concept.
         // Gate G1. No scope freeze. Gate G2. Facts come from the code only.
-        // B1. Start from the concept. Read the code the concept needs. Expand the explored region.
+        // B1. Start from the concept, or from the region when the caller passed one. Read that code. Expand the explored region inside that scope.
         // B2. Extract facts that the code forces. Do not state guesses.
         // B3. For every branch, list every case, or leave it on uncovered branches.
         // B4. A case not in this node opens a named hold and points to a later node id.
@@ -118,7 +119,8 @@ module Discovery
         expansions ← 0
         checklist ← blank list   // fill DC1–DC5 evidence as facts grow; DC6 after adversary
         while true
-            // Read more related code; append facts; update explored.description
+            // Read more related code inside the scope (the region, or the whole concept when region is null).
+            // Append facts; update explored.description. Do not leave a region scope.
             // Missing fact → append openCodeQuestions; never invent
             // New branch → append uncoveredBranches until case or named hold
             // Update checklist rows with evidence citations; empty evidence never counts as satisfied
@@ -168,6 +170,56 @@ module Graph
         if Graph.hasSoftHole(graph.nodes)
             error "soft hole: deferred case without named hold and closer"   // C6. E6g.
         // Set predecessors/followers from edges.
+        return graph
+
+    function mergeGraphs(base, addition)   // Graph, Graph → Graph
+        // Keep every node and edge already in base. Append only nodes and edges from addition that are not already there.
+        if base = null
+            base ← blank Graph
+            base.nodes ← blank list
+            base.edges ← blank list
+        if addition = null
+            return base
+        for each node in addition.nodes
+            if no node in base.nodes has id = node.id
+                append(base.nodes, node)
+        for each edge in addition.edges
+            if edge not in base.edges
+                append(base.edges, edge)
+        return base
+
+    function mergeNodes(graph, nodes)   // Graph, list of Node → Graph
+        // Caller-made nodes join the existing graph. They do not replace it.
+        if graph = null
+            graph ← blank Graph
+            graph.nodes ← blank list
+            graph.edges ← blank list
+        for each node in nodes
+            if no node in graph.nodes has id = node.id
+                append(graph.nodes, node)
+        // C5. Fail closed on a prerequisite cycle. C6. Fail closed on a soft hole. C7. Predecessors and followers stay from the edges.
+        if Graph.hasPrerequisiteCycle(graph.edges)
+            error "prerequisite cycle"
+        if Graph.hasSoftHole(graph.nodes)
+            error "soft hole: deferred case without named hold and closer"
+        return graph
+
+    function phaseCOnRegion(graph, regionNodes)   // Graph, nodes or node ids → Graph
+        // Phase C for those nodes, inside the existing graph. Do not return a graph of only the region's nodes.
+        if graph = null
+            graph ← blank Graph
+            graph.nodes ← blank list
+            graph.edges ← blank list
+        for each node in regionNodes
+            if node is an id
+                continue
+            if no node in graph.nodes has id = node.id
+                append(graph.nodes, node)
+        // C2. Prerequisite edges so no node needs an undefined term. C5. C6. C7.
+        if Graph.hasPrerequisiteCycle(graph.edges)
+            error "prerequisite cycle"
+        if Graph.hasSoftHole(graph.nodes)
+            error "soft hole: deferred case without named hold and closer"
         return graph
 
 // --- piece 4: converge + adversary ---
@@ -243,13 +295,50 @@ module Validation
         c1.convergenceStatus ← "escalated"
         return c1
 
-    function adversaryClear(curriculum, proofBacklog, expandCount, maxRetries)   // → DiscoveryRecord, list of ProofEntry
+    function mergePartial(base, facts, explored, openCodeQuestions, uncoveredBranches, checklist)   // → DiscoveryRecord
+        // Merge a Phase B fragment into the caller's record. Never drop the caller's graph.
+        if base = null
+            base ← blank DiscoveryRecord
+        if facts ≠ null and facts ≠ blank list
+            base.graph ← Graph.mergeGraphs(base.graph, Graph.buildGraph(facts))
+        if explored ≠ null
+            if base.exploredRegion = null
+                base.exploredRegion ← explored
+            else
+                base.exploredRegion.description ← base.exploredRegion.description + "\n" + explored.description
+        for each q in openCodeQuestions
+            if q not in base.openCodeQuestions
+                append(base.openCodeQuestions, q)
+        for each b in uncoveredBranches
+            if b not in base.uncoveredBranches
+                append(base.uncoveredBranches, b)
+        for each row in checklist
+            setChecklistRow(base.discoveryChecklist, row.id, row.satisfied, row.evidence)
+        return base
+
+    function convergeSaved(saved, maxRetries)   // → DiscoveryRecord
+        // Phase D over the saved graph. Do not call discoverFacts. Do not start from a blank concept.
+        // D1. Both agents read this saved graph. D2 and D6 compare it. D4 sets converged when the fact set matches and DC1–DC5 are ready.
+        // D5. If substance cannot be evaluated, return this same record escalated. Do not return a blank record.
+        left ← saved
+        right ← saved
+        if not Validation.substanceEqual(left, right)
+            saved.result ← "escalated"
+            saved.reason ← "D5"
+            saved.convergenceStatus ← "escalated"
+            return saved
+        saved.convergenceStatus ← "converged"
+        saved.result ← "clear"
+        saved.reason ← ""
+        return saved
+
+    function adversaryClear(curriculum, proofBacklog, expandCount, maxRetries, onlyNode)   // → DiscoveryRecord, list of ProofEntry
         if expandCount = null
             expandCount ← 0
         if maxRetries = null
             maxRetries ← 3
         // Gate G4. The adversary must not refute the graph by chasing a ghost.
-        // E1. Graph pass against the converged graph.
+        // E1. Graph pass against the converged graph. When onlyNode is set, review that node only. Do not review the rest of the record.
         // E2. Any code may be read. New reads append to exploredRegion. Outside-world attacks are ghosts.
         // E6. Graph probes only. The chunk probes belong to the caller. The caller does not set DC6.
         // E6a. Checklist rows DC1–DC5. E6d. Prerequisite cycles. E6g. Soft holes (C6).
@@ -257,9 +346,12 @@ module Validation
         append(proofBacklog, ProofEntry("L1 adversary blindness", "killed",
             "adversary seeks disproof in any code; miss forces discovery expand"))
         realHoleFound ← false
-        // Hunt graph probes only: DC1–DC5 (E6a), cycles (E6d), soft holes (E6g),
+        huntNodes ← curriculum.graph.nodes
+        if onlyNode ≠ null
+            huntNodes ← onlyNode
+        // Hunt graph probes only, on huntNodes: DC1–DC5 (E6a), cycles (E6d), soft holes (E6g),
         // and contradicting code outside the prior explored window.
-        // E5. For each attack: append ProofEntry.
+        // E5. For each attack: append ProofEntry onto proofBacklog. Do not replace entries already there.
         // Chunk probes (hold sync, use-checks, sanityByPred, stranded) are not run here.
         if realHoleFound
             // E3. Graph hole. Internal loop: expand discovery and re-enter converge. Not a caller call.
@@ -269,10 +361,21 @@ module Validation
                 curriculum.reason ← "D5"
                 curriculum.convergenceStatus ← "escalated"
                 return curriculum, proofBacklog
+            if onlyNode ≠ null
+                // Stay on this node. Phase B on that node only, merged back. Do not converge the whole concept.
+                facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(curriculum.concept, maxRetries, onlyNode)
+                if dstat = "escalated"
+                    curriculum ← Validation.mergePartial(curriculum, facts, explored, oq, ub, checklist)
+                    curriculum.result ← "escalated"
+                    curriculum.reason ← reason
+                    curriculum.discoveryStatus ← "escalated"
+                    return curriculum, proofBacklog
+                curriculum ← Validation.mergePartial(curriculum, facts, explored, oq, ub, checklist)
+                return Validation.adversaryClear(curriculum, proofBacklog, expandCount, maxRetries, onlyNode)
             again ← Validation.converge(curriculum.concept, maxRetries)
             if again.result = "escalated"
                 return again, proofBacklog
-            return Validation.adversaryClear(again, proofBacklog, expandCount, maxRetries)
+            return Validation.adversaryClear(again, proofBacklog, expandCount, maxRetries, null)
         // DC6. Set only by this graph hunt. E4. adversaryStatus clear for the graph pass.
         setChecklistRow(curriculum.discoveryChecklist, "DC6", true, proofBacklogEvidence)
         curriculum.adversaryStatus ← "clear"
@@ -282,8 +385,18 @@ module Validation
 
 // --- piece 5: entry ---
 
+function addProof(curriculum, proof)
+    // E5. Add entries. Do not replace the entries already on the record.
+    if curriculum.proofEntries = null
+        curriculum.proofEntries ← blank list
+    for each entry in proof
+        if entry not in curriculum.proofEntries
+            append(curriculum.proofEntries, entry)
+    return curriculum
+
 function run(concept, targetCode, mode, delta, maxRetries)
     // One entry point. Outputs are the DiscoveryRecord fields recorded today, saved as one file by the caller.
+    // targetCode is the code the concept is about.
     if maxRetries = null
         maxRetries ← 3
     adversaryOnly ← false
@@ -291,69 +404,95 @@ function run(concept, targetCode, mode, delta, maxRetries)
     if delta ≠ null
         adversaryOnly ← delta.adversaryOnly
         convergeFlag ← delta.converge
+        if delta.regionNodes = null and delta.region ≠ null and not delta.regionIsMissingFact
+            delta.regionNodes ← delta.region
     if adversaryOnly and not (mode = "delta" and convergeFlag = "off")
         error "adversary-only flag rejected; do no work"
     if mode = "full"
         // No seed, or the checklist is not satisfied: Phases B, C, D, and the graph pass.
-        // Seeded saved graph whose checklist is already satisfied: Phase D and the graph pass
-        // over the WHOLE graph, not only the new parts.
+        // Seeded saved graph whose checklist is already satisfied: Phase D over that saved graph,
+        // then the graph pass over the WHOLE graph. Do not discover the concept from scratch.
         if delta ≠ null and delta.seed ≠ null and Discovery.discoveryComplete(delta.seed)
-            fresh ← Validation.converge(concept, maxRetries)
-            if fresh.result = "escalated"
-                return fresh
-            if not Validation.substanceEqual(delta.seed, fresh)
-                curriculum ← fresh
-            else
-                curriculum ← delta.seed
-                curriculum.convergenceStatus ← "converged"
-                curriculum.result ← "clear"
-                curriculum.reason ← ""
+            curriculum ← Validation.convergeSaved(delta.seed, maxRetries)
+            if curriculum.result = "escalated"
+                return curriculum
         else
             curriculum ← Validation.converge(concept, maxRetries)
             if curriculum.result = "escalated"
                 return curriculum
-        curriculum, proof ← Validation.adversaryClear(curriculum, blank list, 0, maxRetries)
-        curriculum.proofEntries ← proof
+        prior ← curriculum.proofEntries
+        if prior = null
+            prior ← blank list
+        curriculum, proof ← Validation.adversaryClear(curriculum, prior, 0, maxRetries, null)
+        curriculum ← addProof(curriculum, proof)
         return curriculum
-    // mode = delta
+    // mode = delta. Merge into the caller's graph. Never replace it.
+    // A path that runs Phase B runs it on the region only, then merges.
+    // Converge on, and a missing fact, run Phase B. Adversary-only, caller-made nodes,
+    // and a region of node ids do not: those paths are Phase C or a scoped graph pass.
+    if delta = null or delta.existing = null
+        error "delta requires the caller's graph"
     if convergeFlag = "on"
-        // Phase B on the region, then C, D, and the graph pass.
-        curriculum ← Validation.converge(concept, maxRetries)
-        if curriculum.result = "escalated"
-            return curriculum
-        curriculum, proof ← Validation.adversaryClear(curriculum, blank list, 0, maxRetries)
-        curriculum.proofEntries ← proof
-        return curriculum
-    if adversaryOnly
-        // Graph pass only, on the caller-made node.
-        curriculum ← delta.existing
-        curriculum, proof ← Validation.adversaryClear(curriculum, blank list, 0, maxRetries)
-        curriculum.proofEntries ← proof
-        return curriculum
-    if delta.callerNodes ≠ null
-        // Phase C and the graph pass on the caller-made nodes. Do not run Phase D.
-        curriculum ← delta.existing
-        curriculum.graph ← Graph.buildGraph(delta.callerNodes)
-        curriculum, proof ← Validation.adversaryClear(curriculum, blank list, 0, maxRetries)
-        curriculum.proofEntries ← proof
-        return curriculum
-    if delta.regionIsMissingFact
-        // Phase B on the missing fact, then Phase C.
-        facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries)
+        // Converge on. Phase B on the region only. Merge into the existing graph.
+        // Then Phase D and the graph pass over the region and the existing graph. Not the whole concept.
+        base ← delta.existing
+        facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries, delta.region)
+        base ← Validation.mergePartial(base, facts, explored, oq, ub, checklist)
         if dstat = "escalated"
-            curriculum ← blank DiscoveryRecord
-            curriculum.result ← "escalated"
-            curriculum.reason ← reason
-            curriculum.discoveryStatus ← "escalated"
-            return curriculum
-        curriculum ← delta.existing
-        curriculum.graph ← Graph.buildGraph(facts)
-        curriculum.exploredRegion ← explored
-        curriculum.result ← "clear"
-        return curriculum
-    // Region is node ids: Phase C only.
-    curriculum ← delta.existing
-    curriculum.graph ← Graph.buildGraph(delta.regionNodes)
-    curriculum.result ← "clear"
-    return curriculum
+            base.result ← "escalated"
+            base.reason ← reason
+            base.discoveryStatus ← "escalated"
+            return base
+        base ← Validation.convergeSaved(base, maxRetries)
+        if base.result = "escalated"
+            return base
+        prior ← base.proofEntries
+        if prior = null
+            prior ← blank list
+        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, null)
+        base ← addProof(base, proof)
+        return base
+    if adversaryOnly
+        // Adversary-only. Merge the caller-made node into the existing graph, then review that node only.
+        base ← delta.existing
+        if delta.callerNodes ≠ null
+            base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
+        node ← delta.callerNodes[0]
+        prior ← base.proofEntries
+        if prior = null
+            prior ← blank list
+        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, node)
+        base ← addProof(base, proof)
+        return base
+    if delta.callerNodes ≠ null
+        // Caller-made nodes, not adversary-only. Merge them into the existing graph. Phase C and the graph pass on those nodes.
+        // Do not rebuild the graph from only those nodes. Do not run Phase D.
+        base ← delta.existing
+        base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
+        prior ← base.proofEntries
+        if prior = null
+            prior ← blank list
+        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, delta.callerNodes)
+        base ← addProof(base, proof)
+        return base
+    if delta.regionIsMissingFact
+        // Missing fact. Phase B on that fact only, then Phase C via the merge. Not discovery of the whole concept.
+        base ← delta.existing
+        facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries, delta.region)
+        base ← Validation.mergePartial(base, facts, explored, oq, ub, checklist)
+        if dstat = "escalated"
+            // Return the merged record. Do not return an empty one.
+            base.result ← "escalated"
+            base.reason ← reason
+            base.discoveryStatus ← "escalated"
+            return base
+        base.result ← "clear"
+        base.reason ← ""
+        return base
+    // Region is node ids. Phase C on that region, merged into the existing graph.
+    base ← delta.existing
+    base.graph ← Graph.phaseCOnRegion(base.graph, delta.regionNodes)
+    base.result ← "clear"
+    base.reason ← ""
+    return base
 ```

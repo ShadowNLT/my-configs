@@ -154,13 +154,17 @@ Inputs:
 - adversary-only flag. Accept it only when mode is delta and converge is off. Any other combination is an error. Do no work.
 
 full, with no saved graph: run Phases B, C, D, and the graph pass.
-full, seeded with a saved graph: run Phase D and the graph pass over the whole graph. If the discovery checklist is not satisfied, run Phase B on the whole concept first, then Phase C, Phase D, and the graph pass.
+full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first, then Phase C, Phase D, and the graph pass.
 
-delta, converge on: run Phase B on the region, then Phase C, Phase D, and the graph pass.
-delta, converge off, adversary-only: run the graph pass on the caller-made node only.
-delta, converge off, with caller-made nodes, not adversary-only: run Phase C and the graph pass on those nodes. Do not run Phase D.
-delta, converge off, region is node ids: run Phase C on that region.
-delta, converge off, region is a missing fact: run Phase B on that fact, then Phase C.
+A delta call merges into the caller's graph. It never replaces that graph. A delta path that runs Phase B runs it on the region only and merges the result into the input graph. An escalated Phase B still returns that merged record.
+
+delta, converge on: run Phase B on the region only, merge the result into the existing graph, then Phase C, Phase D, and the graph pass over the region and the existing graph. Do not discover the whole concept.
+delta, converge off, adversary-only: merge the caller-made node into the existing graph, then run the graph pass on that node only. Do not review the rest of the record.
+delta, converge off, with caller-made nodes, not adversary-only: merge those nodes into the existing graph, then run Phase C and the graph pass on those nodes. Do not rebuild the graph from only those nodes. Do not run Phase D.
+delta, converge off, region is node ids: run Phase C on that region inside the existing graph. Do not keep only the region's nodes.
+delta, converge off, region is a missing fact: run Phase B on that fact only, merge the result into the existing graph, then Phase C. An escalated result returns that merged record.
+
+Proof backlog entries from a delta call are added to the entries already on the input record (E5). They do not replace them.
 
 Outputs are only the fields recorded today:
 - graph (§3.2 and §3.3)

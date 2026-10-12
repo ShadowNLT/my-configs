@@ -13,6 +13,7 @@
 // Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
 // Phases B–D and the graph half of the adversary are code-discovery-machine.
 // This sketch calls that process. It does not copy those rules.
+// targetCode is the code the concept is about. Every code-discovery-machine call takes it.
 // This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
 // The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
 // (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
@@ -30,7 +31,6 @@
 // This sketch reads the saved record. It does not redefine those shapes.
 // L1, L2, and L3 are owned by code-discovery-machine.
 
-record Concept
 record Concept
     name           // string; logical name; not a file path
 
@@ -220,6 +220,77 @@ module Teaching
             error "hold sync invariant breached"
         return curriculum
 
+    function holeFixChangesGraph(kind, curriculum)   // → true/false
+        // True when fixing this hole means adding or changing a node or edge.
+        // A use-check or a sanity line can be fixed in the chunk text: that is a chunk hole.
+        // Hold sync or a stranded chunk is a code/graph hole when the node layer is missing
+        // the hold or the predecessor, and a chunk hole when those nodes are already there.
+        if kind = "use-check" or kind = "sanity"
+            return false
+        if kind = "hold-sync"
+            return a named hold is missing on the node layer
+        if kind = "stranded"
+            return a predecessor edge is missing on the node layer
+        return false
+
+    function chunkAdversary(curriculum, proofBacklog, pass)   // → Curriculum, proof backlog
+        // F8. Chunk-level hunt after chunkGraph.
+        // E6b. Use-check checklist UC1–UC5, including pure restatement must fail.
+        // E6c. Hold sync (§3.5).
+        // E6e. Every sanityByPred entry is non-empty and claim-relevant.
+        // E6f. Stranded chunks: ready empty while unpassed chunks remain.
+        // This hunt does not set the adversary row of the discovery checklist.
+        // Append each attack to the same proof backlog.
+        // L4 killed: the use-check checklist replaces the grader shrug.
+        if pass = null
+            pass ← 1
+        realHole ← null
+        hole ← null
+        if not Teaching.holdsSynced(curriculum)
+            if Teaching.holeFixChangesGraph("hold-sync", curriculum)
+                realHole ← "code"
+                hole ← the hold that is missing on the node layer
+            else
+                realHole ← "chunk"
+                hole ← "hold-sync"
+        for each chunk in curriculum.chunks
+            if not Teaching.useCheckChecklistOk(chunk, proofBacklog)
+                if realHole ≠ "code"
+                    realHole ← "chunk"
+                    hole ← chunk
+            if not Teaching.sanityOk(chunk)
+                if realHole ≠ "code"
+                    realHole ← "chunk"
+                    hole ← chunk
+        if Teaching.readySet can be empty while an unpassed chunk remains
+            if Teaching.holeFixChangesGraph("stranded", curriculum)
+                realHole ← "code"
+                hole ← the missing predecessor
+            else if realHole ≠ "code"
+                realHole ← "chunk"
+                hole ← "stranded"
+        if realHole = "code"
+            // F8 hole test. Call code-discovery-machine (delta, region = the hole, converge on).
+            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=hole, converge="on")
+            if record.result = "escalated"
+                error "escalated; present the record to the learner; do not teach"
+            apply record onto curriculum
+            curriculum ← Teaching.chunkGraph(curriculum)
+            if pass = 1
+                return Teaching.chunkAdversary(curriculum, proofBacklog, 2)
+            curriculum.adversaryStatus ← "pending"
+            return curriculum, proofBacklog
+        if realHole = "chunk"
+            // Chunk hole. Re-run Phase F. Do not call code-discovery-machine.
+            curriculum ← Teaching.chunkGraph(curriculum)
+            if pass = 1
+                return Teaching.chunkAdversary(curriculum, proofBacklog, 2)
+            curriculum.adversaryStatus ← "pending"
+            return curriculum, proofBacklog
+        // Second hunt included: no hole left, so set adversaryStatus on this path too.
+        curriculum.adversaryStatus ← "clear"
+        return curriculum, proofBacklog
+
     function readySet(curriculum, passedIds)   // → list of Chunk
         ready ← blank list
         for each chunk in curriculum.chunks
@@ -305,7 +376,7 @@ module Teaching
             return term                               // blocked
         return "ok"
 
-    function render(chunk, passedIds, curriculum)   // → string prose  (G2g + G2f)
+    function render(chunk, passedIds, curriculum)   // → prose or "teach-prerequisite-first", Curriculum  (G2g + G2f)
         prose ← chunk.claim, definitions, and holds as short full sentences; root first
         if prose is a table or a node/claim list or the graph or the checklist
             error "not teaching prose (G2g)"
@@ -320,11 +391,18 @@ module Teaching
             error "number does not match the file or test output (G2h)"
         result ← Teaching.termCheck(prose + chunk.useCheck.prompt, chunk, passedIds, curriculum)
         if result ≠ "ok"
-            // Step G2f. Block. Define inline, or call code-discovery-machine
-            // (delta, region = the new prerequisite node). It runs Phase C.
-            // Then chunkGraph (Phase F) and teach that chunk first.
-            error "term check failed: " + result + "; define inline or call code-discovery-machine"
-        return prose
+            // Step G2f. Block. Define the term inline, or call code-discovery-machine.
+            // delta, region = the new prerequisite node, converge off. It runs Phase C.
+            // clear: Phase F, then teach that chunk first. Do not show the blocked text.
+            // escalated: do not teach. Budget spent, concept still ambiguous, or agents failed to converge.
+            newNode ← the new prerequisite node for the blocked term result
+            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=newNode, converge="off")
+            if record.result = "escalated"
+                error "escalated; present the record to the learner; do not teach"
+            apply record onto curriculum
+            curriculum ← Teaching.chunkGraph(curriculum)
+            return "teach-prerequisite-first", curriculum
+        return prose, curriculum
 
     function numbersCheck(text)   // → true/false   (G2h; runs on every learner-facing text)
         for each number in lineNumbersCountsAndListSizesIn(text)
@@ -359,7 +437,7 @@ module Teaching
     function teach(curriculum, passedIds, lessonLog, entry)   // → "complete" or "stuck"
         // entry: "fresh" | "resume" | "solution"
         //   fresh    — new run (passedIds blank), or the same run continuing after stuckRevisit (no recap)
-        //   resume   — G0: saved passed_chunks from a pause; recap first
+        //   resume   — G0: saved passed_chunks from a pause; discovery re-run, then recap
         //   solution — Phase S: picture passes kept in passedIds as the floor; NOT a resume, no recap (S3)
         if passedIds = null
             passedIds ← blank list
@@ -383,8 +461,8 @@ module Teaching
                 if not Teaching.allChunksPassed(curriculum, passedIds)
                     error "stranded chunks: ready empty but unpassed remain (G11)"
                 if not Teaching.allHoldsResolved(curriculum)
-                    // I2. Call code-discovery-machine (delta, Phase C on the hold's region).
-                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=openHolds, converge="off", phaseCOnly=true)
+                    // I2. Call code-discovery-machine (delta, region = the hold's region, converge off). It runs Phase C.
+                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=openHolds, converge="off")
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
@@ -394,7 +472,9 @@ module Teaching
                 return "complete"
             // Fork: graph order unless the learner asked to reorder (G2c)
             chunk ← Teaching.pickRuleX(ready, learnerReorderRequest())
-            prose ← Teaching.render(chunk, passedIds, curriculum)
+            prose, curriculum ← Teaching.render(chunk, passedIds, curriculum)
+            if prose = "teach-prerequisite-first"
+                continue
             if not Teaching.holdsVisibleInProse(chunk, prose)
                 error "soft hole: hold not named in prose"
             // G1. Serve the ready set. G2. Teaching prose only. G3. Then the use-check.
@@ -421,8 +501,9 @@ module Teaching
         if side = "solution"
             // H8. Stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
             if gap is a missing code fact or not clearly a reasoning step   // incl. a bare "I don't know" (fail closed)
-                // S4. code-discovery-machine delta, region = the missing fact.
-                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=missingFact, converge="off")
+                // S4. code-discovery-machine delta, region = the missing fact, converge off.
+                // Phase B on that fact only, then merge into the existing graph.
+                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=missingFact, converge="off", regionIsMissingFact=true)
             else   // reasoning step (H2 exception): no new code fact
                 // Caller-made node: kind ← "solution", citesFactIds ← facts + ticket text (S2).
                 // code-discovery-machine delta, adversary only, converge off.
@@ -435,6 +516,7 @@ module Teaching
             // New chunk: stuckAdded ← true, side ← "solution"; its pass counts toward the solution close.
         else
             // H2 and H3 are one call: delta, region = the stuck region, converge on.
+            // That call runs over the region and the existing graph.
             record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=stuckRegion, converge="on")
             if record.result = "escalated"
                 error "escalated; present the record to the learner; do not teach"
@@ -463,13 +545,14 @@ module Solution
                 error "solution node must cite fact ids (S2)"
             for each factId in node.citesFactIds
                 if factId not in curriculum facts
-                    // S4. code-discovery-machine delta, region = the missing fact.
-                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=factId, converge="off")
+                    // S4. code-discovery-machine delta, region = the missing fact, converge off.
+                    // Phase B on that fact only, then merge into the existing graph.
+                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=factId, converge="off", regionIsMissingFact=true)
                     if record.result = "escalated"
                         error "escalated; present the record to the learner; do not teach"
                     apply record onto curriculum
-        // S3. code-discovery-machine delta, caller-made nodes, converge off
-        //     (Phase C and the graph adversary on the delta; no Phase D).
+        // S3. code-discovery-machine delta, caller-made nodes, converge off.
+        //     Merge those nodes into the existing graph, then Phase C and the graph adversary on those nodes. No Phase D.
         record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", callerNodes=solutionNodes, converge="off")
         if record.result = "escalated"
             error "escalated; present the record to the learner; do not teach"
@@ -486,40 +569,12 @@ function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
     // One call. The saved record is code-discovery-machine's. This function does not restate its rules.
     // Resolve it as protocols/code-discovery-machine/, or $CONFIG_DIR/code-discovery-machine/ after a command install.
     // mode "full" or "delta". See that process for seed, region, caller-made nodes, converge, adversary-only.
+    // targetCode is the code the concept is about.
+    // clear: the caller continues. escalated: do not teach.
+    // Discovery budget spent: failing checklist rows, open questions, uncovered branches.
+    // Concept still ambiguous: ask the learner to clarify the concept (A3).
+    // Agents failed to converge: present the conflict.
     return the saved record
-
-function chunkAdversary(curriculum, proofBacklog)
-    // F8. Chunk-level hunt after chunkGraph.
-    // E6b. Use-check checklist UC1–UC5, including pure restatement must fail.
-    // E6c. Hold sync (§3.5).
-    // E6e. Every sanityByPred entry is non-empty and claim-relevant.
-    // E6f. Stranded chunks: ready empty while unpassed chunks remain.
-    // This hunt does not set the adversary row of the discovery checklist.
-    // When no chunk hole remains, set adversaryStatus clear again.
-    // Append each attack to the same proof backlog.
-    // L4 killed: the use-check checklist replaces the grader shrug.
-    if not Teaching.holdsSynced(curriculum)
-        realHole ← "chunk"          // E6c
-    for each chunk in curriculum.chunks
-        if not Teaching.useCheckChecklistOk(chunk, proofBacklog)
-            realHole ← "chunk"      // E6b
-        if not Teaching.sanityOk(chunk)
-            realHole ← "chunk"      // E6e
-    if Teaching.readySet can be empty while an unpassed chunk remains
-        realHole ← "chunk"          // E6f
-    if realHole is a code/graph hole     // fixing it adds or changes a node or edge
-        // F8 hole test. Call code-discovery-machine (delta, region = the hole, converge on).
-        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", region=hole, converge="on")
-        if record.result = "escalated"
-            error "escalated; present the record to the learner; do not teach"
-        apply record onto curriculum
-        curriculum ← Teaching.chunkGraph(curriculum)
-    else if realHole = "chunk"
-        // Chunk hole. Re-run Phase F. Do not call code-discovery-machine.
-        curriculum ← Teaching.chunkGraph(curriculum)
-    else
-        curriculum.adversaryStatus ← "clear"
-    return curriculum, proofBacklog
 
 function runTeachConcept(conceptName, maxStuckRevisits)
     if maxStuckRevisits = null

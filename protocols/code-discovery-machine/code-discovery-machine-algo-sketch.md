@@ -209,16 +209,21 @@ module Graph
         // Hold-target edges this node opens are restated. Do not walk followers. A follower linked only by elaborates never becomes a prerequisite.
         // C7 works predecessors and followers out from the edges.
         // An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog.
-        // An existing incoming prerequisite edge that the node's predecessor list does not contradict is kept. An edge that is dropped is recorded in the proof backlog. A caller node never loses an edge silently.
+        // Drop an incoming prerequisite edge only when the new read explicitly disagrees with it. That happens when the new read's edges give the same pair a different kind, or when keeping the edge would create a cycle. A predecessor that simply isn't listed, or an empty list, drops nothing. An edge that is dropped is recorded in the proof backlog. A caller node never loses an edge silently.
         if proofBacklog = null
             proofBacklog ← blank list
         kept ← blank list
         for each edge in graph.edges
             if edge.kind = "prerequisite" and edge.toId = node.id
-                if edge.fromId is in node.predecessors
-                    append(kept, edge)
+                differentKind ← false
+                for each other in graph.edges
+                    if other.fromId = edge.fromId and other.toId = edge.toId and other.kind ≠ edge.kind
+                        differentKind ← true
+                createsCycle ← a prerequisite path from edge.toId to edge.fromId exists in the other prerequisite edges
+                if differentKind or createsCycle
+                    append(proofBacklog, ProofEntry("contradicted prerequisite", "named-limitation", edge.fromId + " → " + edge.toId + " dropped; the new read disagrees"))
                 else
-                    append(proofBacklog, ProofEntry("contradicted prerequisite", "named-limitation", edge.fromId + " → " + edge.toId + " dropped; the predecessor list contradicts it"))
+                    append(kept, edge)
                 continue
             if edge.kind = "hold-target" and edge.fromId = node.id
                 continue
@@ -566,9 +571,8 @@ function run(concept, targetCode, mode, delta, maxRetries)
     if adversaryOnly and not (mode = "delta" and convergeFlag = "off")
         error "adversary-only flag rejected; do no work"
     if mode = "full"
-        // Seeded saved graph whose checklist is already satisfied: Phase D over that saved graph,
-        // then the graph pass over the WHOLE graph. Do not discover the concept from scratch.
-        // If the discovery checklist is not satisfied, run Phase B on the whole concept first. If that result is escalated, return it and do not merge the seed. Otherwise run Phase C. The fresh read always wins: merge only the seed node ids the fresh rediscovery does not have, keeping their edges, then Phase D and the graph pass. Do not throw them away.
+        // full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first. If that result is escalated, return it and do not merge the seed. Otherwise run Phase C. The fresh read always wins: merge only the seed node ids the fresh rediscovery does not have, keeping their edges, then Phase D and the graph pass. Do not throw them away.
+        // On a seed resume, the first read is a single discoverFacts, and convergeSaved then does the two reads.
         if delta ≠ null and delta.seed ≠ null and Discovery.discoveryComplete(delta.seed)
             curriculum ← Validation.convergeSaved(delta.seed, maxRetries)
             if curriculum.result = "escalated"
@@ -590,10 +594,17 @@ function run(concept, targetCode, mode, delta, maxRetries)
             proof ← curriculum.proofEntries
             if delta.seed.graph ≠ null and delta.seed.graph.nodes ≠ null
                 missing ← blank list
+                missingIds ← blank list
                 for each node in delta.seed.graph.nodes
                     if no node in curriculum.graph.nodes has id = node.id
                         append(missing, node)
+                        append(missingIds, node.id)
                 curriculum.graph, proof ← Graph.mergeNodes(curriculum.graph, missing, proof)
+                // keeping their edges. An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog.
+                if delta.seed.graph.edges ≠ null
+                    for each edge in delta.seed.graph.edges
+                        if edge.fromId is in missingIds or edge.toId is in missingIds
+                            curriculum.graph, proof ← Graph.addEdgeIfEndsExist(curriculum.graph, edge, proof)
                 curriculum.proofEntries ← proof
             curriculum ← Validation.convergeSaved(curriculum, maxRetries)
             if curriculum.result = "escalated"

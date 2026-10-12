@@ -2,7 +2,7 @@
 
 Teach one code concept as a knowledge-graph curriculum. The procedure is the two process twins in this folder. `command.md` and `SKILL.md` only point at them.
 
-This process is self-contained: it depends on no other teaching protocol. Its term check (G2f) reads the layman-terms denylist, so install `protocols/layman-terms/` too. Installing this protocol copies only its own files and must not overwrite any other protocol's folder or installed `$CONFIG_DIR/` sidecar.
+This process needs `protocols/code-discovery-machine/` installed too. Its term check (G2f) reads the layman-terms denylist, so install `protocols/layman-terms/` too. Installing this protocol copies only its own files and must not overwrite any other protocol's folder or installed `$CONFIG_DIR/` sidecar.
 
 ## Files
 

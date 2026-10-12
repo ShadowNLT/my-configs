@@ -182,26 +182,43 @@ module Graph
         return node
 
     function addEdgeIfEndsExist(graph, edge, proofBacklog)   // → Graph, list of ProofEntry
-        // Add the edge only when both ends exist in the merged graph. Otherwise drop it and record it.
+        // An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog.
+        // The overwrite case uses this same check.
+        if proofBacklog = null
+            proofBacklog ← blank list
         fromNode ← find graph.nodes where node.id = edge.fromId
         toNode ← find graph.nodes where node.id = edge.toId
         if fromNode = null or toNode = null
             append(proofBacklog, ProofEntry("dangling edge", "named-limitation", edge.fromId + " → " + edge.toId + " (" + edge.kind + ") dropped; an end is not in the merged graph"))
+            kept ← blank list
+            for each existing in graph.edges
+                if existing.fromId = edge.fromId and existing.toId = edge.toId and existing.kind = edge.kind
+                    continue
+                append(kept, existing)
+            graph.edges ← kept
             return graph, proofBacklog
+        for each i in graph.edges
+            if graph.edges[i].fromId = edge.fromId and graph.edges[i].toId = edge.toId and graph.edges[i].kind = edge.kind
+                graph.edges[i] ← edge
+                return graph, proofBacklog
         append(graph.edges, edge)
         return graph, proofBacklog
 
     function replaceEdges(graph, node, proofBacklog)   // → Graph, list of ProofEntry
         // Keep every edge type. elaborates and case-of stay; they are not rebuilt as prerequisites.
-        // Replace only the incoming prerequisite edges and the hold-target edges this node states.
-        // Do not walk followers. A follower linked only by elaborates never becomes a prerequisite.
+        // Hold-target edges this node opens are restated. Do not walk followers. A follower linked only by elaborates never becomes a prerequisite.
         // C7 works predecessors and followers out from the edges.
-        // Add an edge only when both ends exist. Otherwise drop it and record it.
+        // An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog.
+        // An existing incoming prerequisite edge that the node's predecessor list does not contradict is kept. An edge that is dropped is recorded in the proof backlog. A caller node never loses an edge silently.
         if proofBacklog = null
             proofBacklog ← blank list
         kept ← blank list
         for each edge in graph.edges
             if edge.kind = "prerequisite" and edge.toId = node.id
+                if edge.fromId is in node.predecessors
+                    append(kept, edge)
+                else
+                    append(proofBacklog, ProofEntry("contradicted prerequisite", "named-limitation", edge.fromId + " → " + edge.toId + " dropped; the predecessor list contradicts it"))
                 continue
             if edge.kind = "hold-target" and edge.fromId = node.id
                 continue
@@ -222,27 +239,23 @@ module Graph
                 graph, proofBacklog ← Graph.addEdgeIfEndsExist(graph, edge, proofBacklog)
         return graph, proofBacklog
 
-    function mergeGraphs(base, addition)   // Graph, Graph → Graph
+    function mergeGraphs(base, addition, proofBacklog)   // → Graph, list of ProofEntry
         // Replace a node when its id already exists.
         // Keep every caller edge the new read does not mention. Replace only an edge the new read covers (same fromId, toId, and kind).
+        // An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog.
+        if proofBacklog = null
+            proofBacklog ← blank list
         if base = null
             base ← blank Graph
             base.nodes ← blank list
             base.edges ← blank list
         if addition = null
-            return base
+            return base, proofBacklog
         for each node in addition.nodes
             Graph.replaceNode(base, node)
         for each edge in addition.edges
-            replaced ← false
-            for each i in base.edges
-                if base.edges[i].fromId = edge.fromId and base.edges[i].toId = edge.toId and base.edges[i].kind = edge.kind
-                    base.edges[i] ← edge
-                    replaced ← true
-                    break
-            if not replaced
-                append(base.edges, edge)
-        return base
+            base, proofBacklog ← Graph.addEdgeIfEndsExist(base, edge, proofBacklog)
+        return base, proofBacklog
 
     function mergeNodes(graph, nodes, proofBacklog)   // → Graph, list of ProofEntry
         // Caller-made nodes join the existing graph. Replace each node once, here. phaseCOnRegion does not replace it again.
@@ -380,7 +393,9 @@ module Validation
         if base = null
             base ← blank DiscoveryRecord
         if facts ≠ null and facts ≠ blank list
-            base.graph ← Graph.mergeGraphs(base.graph, Graph.buildGraph(facts))
+            proof ← base.proofEntries
+            base.graph, proof ← Graph.mergeGraphs(base.graph, Graph.buildGraph(facts), proof)
+            base.proofEntries ← proof
             // Phase C on the merged graph, not only the new piece.
             // C2 and C7 see the new piece's edges to the existing nodes.
             proof ← base.proofEntries
@@ -553,18 +568,38 @@ function run(concept, targetCode, mode, delta, maxRetries)
     if mode = "full"
         // Seeded saved graph whose checklist is already satisfied: Phase D over that saved graph,
         // then the graph pass over the WHOLE graph. Do not discover the concept from scratch.
-        // Seeded saved graph whose checklist is not satisfied: full rediscovery, and the seed's nodes
-        // are caller-made nodes. Merge them once and run Phase C, keeping their edges. Do not throw them away.
+        // If the discovery checklist is not satisfied, run Phase B on the whole concept first. If that result is escalated, return it and do not merge the seed. Otherwise run Phase C. The fresh read always wins: merge only the seed node ids the fresh rediscovery does not have, keeping their edges, then Phase D and the graph pass. Do not throw them away.
         if delta ≠ null and delta.seed ≠ null and Discovery.discoveryComplete(delta.seed)
             curriculum ← Validation.convergeSaved(delta.seed, maxRetries)
             if curriculum.result = "escalated"
                 return curriculum
+        else if delta ≠ null and delta.seed ≠ null
+            facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries)
+            curriculum ← blank DiscoveryRecord
+            curriculum.concept ← concept
+            curriculum.exploredRegion ← explored
+            curriculum.openCodeQuestions ← oq
+            curriculum.uncoveredBranches ← ub
+            curriculum.discoveryChecklist ← checklist
+            if dstat = "escalated"
+                curriculum.result ← "escalated"
+                curriculum.reason ← reason
+                curriculum.discoveryStatus ← "escalated"
+                return curriculum
+            curriculum.graph ← Graph.buildGraph(facts)
+            proof ← curriculum.proofEntries
+            if delta.seed.graph ≠ null and delta.seed.graph.nodes ≠ null
+                missing ← blank list
+                for each node in delta.seed.graph.nodes
+                    if no node in curriculum.graph.nodes has id = node.id
+                        append(missing, node)
+                curriculum.graph, proof ← Graph.mergeNodes(curriculum.graph, missing, proof)
+                curriculum.proofEntries ← proof
+            curriculum ← Validation.convergeSaved(curriculum, maxRetries)
+            if curriculum.result = "escalated"
+                return curriculum
         else
             curriculum ← Validation.converge(concept, maxRetries)
-            if delta ≠ null and delta.seed ≠ null and delta.seed.graph ≠ null
-                proof ← curriculum.proofEntries
-                curriculum.graph, proof ← Graph.mergeNodes(curriculum.graph, delta.seed.graph.nodes, proof)
-                curriculum.proofEntries ← proof
             if curriculum.result = "escalated"
                 return curriculum
         prior ← curriculum.proofEntries

@@ -181,35 +181,50 @@ module Graph
         append(graph.nodes, node)
         return node
 
-    function replaceEdges(graph, node)   // keep this node's edges; replace them when they changed
+    function addEdgeIfEndsExist(graph, edge, proofBacklog)   // → Graph, list of ProofEntry
+        // Add the edge only when both ends exist in the merged graph. Otherwise drop it and record it.
+        fromNode ← find graph.nodes where node.id = edge.fromId
+        toNode ← find graph.nodes where node.id = edge.toId
+        if fromNode = null or toNode = null
+            append(proofBacklog, ProofEntry("dangling edge", "named-limitation", edge.fromId + " → " + edge.toId + " (" + edge.kind + ") dropped; an end is not in the merged graph"))
+            return graph, proofBacklog
+        append(graph.edges, edge)
+        return graph, proofBacklog
+
+    function replaceEdges(graph, node, proofBacklog)   // → Graph, list of ProofEntry
+        // Keep every edge type. elaborates and case-of stay; they are not rebuilt as prerequisites.
+        // Replace only the incoming prerequisite edges and the hold-target edges this node states.
+        // Do not walk followers. A follower linked only by elaborates never becomes a prerequisite.
+        // C7 works predecessors and followers out from the edges.
+        // Add an edge only when both ends exist. Otherwise drop it and record it.
+        if proofBacklog = null
+            proofBacklog ← blank list
         kept ← blank list
         for each edge in graph.edges
-            if edge.fromId ≠ node.id and edge.toId ≠ node.id
-                append(kept, edge)
+            if edge.kind = "prerequisite" and edge.toId = node.id
+                continue
+            if edge.kind = "hold-target" and edge.fromId = node.id
+                continue
+            append(kept, edge)
         graph.edges ← kept
         for each predId in node.predecessors
             edge ← blank Edge
             edge.fromId ← predId
             edge.toId ← node.id
             edge.kind ← "prerequisite"
-            append(graph.edges, edge)
-        for each followerId in node.followers
-            edge ← blank Edge
-            edge.fromId ← node.id
-            edge.toId ← followerId
-            edge.kind ← "prerequisite"
-            append(graph.edges, edge)
+            graph, proofBacklog ← Graph.addEdgeIfEndsExist(graph, edge, proofBacklog)
         for each hold in node.holdsOpened
             if hold.closerNodeId ≠ ""
                 edge ← blank Edge
                 edge.fromId ← node.id
                 edge.toId ← hold.closerNodeId
                 edge.kind ← "hold-target"
-                append(graph.edges, edge)
-        return graph
+                graph, proofBacklog ← Graph.addEdgeIfEndsExist(graph, edge, proofBacklog)
+        return graph, proofBacklog
 
     function mergeGraphs(base, addition)   // Graph, Graph → Graph
-        // Keep every node and edge already in base. Replace a node when its id already exists, and replace its edges when they changed.
+        // Replace a node when its id already exists.
+        // Keep every caller edge the new read does not mention. Replace only an edge the new read covers (same fromId, toId, and kind).
         if base = null
             base ← blank Graph
             base.nodes ← blank list
@@ -218,53 +233,66 @@ module Graph
             return base
         for each node in addition.nodes
             Graph.replaceNode(base, node)
-            kept ← blank list
-            for each edge in base.edges
-                if edge.fromId ≠ node.id and edge.toId ≠ node.id
-                    append(kept, edge)
-            base.edges ← kept
-            for each edge in addition.edges
-                if edge.fromId = node.id or edge.toId = node.id
-                    append(base.edges, edge)
         for each edge in addition.edges
-            if edge not in base.edges
+            replaced ← false
+            for each i in base.edges
+                if base.edges[i].fromId = edge.fromId and base.edges[i].toId = edge.toId and base.edges[i].kind = edge.kind
+                    base.edges[i] ← edge
+                    replaced ← true
+                    break
+            if not replaced
                 append(base.edges, edge)
         return base
 
-    function mergeNodes(graph, nodes)   // Graph, list of Node → Graph
-        // Caller-made nodes join the existing graph. An existing id is replaced, not dropped. Edges stay, then Phase C runs.
+    function mergeNodes(graph, nodes, proofBacklog)   // → Graph, list of ProofEntry
+        // Caller-made nodes join the existing graph. Replace each node once, here. phaseCOnRegion does not replace it again.
+        // Edges stay (every type), then Phase C runs.
+        if proofBacklog = null
+            proofBacklog ← blank list
         if graph = null
             graph ← blank Graph
             graph.nodes ← blank list
             graph.edges ← blank list
+        if nodes = null
+            return graph, proofBacklog
         for each node in nodes
             Graph.replaceNode(graph, node)
-        return Graph.phaseCOnRegion(graph, nodes)
+        for each node in nodes
+            graph, proofBacklog ← Graph.replaceEdges(graph, node, proofBacklog)
+        return Graph.phaseCOnRegion(graph, nodes, proofBacklog)
 
-    function phaseCOnRegion(graph, regionNodes)   // Graph, nodes or node ids → Graph
+    function phaseCOnRegion(graph, regionNodes, proofBacklog)   // → Graph, list of ProofEntry
         // Phase C for those nodes, inside the existing graph. Do not return a graph of only the region's nodes.
         // A plain node id is looked up and still gets Phase C. It is not skipped.
+        // A node the merge already replaced is not replaced again.
+        if proofBacklog = null
+            proofBacklog ← blank list
         if graph = null
             graph ← blank Graph
             graph.nodes ← blank list
             graph.edges ← blank list
+        if regionNodes = null
+            regionNodes ← blank list
         for each item in regionNodes
             if item is an id
                 node ← find graph.nodes where node.id = item
                 if node = null
                     error "region node id is not in the graph"
             else
-                node ← Graph.replaceNode(graph, item)
-                Graph.replaceEdges(graph, node)
+                node ← find graph.nodes where node.id = item.id
+                if node = null
+                    node ← Graph.replaceNode(graph, item)
+                    graph, proofBacklog ← Graph.replaceEdges(graph, node, proofBacklog)
             // C2. Prerequisite edges so this node needs no undefined term.
+            // Both ends must exist. Otherwise the edge is dropped and recorded.
             for each predId in node.predecessors
                 if no prerequisite edge predId → node.id is in graph.edges
                     edge ← blank Edge
                     edge.fromId ← predId
                     edge.toId ← node.id
                     edge.kind ← "prerequisite"
-                    append(graph.edges, edge)
-            // C7. Predecessors and followers come from the edges that touch this node.
+                    graph, proofBacklog ← Graph.addEdgeIfEndsExist(graph, edge, proofBacklog)
+            // C7. Predecessors and followers come from prerequisite edges. An elaborates edge does not become a prerequisite.
             node.predecessors ← fromIds of prerequisite edges whose toId = node.id
             node.followers ← toIds of prerequisite edges whose fromId = node.id
         // C5. Fail closed on a prerequisite cycle. C6. Fail closed on a soft hole.
@@ -272,7 +300,7 @@ module Graph
             error "prerequisite cycle"
         if Graph.hasSoftHole(graph.nodes)
             error "soft hole: deferred case without named hold and closer"
-        return graph
+        return graph, proofBacklog
 
 // --- piece 4: converge + adversary ---
 
@@ -353,6 +381,11 @@ module Validation
             base ← blank DiscoveryRecord
         if facts ≠ null and facts ≠ blank list
             base.graph ← Graph.mergeGraphs(base.graph, Graph.buildGraph(facts))
+            // Phase C on the merged graph, not only the new piece.
+            // C2 and C7 see the new piece's edges to the existing nodes.
+            proof ← base.proofEntries
+            base.graph, proof ← Graph.phaseCOnRegion(base.graph, base.graph.nodes, proof)
+            base.proofEntries ← proof
         if explored ≠ null
             if base.exploredRegion = null
                 base.exploredRegion ← explored
@@ -518,15 +551,20 @@ function run(concept, targetCode, mode, delta, maxRetries)
     if adversaryOnly and not (mode = "delta" and convergeFlag = "off")
         error "adversary-only flag rejected; do no work"
     if mode = "full"
-        // No seed, or the checklist is not satisfied: Phases B, C, D, and the graph pass.
         // Seeded saved graph whose checklist is already satisfied: Phase D over that saved graph,
         // then the graph pass over the WHOLE graph. Do not discover the concept from scratch.
+        // Seeded saved graph whose checklist is not satisfied: full rediscovery, and the seed's nodes
+        // are caller-made nodes. Merge them once and run Phase C, keeping their edges. Do not throw them away.
         if delta ≠ null and delta.seed ≠ null and Discovery.discoveryComplete(delta.seed)
             curriculum ← Validation.convergeSaved(delta.seed, maxRetries)
             if curriculum.result = "escalated"
                 return curriculum
         else
             curriculum ← Validation.converge(concept, maxRetries)
+            if delta ≠ null and delta.seed ≠ null and delta.seed.graph ≠ null
+                proof ← curriculum.proofEntries
+                curriculum.graph, proof ← Graph.mergeNodes(curriculum.graph, delta.seed.graph.nodes, proof)
+                curriculum.proofEntries ← proof
             if curriculum.result = "escalated"
                 return curriculum
         prior ← curriculum.proofEntries
@@ -560,7 +598,9 @@ function run(concept, targetCode, mode, delta, maxRetries)
         base ← delta.existing
         if delta.callerNodes = null or length(delta.callerNodes) = 0
             error "adversary-only requires caller-made nodes; do no work"
-        base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
+        proof ← base.proofEntries
+        base.graph, proof ← Graph.mergeNodes(base.graph, delta.callerNodes, proof)
+        base.proofEntries ← proof
         prior ← base.proofEntries
         if prior = null
             prior ← blank list
@@ -571,7 +611,9 @@ function run(concept, targetCode, mode, delta, maxRetries)
         // Caller-made nodes, not adversary-only. Merge them into the existing graph. Phase C and the graph pass on those nodes.
         // Do not rebuild the graph from only those nodes. Do not run Phase D.
         base ← delta.existing
-        base.graph ← Graph.mergeNodes(base.graph, delta.callerNodes)
+        proof ← base.proofEntries
+        base.graph, proof ← Graph.mergeNodes(base.graph, delta.callerNodes, proof)
+        base.proofEntries ← proof
         prior ← base.proofEntries
         if prior = null
             prior ← blank list
@@ -579,7 +621,7 @@ function run(concept, targetCode, mode, delta, maxRetries)
         base ← addProof(base, proof)
         return base
     if delta.regionIsMissingFact
-        // Missing fact. Phase B on that fact only, then Phase C via the merge. Not discovery of the whole concept.
+        // Missing fact. Phase B on that fact only, then Phase C on the merged graph. Not discovery of the whole concept.
         base ← delta.existing
         facts, explored, oq, ub, checklist, dstat, reason ← Discovery.discoverFacts(concept, maxRetries, delta.region)
         base ← Validation.mergePartial(base, facts, explored, oq, ub, checklist)
@@ -594,7 +636,9 @@ function run(concept, targetCode, mode, delta, maxRetries)
         return base
     // Region is node ids. Phase C on that region, merged into the existing graph.
     base ← delta.existing
-    base.graph ← Graph.phaseCOnRegion(base.graph, delta.regionNodes)
+    proof ← base.proofEntries
+    base.graph, proof ← Graph.phaseCOnRegion(base.graph, delta.regionNodes, proof)
+    base.proofEntries ← proof
     base.result ← "clear"
     base.reason ← ""
     return base

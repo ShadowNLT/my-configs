@@ -439,17 +439,12 @@ module Teaching
     function teach(curriculum, passedIds, lessonLog, entry, proofBacklog)   // → "complete" or "stuck"
         // entry: "fresh" | "resume" | "solution"
         //   fresh    — new run (passedIds blank), or the same run continuing after stuckRevisit (no recap)
-        //   resume   — G0: saved passed_chunks from a pause; recap, then the discovery call
+        //   resume   — G0: saved passed_chunks from a pause; the discovery call, then the recap
         //   solution — Phase S: picture passes kept in passedIds as the floor; NOT a resume, no recap (S3)
         if passedIds = null
             passedIds ← blank list
         if entry = "resume"
-            // Step G0. Recap first. If discoveryStatus is not clear, call code-discovery-machine
-            // in full mode, seeded with the saved graph.
-            recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
-            if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
-                error "recap failed term check (G0, G2f)"
-            // show recap; do not rebuild or show the graph; do not re-teach passed chunks
+            // Step G0. The discovery call is first, so an escalated result shows no recap. Then the recap.
             // restore saved stuckRevisits per side (H7); never reset to 0
             if curriculum.discoveryStatus ≠ "clear"
                 record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "full", existing=curriculum, seed=curriculum)
@@ -457,6 +452,10 @@ module Teaching
                 if record.result = "escalated"
                     error "escalated; present the record to the learner; do not teach"
                 apply record onto curriculum
+            recap ← plain recap of PASSED chunks only, by headline, no ids (no question)
+            if Teaching.termCheck(recap, null, passedIds, curriculum) ≠ "ok"
+                error "recap failed term check (G0, G2f)"
+            // show recap; do not rebuild or show the graph; do not re-teach passed chunks
         while true
             ready ← Teaching.readySet(curriculum, passedIds)
             if ready = blank list

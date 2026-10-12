@@ -154,17 +154,17 @@ Inputs:
 - adversary-only flag. Accept it only when mode is delta and converge is off. Any other combination is an error. Do no work.
 
 full, with no saved graph: run Phases B, C, D, and the graph pass.
-full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first, then Phase C, Phase D, and the graph pass.
+full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first, then Phase C, Phase D, and the graph pass, with that saved graph's nodes passed in as caller-made nodes so they are merged and checked, keeping their edges. Do not throw them away.
 
 Phase D over a saved graph is two independent reads of the code that graph covers. Each read is checked against the saved graph and against the other read. When the two reads agree and differ from the saved graph, merge that agreed region into the saved graph and read again on the disputed region. When the two reads disagree, do not merge them; read again on the disputed region only. The saved graph is not replaced.
 
-A delta call merges into the caller's graph. It never replaces that graph. A delta path that runs Phase B runs it on the region only and merges the result into the input graph. An escalated Phase B still returns that merged record.
+A delta call merges into the caller's graph. It never replaces that graph. A merge keeps every caller edge the new read does not mention, and replaces only the edges the new read covers. Every edge keeps its type. An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog. A delta path that runs Phase B runs it on the region only and merges the result into the input graph. An escalated Phase B still returns that merged record.
 
 delta, converge on: run Phase B on the region only as two independent reads inside Phase D, merge the result into the existing graph (Phase C on the merged nodes), then the graph pass over the region and the existing graph. Do not discover the whole concept.
 delta, converge off, adversary-only: merge the caller-made nodes and their edges into the existing graph, run Phase C on those nodes, then run the graph pass on that list only. Do not review the rest of the record. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
 delta, converge off, with caller-made nodes, not adversary-only: merge those nodes and their edges into the existing graph, then run Phase C and the graph pass on those nodes. Do not rebuild the graph from only those nodes. Do not run Phase D. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
 delta, converge off, region is node ids: run Phase C on those nodes inside the existing graph, including when the region is a list of node ids. Do not keep only the region's nodes. Do not skip a node id.
-delta, converge off, region is a missing fact: run Phase B on that fact only, merge the result into the existing graph, then Phase C. An escalated result returns that merged record.
+delta, converge off, region is a missing fact: run Phase B on that fact only, merge the result into the existing graph, then Phase C on the merged graph. An escalated result returns that merged record.
 
 Proof backlog entries from a delta call are added to the entries already on the input record (E5). They do not replace them.
 

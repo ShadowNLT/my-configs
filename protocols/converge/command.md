@@ -1,5 +1,5 @@
 ---
-description: Fan out 2 independent agents to propose how to do a task; loop until their plans match in substance and artifacts (a third agent cannot find a difference), or stop after n rounds and report. Reports the agreed plan only — never executes it.
+description: Fan out 2 independent agents to propose how to do a task; loop until both reach the same result on the task as stated and both rest on the same facts (steps, order, and artifacts may differ; a third agent cannot find a difference in the result or the facts), or stop after n rounds and report. Reports which plans converged — never executes them. The caller decides.
 argument-hint: ["n"] <task to plan> [--n n]
 ---
 
@@ -31,7 +31,7 @@ one-read plain language, jargon defined or replaced, no substance dropped.
 | Token / flag | Default | Meaning |
 |---|---|---|
 | leading integer `n`, or `--n n` | `4` | Max fan-out rounds (integer ≥ 1). |
-| task text (remainder) | required | What to plan. If empty, infer the most recent substantive task in the conversation and **state which you picked**. Ambiguity → ask, don't guess. |
+| task text (remainder) | required | What to plan. Whoever calls converge sets the task: run standalone, the operator states the task (if the task text is empty, infer the most recent substantive task in the conversation); called by another protocol, that protocol supplies the task (for freeze-task-ship, its frozen criteria). **State which you picked.** Ambiguity → ask, don't guess. |
 
 Reject non-integer / `< 1` for `n` — stop and report rather than clamping.
 Unknown flags → stop and report. Cap `n` at 8; if the operator wants more, ask
@@ -93,24 +93,38 @@ not repair their substance yourself).
 
 ## 4. Converge test (definition)
 
-**Converged** means the two plans match in **substance** and have
-**near-identical artifacts**, such that an independent agent cannot find a
-difference between the two approaches.
+**Converged** means both plans reach the same result on the task as stated,
+and both rest on the same facts. Their steps, order, and artifacts may differ.
 
 Operational check (required when the two plans look aligned):
 
 1. Spawn a **third independent agent** (the **differ**) that sees **only**: the
    Task Brief, Plan A, and Plan B — sealed from the proposers' identities and
    from prior-round chatter.
-2. Differ mandate: list every difference that would change *how* someone
-   executes the plan (steps, order, artifacts touched, non-goals, load-bearing
-   assumptions). Ignore pure wording / formatting / synonymy.
-3. If the differ returns **no substantive differences** → **converged**.
-4. If the differ returns **any** substantive difference → **not converged**.
+2. Differ mandate: flag only differences in the result or in the facts a plan
+   rests on. A difference in steps, order, or artifacts alone is not a
+   mismatch. Ignore pure wording / formatting / synonymy.
+3. If the differ returns **no difference in result or facts** → **converged**.
+4. If the differ returns **any** difference in the result or the facts → **not converged**.
 
 The orchestrator does **not** soft-pass "close enough." The differ's empty
 diff is the gate. If the Agent / Task tool is unavailable, the orchestrator
 plays the differ role sequentially and labels `independence: reduced`.
+
+### Examples
+
+**Converged**
+
+- Multiply 2 by 3: one plan does 2+2+2, the other 2×3. Both reach 6.
+- Sorting: one plan uses the built-in sort, the other a hand-written merge sort. Both give the same sorted list.
+- Form field: one plan adds a new input component, the other adds a prop to the existing one. Either way the field shows and gets saved, which meets the task as stated.
+- Email lookup: one plan adds a new database index, the other reuses the existing lookup that filters by email. Both return the same user within the same limits.
+- Bug fix: one plan guards the bad value where it is used, the other stops it where it is created. In both, the failing test passes and nothing else in scope breaks.
+
+**Not converged**
+
+- Result differs: both add the field, but one plan's version is not saved.
+- Facts differ: one plan assumes the API returns a list, the other a single object; only one matches the facts, so the results cannot be the same.
 
 ---
 
@@ -145,12 +159,13 @@ Run the converge test (§4).
 
 - **Converged** → go to §6 (success). Stop the loop.
 - **Not converged** and `r < n` → build a **Diff Themes** block from the
-  differ's findings (themes only — no full rival plan). On the next round,
+  differ's findings. List only differences in the result or in the facts a
+  plan rests on (themes only — no full rival plan). On the next round,
   append that block to the sealed brief copy each proposer gets:
 
   ```markdown
   ## Diff Themes (from prior round — resolve these; do not copy a rival plan)
-  - <theme>
+  - <difference in the result, or in the facts a plan rests on>
   ```
 
   Then start round `r+1` with fresh proposers (do not resume contaminated
@@ -161,16 +176,20 @@ Run the converge test (§4).
 
 ## 6. Success — report only
 
-Emit the agreed plan once (use either proposer's artifact if the differ found
-no differences; if tiny wording differs, pick one and note `wording: normalized
-from A|B`).
+Print both converged plans and report which plans converged. The caller
+chooses. Do not pick a winner or merge the plans.
 
 ```markdown
-## Converged plan
+## Converged plans
 - **Rounds used:** <r> of <n>
-- **Differ:** no substantive differences
+- **Differ:** no difference in result or facts
+- **Converged:** Plan A and Plan B
 
-<the Plan artifact>
+### Plan A
+<full artifact>
+
+### Plan B
+<full artifact>
 ```
 
 **Do not execute.** Do not start implementing, editing files, or running the

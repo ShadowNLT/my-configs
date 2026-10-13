@@ -41,7 +41,7 @@ Do all steps in order, with observable shell output. Do not skip the temp clone 
 
 ### 0. Resolve where this install lives — ask, do not assume
 
-Ask which harness install to update if it is not already obvious in this conversation. Get `COMMANDS_DIR` and `CONFIG_DIR` from the user (see `protocols/README.md`). Do not look up a product name in a path table and do not default to a home directory.
+Ask which harness install to update if it is not already obvious in this conversation. Get `COMMANDS_DIR` and `CONFIG_DIR` from the operator (see `protocols/README.md`). Do not look up a product name in a path table and do not default to a home directory.
 
 Set:
 

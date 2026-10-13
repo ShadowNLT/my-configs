@@ -7,7 +7,7 @@ description: >
   how it breaks its callers), a live browser/app session being tested (how the running flow
   breaks right now), a config/infra file, an API or data contract, or a data transform. Reports
   a severity-ranked list of failure modes with concrete repro conditions by default; when the
-  user asks it attempts to actually trigger the top findings. Owns runtime/concrete breakage
+  operator asks it attempts to actually trigger the top findings. Owns runtime/concrete breakage
   only: defers plan and decision critique to /adversarial-review and general line-by-line bug
   review to /code-review.
 
@@ -22,11 +22,11 @@ You are running an adversarial failure-hunt. The single question you answer: **h
 concrete thing in front of me break in practice?** Not "is this a good idea" (that is
 `/adversarial-review`), not "line-by-line, is this code correct" (that is `/code-review`). You
 hunt runtime and concrete failure modes, rank them by severity, and by default report them; when
-the user asks you go further and try to make the top ones actually happen.
+the operator asks you go further and try to make the top ones actually happen.
 
 Two failures are equally bad: a padded list of theoretical breaks that can't actually occur, and
-missing a real break that a user would hit in the first hour. Default posture is **a hostile
-user and a bad network, not a reviewer being polite**.
+missing a real break that an app user would hit in the first hour. Default posture is **a hostile
+app user and a bad network, not a reviewer being polite**.
 
 ---
 
@@ -35,7 +35,7 @@ user and a bad network, not a reviewer being polite**.
 There is no argument string to parse. The target is whatever concrete artifact is in front of
 you.
 
-**Target resolution:** if the user names a target, break that. Otherwise infer it from the
+**Target resolution:** if the operator names a target, break that. Otherwise infer it from the
 conversation, newest signal first. If it is genuinely ambiguous which of two artifacts is the
 target, ask rather than guess, one short question.
 
@@ -66,7 +66,7 @@ findings are actionable and don't duplicate the other tools:
   latent bug with no triggering condition you can name) → point to `/code-review`. Do not turn
   this into a full code review.
 - Everything that is "under condition X, this breaks / errors / corrupts / hangs / misleads the
-  user" is yours. If you can't name condition X, it's probably a `/code-review` finding, not an
+  app user" is yours. If you can't name condition X, it's probably a `/code-review` finding, not an
   app-breaker one.
 
 ## 3. The hunt
@@ -74,10 +74,10 @@ findings are actionable and don't duplicate the other tools:
 For each candidate failure, you need three things or it doesn't make the list:
 
 1. **The break** — what actually goes wrong (crash, wrong result, data loss, hang, silent
-   corruption, security exposure, confusing dead-end for the user).
+   corruption, security exposure, confusing dead-end for the app user).
 2. **The trigger** — the concrete condition that causes it. "Null input" is weak; "the `items`
    array is empty because the upstream filter removed everything, and line 42 does `items[0]`"
-   is a finding. If you cannot state a trigger a real user or system could produce, cut it.
+   is a finding. If you cannot state a trigger a real app user or system could produce, cut it.
 3. **Severity** — assign P1–P4 (see §6). Likelihood is part of severity, not a separate axis: a
    catastrophic break that literally cannot be triggered is not a P1, it's cut.
 
@@ -151,7 +151,7 @@ lifecycle assumptions, and the trust boundary (anything from outside is hostile 
 
 ### 4.7 The kill pass (run on every candidate)
 Before a candidate survives, try hard to kill it. A candidate dies if:
-- You cannot name a trigger a real user or system could actually produce.
+- You cannot name a trigger a real app user or system could actually produce.
 - Existing code, validation, a type, or a framework guarantee already prevents it (go check;
   don't assume it's unguarded).
 - It's the same underlying break as another finding (merge them; don't inflate the count).
@@ -162,7 +162,7 @@ Surviving the kill pass is the bar for the list. Killing a plausible-looking can
 
 ## 5. Proving: try to actually trigger the top findings
 
-Only when the user asks. Take the top findings (every P1, then P2s until the cost of proving outweighs the value, usually
+Only when the operator asks. Take the top findings (every P1, then P2s until the cost of proving outweighs the value, usually
 the top three to five) and attempt to make them actually happen, strongest evidence first:
 - **LIVE:** drive the app with the tools — submit the empty form, throttle the network, feed the
   huge input — and capture the console error / failed request / broken screen as proof.
@@ -175,7 +175,7 @@ Respect the environment and the safety rules. Safe, reversible test actions agai
 dev/preview/local target on test data (submitting a throwaway form, throttling the network,
 feeding a large input) are the intended prove path, so do them. Stop at the line the safety rules
 draw: never do anything destructive, and never perform an action that is prohibited or requires
-the user's permission (a real send, purchase, deletion, submission of real user data, or any
+the operator's permission (a real send, purchase, deletion, submission of real app user data, or any
 irreversible control in a production or shared environment) just to prove a point. When proving a
 finding would cross that line, build a safe equivalent if you can; otherwise describe the repro
 precisely and mark it **unproven**. Report each top finding as **proven** (with the evidence) or
@@ -184,7 +184,7 @@ precisely and mark it **unproven**. Report each top finding as **proven** (with 
 ## 6. Severity scale
 
 - **P1 — will break in normal use, high impact.** Data loss, crash on a common path, security
-  exposure, silent wrong output a user relies on. A real user or system hits this soon.
+  exposure, silent wrong output an app user relies on. A real app user or system hits this soon.
 - **P2 — breaks under a plausible-but-not-constant condition, real impact.** A common edge (empty
   set, slow network, expired session, second concurrent request).
 - **P3 — breaks under a narrow or uncommon condition, or impact is contained/recoverable.** Real,
@@ -192,7 +192,7 @@ precisely and mark it **unproven**. Report each top finding as **proven** (with 
 - **P4 — theoretical, cosmetic, or already-mitigated-but-worth-noting.** True, but you had to
   reach; or fully recoverable with clear feedback; or a nitpick.
 
-If likelihood and impact pull in opposite directions, name both and pick the level the *user*
+If likelihood and impact pull in opposite directions, name both and pick the level the *operator*
 would triage it as. Never inflate to look thorough; never soften a real P1.
 
 ## 7. Output
@@ -203,7 +203,7 @@ P1: the empty-cart checkout"). Then the ranked list, most severe first:
 ```
 ### P1 — <short name of the break>
 **Breaks:** <what goes wrong>
-**Trigger:** <the concrete condition; file:line or the exact user action>
+**Trigger:** <the concrete condition; file:line or the exact app user action>
 **Proof:** <only when proving: proven + evidence, or unproven + why>
 **Fix direction:** <one line, the smallest thing that closes it — not a full patch>
 ```

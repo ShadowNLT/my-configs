@@ -5,7 +5,7 @@ description: Check ShadowNLT/concept-viz upstream and update the locally-seeded 
 
 # Concept Viz Update
 
-Infer the intent from the conversation: the user wants to know if the locally-seeded `concept-viz` command is byte-identical to upstream `https://github.com/ShadowNLT/concept-viz` and, unless they asked for a check-only audit, to update any drifted files. If the request is ambiguous (e.g. "update the viz" could mean this updater vs redrawing a specific grain), ask which is meant before fetching.
+Infer the intent from the conversation: the operator wants to know if the locally-seeded `concept-viz` command is byte-identical to upstream `https://github.com/ShadowNLT/concept-viz` and, unless they asked for a check-only audit, to update any drifted files. If the request is ambiguous (e.g. "update the viz" could mean this updater vs redrawing a specific grain), ask which is meant before fetching.
 
 You are the updater for a globally installed `concept-viz` command. Upstream is `https://github.com/ShadowNLT/concept-viz` (skill package at `concept-viz/`). When seeded from this repo, the source of the seed is `protocols/concept-viz/` — still resolve the live install by asking for that harness's `CONFIG_DIR` and `COMMANDS_DIR`. This skill is the only writer for those install paths.
 
@@ -46,11 +46,11 @@ Derived paths (regenerate, do not `cp` raw `SKILL.md` over them):
 
 ## Procedure — run every time this skill is triggered
 
-Do all steps in order, with observable shell output. Do not skip the temp clone even if the network feels slow. If the user said "check only" or "audit without updating", treat that as `--check-only`; if they said "force", treat as `--force`; otherwise default is to update drifted files.
+Do all steps in order, with observable shell output. Do not skip the temp clone even if the network feels slow. If the operator said "check only" or "audit without updating", treat that as `--check-only`; if they said "force", treat as `--force`; otherwise default is to update drifted files.
 
 ### 0. Resolve where this install lives — ask, do not assume
 
-Ask which harness install to update if it is not already obvious in this conversation. Get `COMMANDS_DIR` and `CONFIG_DIR` from the user (see `protocols/README.md`). Do not look up a product name in a path table and do not default to a home directory.
+Ask which harness install to update if it is not already obvious in this conversation. Get `COMMANDS_DIR` and `CONFIG_DIR` from the operator (see `protocols/README.md`). Do not look up a product name in a path table and do not default to a home directory.
 
 Set:
 
@@ -144,11 +144,11 @@ Present a table:
 | `<name>.md` in the commands dir (derived) | ... |
 | SKILL.md (derived skill) | ... |
 
-If the user asked for check-only, stop here after the table and clean up `/tmp/concept-viz-upstream` (and candidates). Do not write.
+If the operator asked for check-only, stop here after the table and clean up `/tmp/concept-viz-upstream` (and candidates). Do not write.
 
 ### 4. Update any file that is not bytes identical (default)
 
-Only files marked DIFFERS / NEW / GONE are overwritten. Never touch files marked IDENTICAL unless the user said force.
+Only files marked DIFFERS / NEW / GONE are overwritten. Never touch files marked IDENTICAL unless the operator said force.
 
 **For asset paths** — direct byte copy into `$SIDECAR` (and `$REPO_PROTOCOL` when set). Use `--delete` on the recursive dirs so removed upstream files disappear locally:
 

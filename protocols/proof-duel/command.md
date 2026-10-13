@@ -30,7 +30,7 @@ is theater.
 That is the price of contested selection — do not silently drop a pair or skip the hater to save
 tokens. If the budget is unacceptable, stop and ask before starting.
 
-**Layman-terms rule (every user decision point):** stop-and-ask moments (missing problem, invalid
+**Layman-terms rule (every operator decision point):** stop-and-ask moments (missing problem, invalid
 flags, budget refusal) go through the `layman-terms` skill when available; otherwise apply its
 standard: one-read plain language, jargon defined or replaced, no substance dropped.
 
@@ -47,7 +47,7 @@ already-chosen plan → `/ponytail`.
 
 | Token / flag | Default | Meaning |
 |---|---|---|
-| leading integer `N`, or `--pairs N` | `3` | Number of independent pairs. Protocol default; user override only. |
+| leading integer `N`, or `--pairs N` | `3` | Number of independent pairs. Protocol default; operator override only. |
 | problem text (remainder) | required | The problem / fix target. If empty, infer the most recent substantive problem in the conversation and **state which you picked**. Ambiguity → ask, don't guess. |
 | `--rounds R` | `2` | Max writer↔hater revise cycles per pair after the opening draft (integer ≥ 1). |
 | `--solo` | off | Forbid real parallel sub-agents; run pairs sequentially in one mind and **log reduced independence**. |
@@ -58,10 +58,10 @@ already-chosen plan → `/ponytail`.
 | `--deck full\|core` | `full` | Catalog subset. |
 | `--exclude id,id` | empty | Hard-exclude ids (must still satisfy rule-1 at seal; passed into `cast-lenses.sh`). |
 
-**Who decides N:** the protocol (`3`) or an explicit user override. The orchestrator never
+**Who decides N:** the protocol (`3`) or an explicit operator override. The orchestrator never
 chooses N from vibes, stakes, or "how hard this feels." Reject non-integer / `< 1` / `> 5` for N
 or R, and reject invalid lens knobs — stop and report rather than clamping silently. Cap at 5
-keeps cost bounded; if the user wants more, ask them to confirm the spend. Full lens table:
+keeps cost bounded; if the operator wants more, ask them to confirm the spend. Full lens table:
 `lens-cast.md`.
 
 Unknown flags → stop and report.
@@ -225,7 +225,7 @@ resort under `--solo` or tool failure — log `judge: orchestrator-fallback`.
 
 ## 6. Present the verdict
 
-Return to the user:
+Return to the operator:
 
 ```markdown
 ## Proof Duel — Verdict
@@ -246,14 +246,14 @@ Return to the user:
 - Candidate <k>: one-line summary + total score
 ```
 
-Do **not** implement the winning proposal unless the user explicitly asks after the verdict.
+Do **not** implement the winning proposal unless the operator explicitly asks after the verdict.
 The deliverable of this command is the judged selection, not the patch.
 
 ---
 
 ## 7. Behaviour notes
 
-- **Protocol owns N** — default 3; user override only; never mid-run invention.
+- **Protocol owns N** — default 3; operator override only; never mid-run invention.
 - **Sealed pairs** — no cross-talk, no shared discoveries, identical brief.
 - **Hater does not write the fix** — attack only.
 - **Rubric before combat** — immutable for the run.

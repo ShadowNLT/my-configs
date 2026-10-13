@@ -20,7 +20,17 @@ Supporting files live in the protocol folder. Protocol bodies never hardcode a
 harness home path. They resolve assets from this folder, or from the sidecar
 rule below after a command install.
 
-When the user asks to install a protocol globally, **ask where each harness
+## Terminology
+
+**Operator** is the person running the agent (confirms tabs, answers escalations, freezes specs).
+
+**App user** is an account inside the software under test; add its role where known, e.g. 'app user (admin)'.
+
+In `app-breaker --user`, the operator logs in with the app user's test account.
+
+`system-atlas` is the sole exception to this terminology rule because it is copied from `inkboard/system-atlas`.
+
+When the operator asks to install a protocol globally, **ask where each harness
 lives before copying anything.** Do not assume a product name maps to one
 directory (work vs personal Cursor, a renamed config dir, etc.). For every
 harness they want seeded, get:
@@ -44,7 +54,7 @@ Then install:
 - **Standing rule or convention** — neither form; it belongs in project
   instructions (`AGENT.md`, `AGENTS.md`, rules) rather than a command or skill.
 
-Only install when the user asks. Echo the resolved `CONFIG_DIR` /
+Only install when the operator asks. Echo the resolved `CONFIG_DIR` /
 `COMMANDS_DIR` (and `SKILLS_DIR` if any) and get confirmation before writing.
 
 ## Sidecar layout
@@ -57,13 +67,13 @@ At run time, resolve supporting files in this order:
    `protocols/<name>/`, or a skill install under `$SKILLS_DIR/<name>/`).
 2. Otherwise this is a command file in a flat commands dir — use the sidecar
    `$CONFIG_DIR/<name>/` (parent of `$COMMANDS_DIR` when `COMMANDS_DIR` is a
-   direct child of the config root; if the user gave a layout that is not
+   direct child of the config root; if the operator gave a layout that is not
    that, trust the `CONFIG_DIR` they named).
 
 ## Protocols that need a sidecar
 
 These are not self-contained markdown. Command install is the `.md` **plus**
-the sidecar. Do not also install the skill unless the user asked for auto-discovery.
+the sidecar. Do not also install the skill unless the operator asked for auto-discovery.
 
 | Protocol | Copy into `$CONFIG_DIR/<name>/` |
 | -------- | -------------------------------- |
@@ -103,7 +113,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
 `proof-duel`, `code-concept-curriculum`, and `code-discovery-machine` are **not** markdown-only — use the sidecar install block below. `code-concept-curriculum` depends on `code-discovery-machine`. Install both, the same way the term check needs `layman-terms`.
 
-Command-form install after the user has named `$COMMANDS_DIR` and `$CONFIG_DIR`:
+Command-form install after the operator has named `$COMMANDS_DIR` and `$CONFIG_DIR`:
 
 ```bash
 # system-atlas + system-atlas-update (always together)
@@ -183,6 +193,6 @@ command with the protocol `command.md` unless you intend to drop the variables.
   the skill does and ends with `Trigger on: ...` cues, then the same procedure
   written to infer its target from context.
 - Keep the file consumable as-is by an agent reading it in-context. The
-  installed form is a wrapping concern: ask the user for `$CONFIG_DIR` and
+  installed form is a wrapping concern: ask the operator for `$CONFIG_DIR` and
   `$COMMANDS_DIR`, then copy. Never bake a harness home path into the procedure.
 - Update both forms when a procedure changes; they must not drift.

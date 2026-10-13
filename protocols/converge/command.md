@@ -11,14 +11,14 @@ converge / continue / stop. You do **not** execute the plan.
 
 Fan out **2 independent agents**. Each proposes **how** they would do the
 task. If they do not converge, repeat until they do. If you have looped more
-than `n` times, stop and report to the user.
+than `n` times, stop and report to the operator.
 
 **Lane:** this owns **task → agreed how-plan (report only)**. Competing fix
 proposals under adversarial pressure → `/proof-duel`. Plan/doc hardening →
 `/adversarial-review`. Minimality of an already-chosen plan → `/ponytail`.
 Blast radius → `/code-pi`.
 
-**Layman-terms rule (every user decision point):** stop-and-ask moments go
+**Layman-terms rule (every operator decision point):** stop-and-ask moments go
 through the `layman-terms` skill when available; otherwise apply its standard:
 one-read plain language, jargon defined or replaced, no substance dropped.
 
@@ -34,7 +34,7 @@ one-read plain language, jargon defined or replaced, no substance dropped.
 | task text (remainder) | required | What to plan. If empty, infer the most recent substantive task in the conversation and **state which you picked**. Ambiguity → ask, don't guess. |
 
 Reject non-integer / `< 1` for `n` — stop and report rather than clamping.
-Unknown flags → stop and report. Cap `n` at 8; if the user wants more, ask
+Unknown flags → stop and report. Cap `n` at 8; if the operator wants more, ask
 them to confirm the spend before starting.
 
 State in one line: `n=<n> task=<one-line restatement>` then proceed.
@@ -174,7 +174,7 @@ from A|B`).
 ```
 
 **Do not execute.** Do not start implementing, editing files, or running the
-steps unless the user explicitly asks in a later message. End the turn after
+steps unless the operator explicitly asks in a later message. End the turn after
 the report.
 
 ---
@@ -199,7 +199,7 @@ After `n` rounds without converge:
 ```
 
 Do **not** pick a winner, merge the plans, or execute. Hand the divergence to
-the user and stop.
+the operator and stop.
 
 ---
 

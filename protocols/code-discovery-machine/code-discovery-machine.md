@@ -183,11 +183,11 @@ Do not talk to the learner. The caller presents an escalated result and does not
 - It does not teach, chunk, or run a use-check.
 - It does not talk to the learner.
 - It does not edit the target code repository.
-- It does not write my-configs until the user co-signs and orders a write.
+- It does not write my-configs until the operator co-signs and orders a write.
 
 ## 7. Co-sign rule
 
-Before any repository change, the user must co-sign:
+Before any repository change, the operator must co-sign:
 1. this process in Simplified English form, and
 2. the same process in algo-sketch form,
 with a proof backlog that records closed attacks on logical tightness.

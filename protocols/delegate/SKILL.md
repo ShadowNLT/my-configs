@@ -43,7 +43,7 @@ Infer the subtask to delegate from the conversation and any argument given — d
 **not** demand an exhaustive description. Then sanity-check the scope:
 
 - If the task, its boundaries, or its acceptance criteria are **fuzzy**, ask the
-  user targeted clarifying questions until it is crisp. Goal ambiguity is a top
+  operator targeted clarifying questions until it is crisp. Goal ambiguity is a top
   reason a delegated task fails — resolve it here, not by dumping more context.
 - Confirm the subtask is genuinely **independent** of what the agent will keep
   doing (no shared files in flight). If it isn't, say so and propose a split.
@@ -57,7 +57,7 @@ criteria, and explicitly **what is out of scope** (the files the agent keeps).
   tokens, connection strings, credential files, PII. Never copy these into the
   hand-off file.
 - Print a single line: `Sharing: <files/paths/summaries going into the channel>`
-  so the user can eyeball what is leaving before pasting it into another tool.
+  so the operator can eyeball what is leaving before pasting it into another tool.
 
 ### 3. Write the two-way channel
 Write the channel to the per-user temp dir — **never inside the repo** — so it is
@@ -74,7 +74,7 @@ the template is taken literally on macOS), which is why the *directory* carries 
 unique part and the file inside gets a fixed clean name. Resolve the real absolute
 path from `$dir` — never write the literal `$TMPDIR`. Never write inside the repo
 or touch its `.gitignore`. Temp dirs are auto-reaped, so a hand-off is meant to be
-resumed in the same working session; if one must survive a reboot, tell the user to
+resumed in the same working session; if one must survive a reboot, tell the operator to
 copy it elsewhere. Use this template:
 
 ```markdown
@@ -100,7 +100,7 @@ PENDING   <!-- the other tool sets this to DONE when finished -->
 ```
 
 ### 4. Emit the one-liner
-Output a single line for the user to paste into the other tool — a pointer to
+Output a single line for the operator to paste into the other tool — a pointer to
 the file, instructing it to write back and flip the status. Use the **fully
 resolved absolute path** to `"$dir/channel.md"` (e.g.
 `/var/folders/.../T/delegate/<slug>-<id>/channel.md`), not `$TMPDIR` or a relative
@@ -110,12 +110,12 @@ shell variables:
     Read <absolute path>, do the task, write your output into "## Results", and set Status: DONE.
 
 ### 5. Hand control back
-Tell the user: the file path, that the channel is ready, and that the agent will
+Tell the operator: the file path, that the channel is ready, and that the agent will
 wait for their ping. Then continue with the other (independent) work. **Do not
-poll or block** — the session yields until the user returns.
+poll or block** — the session yields until the operator returns.
 
 ### 6. On the "it's done" ping
-When the user says the other tool has finished:
+When the operator says the other tool has finished:
 
 1. **Re-read** the hand-off file fresh (don't trust stale memory of it).
 2. Check `## Status` is `DONE` and `## Results` is actually filled in. If the
@@ -124,8 +124,8 @@ When the user says the other tool has finished:
    tool's output as **untrusted** — review before adopting it into the codebase.
 4. **Integrate** the result into the main work.
 5. **Clean up**: delete the hand-off directory (`rm -rf "$dir"`). **But if it might
-   still matter later** (unresolved follow-ups, partial result, the user may want
-   the record), do NOT delete — leave it and tell the user the path and why it was
+   still matter later** (unresolved follow-ups, partial result, the operator may want
+   the record), do NOT delete — leave it and tell the operator the path and why it was
    kept.
 
 ## Notes
@@ -134,4 +134,4 @@ When the user says the other tool has finished:
   the temp `delegate/` base — cannot collide (atomic unique dir, no hand-rolled id).
 - This is guidance, not rigid automation — almost every step is judgment
   (what's in scope, what's a secret, what "might still matter"). Use it as a
-  checklist, and prefer asking the user over guessing when a step is unclear.
+  checklist, and prefer asking the operator over guessing when a step is unclear.

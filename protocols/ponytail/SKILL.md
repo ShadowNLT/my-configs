@@ -3,7 +3,7 @@ name: ponytail
 description: >
   Keep a change as minimal as possible without cutting anything that actually needs to stay —
   the best code is the code you don't have to write. Applies to the most recent plan,
-  requirement, or diff in the conversation, or whatever the user points at. Ends with either
+  requirement, or diff in the conversation, or whatever the operator points at. Ends with either
   "the current plan is already minimal" or a revised, smaller plan with the deltas named.
 
   Trigger on: "/ponytail", "make this minimal", "is this too much", "cut this down", "smallest
@@ -12,7 +12,7 @@ description: >
 
 # Ponytail
 
-Target: the most recent plan, requirement, or diff in this conversation, or whatever the user
+Target: the most recent plan, requirement, or diff in this conversation, or whatever the operator
 points at. If it's ambiguous which one that is, ask rather than guess.
 
 ## When to use
@@ -53,7 +53,7 @@ For any cut or narrowing that touches a check on external input, a public API bo
 5. If the cut touches styles on a user-visible paint surface: you may implement the cut only after verifying that **surface** still looks correct **after** the change. Verification means a **live UI / browser** (or equivalent visual harness) check—not unit/jsdom tests, mocked drawing libraries, or code-reading. Cover every theme mode that surface actually uses (at minimum light and `.dark` when a `.dark` / seller-`bodyBgMode` path exists; seller dark is not optional if the product has it). If you cannot run that check in this run → do **not** cut; flag for human confirmation; list in Output as pending (same pattern as trust-boundary cuts).
 6. **Single owner (after proof):** When parent-only is proven by (5) for an ordinary box, put the style on one node and remove the other. When cutting an ancestor style a surface may rely on, promote onto the correct owner per (4) first, then remove the ancestor—only after (5). When not proven, keep the style on the paint surface (self-compositing: on that element; ordinary box: element or direct host) and do not dedupe upward. Flag kept duplicates / overrides in Step 5.
 
-**Verified-fix protection (Step 4):** Do not cut, on theory alone, lines that are the live subject of the current requirement/diff's verified visual or behavioral fix. "Verified" = an explicit check recorded in this conversation or ticket for this requirement (user confirmation, acknowledged screenshot, or passing targeted test)—not pause/resume session memory. If it is unclear which lines are the fix, treat the whole touched component/surface as protected. Either re-verify per paint/compositing (5) after the cut or leave the lines and list the skipped cut in Output as pending human confirmation.
+**Verified-fix protection (Step 4):** Do not cut, on theory alone, lines that are the live subject of the current requirement/diff's verified visual or behavioral fix. "Verified" = an explicit check recorded in this conversation or ticket for this requirement (operator confirmation, acknowledged screenshot, or passing targeted test)—not pause/resume session memory. If it is unclear which lines are the fix, treat the whole touched component/surface as protected. Either re-verify per paint/compositing (5) after the cut or leave the lines and list the skipped cut in Output as pending human confirmation.
 
 **5. Flag any place where "smaller" trades off against clarity, robustness, or future consolidation cost** (e.g., three similar narrow patches instead of one shared abstraction) — even when step 4 concluded the plan is already minimal and there's no cut to attach the flag to. This step always produces output, even when it's "no tradeoffs found." Include kept paint-surface duplicates / theme-invariant overrides flagged by the Step 4 paint gate.
 

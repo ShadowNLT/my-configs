@@ -27,9 +27,9 @@ procedure. Do not drop a step because it feels redundant with another.
 
 Infer from the target; state which you picked.
 
-- **Write** — the user is adding or changing tests, or implementing a feature that needs tests.
+- **Write** — the operator is adding or changing tests, or implementing a feature that needs tests.
   Produce the tests (or the test plan plus tests) that pass the decision order.
-- **Review** — the user points at existing tests or a PR. Do not rewrite until asked. Report
+- **Review** — the operator points at existing tests or a PR. Do not rewrite until asked. Report
   violations using the output format below.
 - **Strategy** — “is this tested enough,” E2E-only, coverage targets, pyramid vs hourglass.
   Apply §How much is enough and §Suite shape. Do not invent a coverage number.
@@ -37,7 +37,7 @@ Infer from the target; state which you picked.
 If the target is production-only and the change is a testability smell (new `static` mutable,
 singleton, `new` in application logic, work in a constructor, god context), run **Write** or
 **Review** on the missing tests *and* name the production seam that is blocking Small tests.
-Do not drive-by refactor production unless the user asked to implement.
+Do not drive-by refactor production unless the operator asked to implement.
 
 ## What a test is for
 
@@ -131,7 +131,7 @@ not skip the rest, and the suite documents which scenarios exist.
 ### 3. Can this be a smaller test without losing the bug it is meant to catch?
 
 Prefer Small. Use Medium when two units must actually talk (contracts, wiring, serialization).
-Use Large only for a **Critical User Journey** that smaller tests cannot see: a critical user
+Use Large only for a **Critical User Journey** that smaller tests cannot see: a critical app-user
 goal plus the path of tasks to achieve it.
 
 Do not automate the manual script through the UI if the same behavior is available on an API
@@ -145,14 +145,14 @@ Suite shape: many Small, some Medium, few Large. The failure mode is an **hourgl
 unit, lots of E2E, no middle). Fix the hourglass with hermetic local stacks and real seams, not
 with RPC hooks inside an E2E test.
 
-E2E-first fails in practice even when it sounds user-focused: overnight loops, partner/lab
+E2E-first fails in practice even when it sounds app-user-focused: overnight loops, partner/lab
 outages, big bugs hiding small ones, flakes, day-long diagnosis, week-late milestones.
 Developers waiting until tomorrow to know if a fix worked is a process smell caused by too
 many Large tests.
 
 Good Large tests: few, journey-sized, hermetic, independent, last step clear on failure.
 
-UI tests follow the user, not the widget tree. Stable debug IDs, not CSS soup.
+UI tests follow the app user, not the widget tree. Stable debug IDs, not CSS soup.
 
 **Hermetic servers:** bring the stack up on localhost with flags pointing at local siblings,
 not production. Isolation of the environment beats “it works on my machine.”
@@ -218,7 +218,7 @@ server).
 
 Tests are not tested. Simplicity beats DRY.
 
-**DAMP** (Descriptive and Meaningful Phrases) over DRY. Inline the users, the register calls,
+**DAMP** (Descriptive and Meaningful Phrases) over DRY. Inline the app users, the register calls,
 and the asserts. Do not hide them in `setUp` + `_RegisterAllUsers` + a for-loop. Shared helpers
 are fine for *noise* (BankSettings unused by this case), not for the values the assertion cares
 about.
@@ -263,9 +263,9 @@ Do not `sleep` to wait for async work. Wait on a condition or inject a clock / v
 
 Time, randomness, locale, timezone, network, and shared filesystems are inputs. Inject them.
 
-Isolate state: no leftover users, no shared temp files, no order dependence. Builder-create
-data inside the test. If the app requires login, do not share one user across tests without a
-lock; prefer dedicated accounts or per-test users.
+Isolate state: no leftover app users, no shared temp files, no order dependence. Builder-create
+data inside the test. If the app requires login, do not share one app user across tests without a
+lock; prefer dedicated accounts or per-test app users.
 
 Do not rely on flaky third-party services in Small/Medium tests.
 
@@ -281,7 +281,7 @@ fixing isolation.
 
 ### 9. Is the production code even testable this way?
 
-If you needed a forest of mocks, fix the code (when the user asked to implement) or report the
+If you needed a forest of mocks, fix the code (when the operator asked to implement) or report the
 seam (in Review).
 
 - **Functional core, imperative shell:** pure logic with no I/O; the shell does DB, email,
@@ -329,7 +329,7 @@ There is no single number. Rubric:
 3. Do not skip Medium / integration. They have fewer dependencies than E2E, so they are faster
    and less flaky, and they catch what unit tests miss.
 4. Large tests for Critical User Journeys, not for every feature combination.
-5. Know coverage of *code* and of *functionality* (user-facing). Use coverage to see gaps.
+5. Know coverage of *code* and of *functionality* (app-user-facing). Use coverage to see gaps.
 6. Feed production bugs back into the suite.
 7. Pair Small tests (fast regression) with a *small* amount of Large tests (closest to the
    customer). Neither diet alone is enough. System tests are like carbohydrates: required, in

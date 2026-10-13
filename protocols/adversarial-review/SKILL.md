@@ -1,8 +1,8 @@
 ---
 name: adversarial-review
 description: >
-  Rigorous adversarial review of any artifact. Two modes, chosen from what the user points at:
-  DOCUMENT mode (the user names a file on disk) hardens it — works on an in-memory copy,
+  Rigorous adversarial review of any artifact. Two modes, chosen from what the operator points at:
+  DOCUMENT mode (the operator names a file on disk) hardens it — works on an in-memory copy,
   proposes surgical fixes, verifies them, and writes to disk only after sign-off, keeping a
   review log. REASONING mode (a plan/decision from the conversation) critiques it and
   returns a ranked verdict — no files touched. Both share one engine: assemble context-inferred
@@ -20,7 +20,7 @@ description: >
 Version: 6 — 2026-08-26 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 
 You are running an autonomous adversarial review. Find every gap, ambiguity, contradiction, or
-missing rule that is meaningful given the user's stated context; try hard to *kill* each
+missing rule that is meaningful given the operator's stated context; try hard to *kill* each
 candidate finding; then (document mode) propose surgical fixes and repeat until clean or the
 round limit is hit.
 
@@ -38,48 +38,48 @@ hundred thousand subagent tokens across the loop and terminal confirmation. That
 of the one-pass guarantee — do not trim rounds or skip the terminal pass mid-run to save
 tokens; if the budget is unacceptable, stop and ask before starting. **Budget tripwire
 (mid-run):** before each spawn wave, check the cumulative agent count; crossing 2× the
-defect-dense figure (60 agents) — or a user-stated `max-agents` — is a stop-and-ask,
+defect-dense figure (60 agents) — or an operator-stated `max-agents` — is a stop-and-ask,
 never a silent trim.
 
-**Layman-terms rule (every user decision point):** whenever this review stops to put a decision
-in front of the user — the no-query prompt (§1.3), ambiguous-path and validation stops (§1),
+**Layman-terms rule (every operator decision point):** whenever this review stops to put a decision
+in front of the operator — the no-query prompt (§1.3), ambiguous-path and validation stops (§1),
 budget tripwires (cost profile / `max-agents`), the Round 2 triage stop, escalation choices
 (§6), sign-off (§8A), the ambiguous-reply re-ask (§8A), and any reasoning-mode verdict that
-puts a choice to the user (§8B) — present that decision through the **`layman-terms` skill**:
+puts a choice to the operator (§8B) — present that decision through the **`layman-terms` skill**:
 invoke it (Skill tool) on the decision presentation before showing it; if the skill is
 unavailable, apply its standard directly. The standard: plain language understandable in a
 single read, every jargon term replaced or defined inline, and **no substance dropped** — this
 is a clarity rewrite, never a summary. Structured elements keep their exact machine-parseable
 form (the §8A reply-grammar line, tables, and fix CHANGE/TO text quoted verbatim); it is the
-surrounding explanation — what happened, what each option means, what happens if the user picks
+surrounding explanation — what happened, what each option means, what happens if the operator picks
 it — that must read in layman's terms.
 
 ---
 
 ## 1. Infer Target, Mode, and Query
 
-Mode is inferred from what the user points at; there is no argument string to parse.
+Mode is inferred from what the operator points at; there is no argument string to parse.
 
 ### 1.1 Mode selection
-- **Document mode** — the user names a file or artifact on disk (a path, a doc, a diff to
+- **Document mode** — the operator names a file or artifact on disk (a path, a doc, a diff to
   harden), or asks to "patch/harden this before we use it".
-- **Reasoning mode** — the user critiques a plan/decision under discussion in the conversation,
+- **Reasoning mode** — the operator critiques a plan/decision under discussion in the conversation,
   with no file involved. The target is the most substantive plan/decision proposed (prefer the
-  most recent one the user is actually deciding on over a trivial aside). **State explicitly
+  most recent one the operator is actually deciding on over a trivial aside). **State explicitly
   which target you picked and why.**
 - **Ambiguity → stop and ask.** If a named file does not resolve to a readable file (typo,
   wrong cwd, moved file), do **not** silently fall back to reasoning mode — stop and ask whether
-  the user meant a file (and which) or a conversational target.
+  the operator meant a file (and which) or a conversational target.
 
 ### 1.2 Parameters
-Defaults are shown; the user may state preferences conversationally, and those override the
+Defaults are shown; the operator may state preferences conversationally, and those override the
 defaults. Reject invalid values rather than guessing:
 
 | Parameter | Default | Meaning |
 |---|---|---|
 | `rounds` | `6` | Max attack→fix→re-attack cycles per document (document mode; ignored, with a warning, in reasoning mode) |
 | `until` | `p2` | Threshold that defines "clean" and gates which fixes apply by default (§4) |
-| `parallel` | on | Real parallel sub-agent hats by default (§5 Round 1); forbid if the user asks for solo |
+| `parallel` | on | Real parallel sub-agent hats by default (§5 Round 1); forbid if the operator asks for solo |
 | `auto` | off | Document mode only: skip the sign-off *prompt* but still auto-apply above-threshold fixes (§8A). No-op (with a warning) in reasoning mode. |
 | `max-agents` | unset | Hard per-run agent budget; crossing it mid-run stops and asks (see cost-profile tripwire) |
 
@@ -224,14 +224,14 @@ Each hat attacks the current working copy on its own terms. Tag every finding wi
 confidence, and record **hat**, **exact location** (section/rule/step/line) **with the verbatim
 text it turns on** — the quoted passage for a claim about what the target says, the missing term
 or topic for a claim about what it omits — and **concrete consequence** (the specific wrong
-outcome in the user's context).
+outcome in the operator's context).
 
 - **Parallel by default.** Unless the target is clearly trivial and reversible, run one Agent
   tool call per hat, in parallel, each given only the target text and its own hat's mandate (not
   the other hats' output) — independence is the whole point; one mind role-playing all hats
   anchors on its first idea. Spawn every sub-agent (hats, refuters, fresh-eyes) with a
   non-spawning agent type where the harness offers one, and state in each prompt that it must
-  not spawn agents or invoke fan-out skills. Forbid parallel only if the user asks.
+  not spawn agents or invoke fan-out skills. Forbid parallel only if the operator asks.
   **When in doubt, run parallel.**
 - **If the Agent tool is unavailable or a hat sub-agent fails**, degrade to a single-mind pass
   for the affected hats and **log that independence was reduced** — never silently drop a hat.
@@ -280,7 +280,7 @@ an absent topic, rule, or case?* Add anything real; don't pad.
 ### Round 3 — Fix proposals + verification (document mode only)
 For every surviving finding **at or above `until`**, author full fix text and verify it.
 Below-threshold (deferred) findings get a **one-line fix sketch only** — full text is authored
-and verified on demand at sign-off if the user opts in. (A deferred fix is never applied to the
+and verified on demand at sign-off if the operator opts in. (A deferred fix is never applied to the
 working copy, so pre-authoring its full text buys verification of text that is unused in the
 common case.) For each above-threshold fix:
 - Write the **exact** text to add/change/remove. Keep it **surgical** — change only what the
@@ -380,7 +380,7 @@ re-ask; apply nothing until the reply is unambiguous.
 
 **Applying fixes to disk:**
 1. **Re-read the file** and confirm it is unchanged since the working-copy snapshot. If it changed
-   (the user edited it meanwhile), stop and report — re-anchor against the new content or abort;
+   (the operator edited it meanwhile), stop and report — re-anchor against the new content or abort;
    never blind-write over a changed file.
 2. Apply approved fixes **in ledger order**, one Edit per fix. If an approved fix depends on an
    unapproved one, or its anchor is now absent/non-unique because of another edit, **skip it and
@@ -424,7 +424,7 @@ proposed · approved · verdict (CLEAN / ESCALATED / PARTIAL / FAILED).
   separate file); only at sign-off / auto-apply.
 - **Validate before you log** — bad input stops the run before any file or log is created.
 - **Decisions arrive in plain language** — every stop-and-ask, escalation, sign-off, and
-  user-facing verdict goes through the layman-terms rule (see intro): the user decides in one
+  operator-facing verdict goes through the layman-terms rule (see intro): the operator decides in one
   read, without decoding jargon.
 - **Be terse** — bullets over prose; a round that finds nothing gets one line, not padding.
 - **Auditable, not vibes** — name which hats fired, why, and (for drops) why not; the run should

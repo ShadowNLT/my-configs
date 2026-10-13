@@ -18,12 +18,12 @@ harness so personal and corporate profiles can both use it without coupling to a
 $CONFIG_DIR/teaching-standard/Teaching-Standard.md
 ```
 
-`CONFIG_DIR` is **user-given at seed time** — ask where the harness lives; never assume or bake a
+`CONFIG_DIR` is **operator-given at seed time** — ask where the harness lives; never assume or bake a
 machine path into this repo.
 
 ## Install
 
-Ask the user for `CONFIG_DIR` (harness config root) and `COMMANDS_DIR` before copying. Echo the
+Ask the operator for `CONFIG_DIR` (harness config root) and `COMMANDS_DIR` before copying. Echo the
 resolved paths and get confirmation, then:
 
 ```bash

@@ -19,7 +19,7 @@ Run this when the caller needs the facts the code forces: discover, build the gr
 - Does not teach, chunk, or run the use-check.
 - Does not talk to the learner.
 - Does not own session pairing, the edit walkthrough, `/learn`, or `/new-session`.
-- Does not edit the target code. Do not write this configs repo unless the user co-signs and orders the write.
+- Does not edit the target code. Do not write this configs repo unless the operator co-signs and orders the write.
 
 ## Cite and obey
 

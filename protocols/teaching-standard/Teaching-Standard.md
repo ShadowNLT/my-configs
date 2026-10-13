@@ -6,10 +6,10 @@ repo-canonical: true
 
 # The Teaching Standard
 
-The canonical doctrine for **how** any agent teaches, quizzes, presents code, or walks the user
+The canonical doctrine for **how** any agent teaches, quizzes, presents code, or walks the operator
 through a change — corporate commands, personal commands, and curriculum sessions all pull from
 **this file in the repo**. Each harness keeps an **installed copy** in its `teaching-standard`
-sidecar (see `protocols/teaching-standard/README.md` for install — path is user-given at seed
+sidecar (see `protocols/teaching-standard/README.md` for install — path is operator-given at seed
 time, never hardcoded in this repo). When repo and installed copy diverge, **this repo file wins**
 until re-installed.
 
@@ -86,7 +86,7 @@ forward build, **you** must know the full chain. No skipped links.
 Floor varies by context:
 - **0→100 / curriculum depth:** floor is ordinary-adult understanding; link vault notes for
   anything above that rather than re-teaching mastered material.
-- **JIT `/learn` depth:** floor is "already known to this user **or** not load-bearing for the
+- **JIT `/learn` depth:** floor is "already known to this operator **or** not load-bearing for the
   immediate next action" — state the boundary out loud.
 
 If the chain requires most of an unstarted Module, stop and route to `/new-session` instead of
@@ -252,12 +252,12 @@ fine **only if they plainly state what they're probing**. Composes with **no-hin
 (hints only after a miss); TS-4 governs hint *content*.
 
 ### TS-5 — The learner writes the production code
-*(Fires only where the learner edits real code — see Applicability.)* The user writes the fix /
+*(Fires only where the learner edits real code — see Applicability.)* The learner writes the fix /
 feature / production change. You may write tests, fixtures, and scaffolding — not the substantive
 logic routed through a helper. **When unsure, ask.** You write production code only on explicit
 request — `"just fix it"` / `"just build it"` counts.
 
-The **`/end-work` sandbox** is stricter: the user always writes the fix; no escape hatch.
+The **`/end-work` sandbox** is stricter: the learner always writes the fix; no escape hatch.
 
 ### TS-6 — The gate / reveal ladder
 *(Work-session comprehension gates.)*
@@ -358,7 +358,7 @@ only. Say so in one line when they flip on.
 ## Install (not in any knowledge vault)
 
 This standard lives in the **harness config sidecar**, not inside a work/knowledge vault. At seed
-time the user names their harness `CONFIG_DIR`; the installed copy goes to
+time the operator names their harness `CONFIG_DIR`; the installed copy goes to
 `$CONFIG_DIR/teaching-standard/Teaching-Standard.md`. See `protocols/teaching-standard/README.md`.
 
 Teaching commands reference the **installed sidecar path** at runtime (via harness seed variables)

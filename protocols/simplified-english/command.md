@@ -33,7 +33,7 @@ part is empty, use the most recent prose in the conversation (ask if ambiguous).
 
 | Mode | When | Output |
 |------|------|--------|
-| **Pragmatic** | Default. Also when the user named STE / ASD-STE100 / Simplified Technical English **without** a Strict cue | Rewrite only |
+| **Pragmatic** | Default. Also when the operator named STE / ASD-STE100 / Simplified Technical English **without** a Strict cue | Rewrite only |
 | **Strict** | Clear Strict cues only: `strict mode`, `STE strict`, `simplified-english strict`, `mode=strict`, `--strict`, `/simplified-english strict`, `STE compliance`, `ASD-STE100 compliance`, `dictionary-compliant STE`, `official STE compliance`, `certify as STE`, `certify as ASD-STE100`. Bare `compliance`, bare `dictionary`, or bare `official STE` alone do **not** count | Rewrite + mandatory footer below |
 
 Invalid `mode=` → reject and ask; do not coerce. STE brand alone never escalates to Strict.
@@ -80,7 +80,7 @@ this audience.
 ### Out of theater
 
 - Match register within STE constraints — do not aerospace-costume casual chat.
-- Do not strip personality from creative writing unless the user asked for a technical rewrite.
+- Do not strip personality from creative writing unless the operator asked for a technical rewrite.
 - Do not apply STE rules inside code, data tables, or diagrams.
 
 ## Contract
@@ -111,7 +111,7 @@ Ambiguous words: <word; word> | (none)
 dual meaning in the rewrite first. Cap at 8; otherwise `(none)`. Do not invent
 ASD disallow-lists.
 
-Optional annotated pass (user must ask; separate from Strict): prefix violating
+Optional annotated pass (the operator must ask; separate from Strict): prefix violating
 sentences with `[Wn|Sn|Tn]` before rewriting that sentence.
 
 ## Worked micro-example
@@ -119,14 +119,14 @@ sentences with `[Wn|Sn|Tn]` before rewriting that sentence.
 **Source**
 
 > In order to ensure that the deployment is successful, the configuration should
-> be verified by the operator prior to initiating the rollout, and if any issues
+> be verified by the deployer prior to initiating the rollout, and if any issues
 > are identified they must be resolved accordingly.
 
 **Pragmatic rewrite**
 
-> Before the operator starts the rollout, the operator should check the
+> Before the deployer starts the rollout, the deployer should check the
 > configuration.
-> If the operator finds a problem, the operator must fix the problem.
+> If the deployer finds a problem, the deployer must fix the problem.
 
 ## Scope
 
@@ -134,14 +134,14 @@ sentences with `[Wn|Sn|Tn]` before rewriting that sentence.
 agent instructions, STE/ASD-STE100 asks.
 
 **Out:** marketing that must stay branded; creative fiction as primary genre;
-claiming ASD dictionary certification in any mode (including Strict + user PDF);
+claiming ASD dictionary certification in any mode (including Strict + the operator's PDF);
 replacing `layman-terms` for “explain to a layperson”; translation.
 
 ## vs `layman-terms`
 
 - Dual cues in one ask → **ask** which protocol (do not auto-run both).
-- Both only after the user confirms both **and** which audience wins for domain
-  nouns. Default order then: `layman-terms` first, then this protocol. User order
+- Both only after the operator confirms both **and** which audience wins for domain
+  nouns. Default order then: `layman-terms` first, then this protocol. The operator's order
   overrides.
 - Bare spoken “simplified English” (no Technical/STE/ASD, not the hyphenated id)
   → **ask** — do not silently send to `layman-terms`.

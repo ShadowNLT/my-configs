@@ -14,6 +14,7 @@
 // Phases B–D and the graph half of the adversary are code-discovery-machine.
 // This sketch calls that process. It does not copy those rules.
 // targetCode is the code the concept is about. Every code-discovery-machine call takes it.
+// currentPinnedCommit is the commit the caller pinned for this run of the target code.
 // This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
 // The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
 // (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
@@ -623,13 +624,21 @@ function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
     // Agents failed to converge: present the conflict.
     return the saved record
 
-function runTeachConcept(conceptName, maxStuckRevisits)
+function runTeachConcept(conceptName, maxStuckRevisits, seedGraph, seedCommit)
+    // seedGraph: optional earlier discovery graph. seedCommit: the commit that graph was built at.
+    // Use the seed only when both were passed and seedCommit equals currentPinnedCommit.
+    // In every other case, ignore the seed and run plain full mode (full, with no saved graph).
+    // The seed does not mark any chunk as passed and does not skip re-teaching.
+    // Teaching still runs in full. Step G0 resume is unchanged.
     if maxStuckRevisits = null
         maxStuckRevisits ← 1
     concept ← Discovery.nameConcept(conceptName)
     // A2. No code-scope freeze. The budget stays inside code-discovery-machine.
-    // Full, with no saved graph. There is no existing graph on this call.
-    record ← callCodeDiscoveryMachine(concept, targetCode, "full", null)
+    pinned ← currentPinnedCommit
+    if seedGraph ≠ null and seedCommit ≠ null and seedCommit ≠ "" and pinned ≠ null and pinned ≠ "" and seedCommit = pinned
+        record ← callCodeDiscoveryMachine(concept, targetCode, "full", seed=seedGraph)
+    else
+        record ← callCodeDiscoveryMachine(concept, targetCode, "full", null)
     if record.result = "escalated"
         showPauseLine(record, null, null)
         // Present the record and do not teach.
@@ -647,6 +656,7 @@ function runTeachConcept(conceptName, maxStuckRevisits)
         error "second hunt still found a hole; escalate; do not teach"
     stuckRevisits ← {picture: 0, solution: 0}   // on resume: the saved stuck_revisits instead (G0, H7)
     lessonLog ← blank list
+    // The seed is not a passed-chunk list. Entry is "fresh". passedIds stays blank. Not Step G0.
     result ← Teaching.teach(curriculum, null, lessonLog, "fresh", proofBacklog)
     if result = "stuck"
         curriculum, stuckRevisits ← Teaching.stuckRevisit(curriculum, /* region */, maxStuckRevisits, stuckRevisits, "picture", proofBacklog)

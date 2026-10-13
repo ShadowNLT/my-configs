@@ -14,7 +14,7 @@ description: >
   Trigger on: "/app-breaker", "app breaker", "break this", "how could this break", "what breaks
   this", "find the failure modes", "how does this fail", "try to break the app", "stress the
   running app", or any pipe like "<thing> | app-breaker".
-argument-hint: [the diff/artifact to break, or leave blank to infer from context] [--prove] [--live] [--diff]
+argument-hint: [the diff/artifact to break, or leave blank to infer from context] [--prove] [--live] [--diff] [--user[=role]]
 ---
 
 # App Breaker
@@ -35,6 +35,34 @@ app user and a bad network, not a reviewer being polite**.
 
 Confirm that `/agent-browser-testing` and `/step-by-step` exist.
 
+## --user[=role]
+
+### Default
+
+Without `--user`, app-breaker tries to break the app regardless, same as today.
+
+### With --user
+
+With `--user` or `--user=<role>`, it still runs the full break as usual and does not limit
+anything. It also focuses on workflows app users are allowed to use, from the perspective of a
+legitimate human app user.
+
+### Role
+
+With plain `--user`, it first checks whether the prompt the command was called with already
+gives the role. If it does not, or there is any doubt, it asks the operator. Do this before the
+hunt.
+
+### Account
+
+When `--user` is used, the agent can take the app user's account details from the operator.
+The operator logs in with the app user's test account, or gives the details so the agent can
+log in. When it switches to another app user, clear the site's data first.
+
+### Account details
+
+Account details are never written into the repo, screenshots or logs, and passwords are blurred.
+
 ## 1. Parse arguments and infer the context
 
 `$ARGUMENTS` is a free-form string: `["<target>"] [flags]`. The target may be empty.
@@ -46,6 +74,8 @@ Confirm that `/agent-browser-testing` and `/step-by-step` exist.
 - `--diff` — force DIFF context (a code change is the target). To force any of the other
   families, name it in the target (e.g. "treat this as config"); only LIVE and DIFF get flags
   because they're the two most easily confused.
+- `--user[=role]` — optional. See `--user[=role]`. Off by default: without `--user`, break the
+  app regardless, same as today.
 
 **Target resolution:** if a target is given, break that. If empty, infer it from the
 conversation, newest signal first. If it is genuinely ambiguous which of two artifacts is the
@@ -241,11 +271,16 @@ would triage it as. Never inflate to look thorough; never soften a real P1.
 
 The report shows each finding's result right next to its evidence.
 
+List all findings. Findings that come from a real app user's journey get a category of their
+own, **App user journey**. Highlight that category specifically when `--user` is used.
+
 Lead with a one-line context call (§1) and a one-line verdict (e.g. "3 real breaks, 1 of them
-P1: the empty-cart checkout"). Then the ranked list, most severe first:
+P1: the empty-cart checkout"). When `--user` is used, the verdict names the **App user journey**
+category. Then list all findings, most severe first:
 
 ```
 ### P1 — <short name of the break>
+**Category:** App user journey
 **Breaks:** <what goes wrong>
 **Trigger:** <the concrete condition; file:line or the exact app user action>
 **Proof:** <proven, unproven, browser unavailable, or operator-reported> — <evidence>
@@ -253,8 +288,15 @@ P1: the empty-cart checkout"). Then the ranked list, most severe first:
 ```
 
 Rules for the output:
-- Order strictly by severity. If there are zero findings above P4, say so plainly and list the
-  P4s (or state there are none) — an honest empty result beats a padded one.
+- Order strictly by severity. When `--user` is used, order by severity inside the highlighted
+  **App user journey** group and inside the other findings. If there are zero findings above P4,
+  say so plainly and list the P4s (or state there are none) — an honest empty result beats a
+  padded one.
+- List all findings. Add `**Category:** App user journey` only when the finding comes from a real
+  app user's journey. When `--user` is used, highlight that category specifically: group those
+  findings under a heading `### App user journey` first, ordered by severity, then list every
+  other finding ordered by severity. When `--user` is not used, keep every finding in the one
+  severity-ranked list.
 - One finding per real break. Merge duplicates.
 - If the artifact was too big to cover fully, say what you focused on and what you left out.
   Silent partial coverage reads as "all clear" when it isn't.

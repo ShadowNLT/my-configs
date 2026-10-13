@@ -26,7 +26,7 @@ rule below after a command install.
 
 **App user** is an account inside the software under test; add its role where known, e.g. 'app user (admin)'.
 
-In `app-breaker --user`, the operator logs in with the app user's test account.
+In `app-breaker --user`, the operator logs in with the app user's test account, or gives the details so the agent can log in.
 
 `system-atlas` is the sole exception to this terminology rule because it is copied from `inkboard/system-atlas`.
 

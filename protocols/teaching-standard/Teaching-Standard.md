@@ -252,12 +252,12 @@ fine **only if they plainly state what they're probing**. Composes with **no-hin
 (hints only after a miss); TS-4 governs hint *content*.
 
 ### TS-5 — The learner writes the production code
-*(Fires only where the learner edits real code — see Applicability.)* The operator writes the fix /
+*(Fires only where the learner edits real code — see Applicability.)* The learner writes the fix /
 feature / production change. You may write tests, fixtures, and scaffolding — not the substantive
 logic routed through a helper. **When unsure, ask.** You write production code only on explicit
 request — `"just fix it"` / `"just build it"` counts.
 
-The **`/end-work` sandbox** is stricter: the operator always writes the fix; no escape hatch.
+The **`/end-work` sandbox** is stricter: the learner always writes the fix; no escape hatch.
 
 ### TS-6 — The gate / reveal ladder
 *(Work-session comprehension gates.)*

@@ -123,14 +123,14 @@ sentences with `[Wn|Sn|Tn]` before rewriting that sentence.
 **Source**
 
 > In order to ensure that the deployment is successful, the configuration should
-> be verified by the operator prior to initiating the rollout, and if any issues
+> be verified by the deployer prior to initiating the rollout, and if any issues
 > are identified they must be resolved accordingly.
 
 **Pragmatic rewrite**
 
-> Before the operator starts the rollout, the operator should check the
+> Before the deployer starts the rollout, the deployer should check the
 > configuration.
-> If the operator finds a problem, the operator must fix the problem.
+> If the deployer finds a problem, the deployer must fix the problem.
 
 ## Scope
 

@@ -109,7 +109,7 @@ Benefit = bugs it would catch. Delete or refuse:
 - Calling `main()` (or the whole app) with no meaningful asserts.
 - `except: pass` / catching all exceptions so the test cannot fail.
 - Change-detectors: a mechanical copy of the production call graph (mock A, mock B, verify A
-  then B) with no check of app-user-visible behavior.
+  then B) with no check of user-visible behavior.
 - Tests that have been broken and ignored (broken-window).
 - Tests that only assert that three slow helpers were called in order, with no insight into
   results.

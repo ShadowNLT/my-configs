@@ -28,6 +28,8 @@ rule below after a command install.
 
 In `app-breaker --user`, the operator logs in with the app user's test account.
 
+`system-atlas` is the sole exception to this terminology rule because it is copied from `inkboard/system-atlas`.
+
 When the operator asks to install a protocol globally, **ask where each harness
 lives before copying anything.** Do not assume a product name maps to one
 directory (work vs personal Cursor, a renamed config dir, etc.). For every

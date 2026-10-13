@@ -111,7 +111,7 @@ If `novel_count == budget` OR `prior_confidence=low` → **SHOULD** prefer split
 - Prefer multi-select / A-B-C  
 - Allowed: (1) checklist of ≤5 candidate prereqs, (2) goal grain pick (definition / mechanism / compare / debug-failure), (3) optional one-sentence near-transfer self-check  
 - **Forbidden:** multi-page diagnostic, timed quiz, 1–10 ratings, placement exams  
-- The operator ignores the probe → **novice-default + pre-train beat 1**; do not re-ask; `prior_source: default_novice`  
+- Operator ignores probe → **novice-default + pre-train beat 1**; do not re-ask; `prior_source: default_novice`  
 - **MUST NOT** ship visuals in the same turn as a probe; **MUST NOT** probe after render  
 - Gate may still split after answers
 
@@ -154,7 +154,7 @@ Assumes: A, B, C · Teaching: D · Exit: able to…
 Chat after serve:  
 `If any of [A,B,C] is new to you, say so — I’ll split/pre-train instead of redrawing pretty.`
 
-The operator's correction → re-gate (may split and then show graph). Internal agent always builds full graph for QA.
+Operator correction → re-gate (may split and then show graph). Internal agent always builds full graph for QA.
 
 ---
 
@@ -185,7 +185,7 @@ Classify ask → at most **one** seed per series; none → general only; multi-h
 - Beats: **3–7** (typical **5**); UI chrome is not a beat. One teaching move each.  
 - Ladder (guidance): name parts → vanilla → twist(s) → boundary/failure → worked application (subgoal-labeled) → retrieval/fade.  
 - **Default motion: OFF.** Continuous animation off.  
-- Motion **MUST** only when manner-of-change over time is the learning goal and steps would falsify it; record `motion_justification`. If motion: schematic, operator-pausable, `prefers-reduced-motion` → stepped fallback; never quiz while moving.  
+- Motion **MUST** only when manner-of-change over time is the learning goal and steps would falsify it; record `motion_justification`. If motion: schematic, user-pausable, `prefers-reduced-motion` → stepped fallback; never quiz while moving.  
 - Interaction v1: step / reveal / predict-then-reveal / optional zoom on shown structure.  
 - **MUST NOT:** talking-head lecture, unguided high-interactivity sandbox as first exposure, meme chrome, uncued multi-panel dashboards.  
 - Exit: one `You should now be able to: …` + one retrieval that cannot be answered from last-frame labels. The retrieval MUST be a closed world (hardened §16). Optional local reveal-answer toggle. **no** backend grader, SRS, XP, mastery loops, or multi-item quizzes.
@@ -318,7 +318,7 @@ Do not ship on “looks educational,” click-through, or self-praise.
 
 ---
 
-## 15. Amendment: beat atomicity (N feedback, 2026-09-04)
+## 15. Amendment: beat atomicity (operator feedback, 2026-09-04)
 
 **Gap found in simulation:** a single beat did `b := a[:2]` and immediately `b[0] = …` without a beat that shows **what `b` sees** after the reslice. Multiple mechanism steps were fused; the viewer never watched the intermediate state.
 
@@ -368,7 +368,7 @@ Not: `name parts → (op₁+mutate+moral) → (op₂+realloc+moral) → quiz`.
 
 ---
 
-## 16. Amendment: retrieval closed world (N feedback, 2026-09-04)
+## 16. Amendment: retrieval closed world (operator feedback, 2026-09-04)
 
 **Gap:** a retrieval stem asked about `cap(a)>1` without stating the initial `a`. The question was not answerable from the prompt. The same stem fused two mutations. Beat atomicity already forbids that in teaching beats. The quiz had no check.
 

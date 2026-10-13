@@ -65,9 +65,9 @@ word 'synergy' three times") — replacing the word there would misstate what th
    trailing footer — a reader shouldn't have to hunt to match a flag back to its claim. This
    inline tag is the only permitted addition beyond the rewrite itself.
 
-If the user explicitly asks for more explanatory context than the source provides, that
+If the operator explicitly asks for more explanatory context than the source provides, that
 instruction overrides Rule 1's default for this request — the default is source-fidelity, not a
-ceiling the user can't lift.
+ceiling the operator can't lift.
 
 ## Self-check before returning
 

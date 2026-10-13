@@ -16,7 +16,7 @@ This process does not teach and does not talk to the learner. code-concept-curri
 
 ## Install
 
-Ask the user for `CONFIG_DIR` (harness config root), `COMMANDS_DIR` (flat slash-command directory), and `SKILLS_DIR` only if they also want the skill form. Echo the resolved paths and get confirmation before copying. Never assume a harness home path.
+Ask the operator for `CONFIG_DIR` (harness config root), `COMMANDS_DIR` (flat slash-command directory), and `SKILLS_DIR` only if they also want the skill form. Echo the resolved paths and get confirmation before copying. Never assume a harness home path.
 
 **Command** — copy the command file, and sidecar the two process twins (README optional):
 

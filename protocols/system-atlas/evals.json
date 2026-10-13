@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "We're redesigning how our app ingests calendar events from several providers and feeds, normalizes them, and serves them to the planner and a hardware display. I want to talk this through with you visually before we touch code — can you make me an atlas of the current pipeline (the calendar packages, the provider adapters, the device API route) with the open questions we'd need to settle for the redesign?",
-      "expected_output": "docs/calendar-pipeline/atlas/{data.mjs,template.html,build.mjs}, built atlas.html + SYSTEM.md, README.md, published artifact; chapters reveal progressively; every structure labelled with a role shape; questions with Q-IDs; a short chat summary with the artifact link and the 3-5 questions only the user can answer.",
+      "expected_output": "docs/calendar-pipeline/atlas/{data.mjs,template.html,build.mjs}, built atlas.html + SYSTEM.md, README.md, published artifact; chapters reveal progressively; every structure labelled with a role shape; questions with Q-IDs; a short chat summary with the artifact link and the 3-5 questions only the operator can answer.",
       "files": []
     },
     {

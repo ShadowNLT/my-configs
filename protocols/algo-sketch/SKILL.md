@@ -18,12 +18,12 @@ code-shaped enough for functions, modules, and composition.
 
 ## Target
 
-Infer the target from the conversation: the algorithm, design, or code the user
+Infer the target from the conversation: the algorithm, design, or code the operator
 wants sketched. Prefer the most recent substantive algorithm / design / code
 explanation. If it is ambiguous which that is, or none is present, ask what to
 present — do not invent a domain.
 
-If the user pastes real code, **translate** into Algo Sketch (behavior +
+If the operator pastes real code, **translate** into Algo Sketch (behavior +
 structure), do not line-preserve syntax. Strip language tokens per the dialect
 hard-reject rules below.
 
@@ -50,7 +50,7 @@ named.
 
 ### Iteration mode
 
-When the user says the format feels off (too code-like, too prose, seams
+When the operator says the format feels off (too code-like, too prose, seams
 unclear): adjust **one** dial per turn and re-emit — do not silently rewrite
 the whole dialect.
 
@@ -77,7 +77,7 @@ reintroduces language tokens.
 **Always** wrap the entire artifact in a single markdown fenced code block with
 info string `text` (not a language that triggers syntax highlighting as JS/Python/
 etc.). One fence for the whole sketch — do not fence each piece separately.
-No prose before or after the fence unless the user asked for commentary or
+No prose before or after the fence unless the operator asked for commentary or
 iteration notes.
 
 ```text
@@ -95,7 +95,7 @@ iteration notes.
 
 Optional footer only when asked: glossary of records in appearance order
 (never as a required preamble) — still **inside** the same fence, or a second
-fenced block only if the user asked for a separate glossary.
+fenced block only if the operator asked for a separate glossary.
 
 **Why the fence is mandatory:** bare chat markdown treats `#` as a heading and
 may flatten leading spaces, so the dialect stops reading as Algorithm-101.
@@ -172,7 +172,7 @@ Field write `x.field ← value` **mutates** that field on the same record value.
 
 - Modules: `PascalCase` or a single clear noun (`Checkout`, `Math`, `Users`)
 - Functions / fields: `camelCase` (default) — do not mix styles in one artifact
-- Prefer real domain names over `foo` / `bar` / `tmp` unless the user is
+- Prefer real domain names over `foo` / `bar` / `tmp` unless the operator is
   illustrating syntax itself
 
 ### Records and invariants
@@ -361,7 +361,7 @@ opts in, Algo Sketch is the mechanism/solution delivery form (vocab nodes stay
 first-principles prose; no language snippets until that command’s post-gate
 edit phase).
 
-**Out of scope** (unless the user expands): compilable code generation;
+**Out of scope** (unless the operator expands): compilable code generation;
 language-idiomatic translations; formal verification; UML / diagram rendering
 (point at `concept-viz` when animation helps more).
 
@@ -373,7 +373,7 @@ language-idiomatic translations; formal verification; UML / diagram rendering
   rendering, not production code.
 - Path **pointers** OK; no **production-language** code fences or language tokens
   (real JS/TS/Python/etc. snippets stay forbidden).
-- Do not ask the user to “install” anything — the invoking command already
+- Do not ask the operator to “install” anything — the invoking command already
   pointed here; just produce the artifact.
 - P6 layman-terms (if the parent runs it) must not rewrite this dialect.
 

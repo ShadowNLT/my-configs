@@ -13,7 +13,7 @@ description: >
 
 # Code Pi
 
-Target: the change the user is about to make — a function, endpoint, schema field, or config key
+Target: the change the operator is about to make — a function, endpoint, schema field, or config key
 someone is about to modify — inferred from the conversation. If it's ambiguous which change that
 is, ask rather than guess.
 
@@ -41,7 +41,7 @@ Before implementing a change, especially one touching a shared module, an API, a
 - Deploy-independence and rollback-safety — can this deploy without lockstep with a caller, and can it be reverted once live, especially if it's already written data in a new format, or if long-tailed clients (older app versions, external integrators) will keep calling the old contract regardless of how fast the server rolls back.
 - Tests that encode assumptions about the old behavior — also note call sites with *no* test coverage at all, since that's a blast-radius fact in its own right.
 - For a schema-field surface specifically: compatibility with data already persisted under the old schema (nullable-to-required, type narrowing) — this can't be caught by caller/shape analysis alone, since it's a fact about existing data, not about any consumer's code.
-- Security: does any caller rely on the changed surface having already enforced a permission/authz check (cross-reference the upstream trace above); does a validation/sanitization assumption shift (a field validated upstream becomes unvalidated, or vice versa); does traced data reach a new sink (a log, an external call) that could expose something sensitive; does a hop cross a privilege boundary (e.g., a user-authenticated path into an admin-only path) — list these first in Open Risks, ahead of routine findings.
+- Security: does any caller rely on the changed surface having already enforced a permission/authz check (cross-reference the upstream trace above); does a validation/sanitization assumption shift (a field validated upstream becomes unvalidated, or vice versa); does traced data reach a new sink (a log, an external call) that could expose something sensitive; does a hop cross a privilege boundary (e.g., an app-user-authenticated path into an admin-only path) — list these first in Open Risks, ahead of routine findings.
 - Multi-tenancy: can shared logic leak or merge data across tenants (e.g., a cache key missing a tenant qualifier) — a distinct failure mode from generic authz.
 
 Consciously out of scope, not silently omitted: dependency licensing/compliance implications (relevant only when the change itself swaps or upgrades a dependency) and locale/i18n breakage beyond what step 2's "shape returned" check already surfaces for format changes.

@@ -19,7 +19,7 @@ description: >
 # Adversarial Review
 
 You are running an autonomous adversarial review. Find every gap, ambiguity, contradiction, or
-missing rule that is meaningful given the user's stated context; try hard to *kill* each
+missing rule that is meaningful given the operator's stated context; try hard to *kill* each
 candidate finding; then (document mode) propose surgical fixes and repeat until clean or the
 round limit is hit.
 
@@ -37,20 +37,20 @@ hundred thousand subagent tokens across the loop and terminal confirmation. That
 of the one-pass guarantee — do not trim rounds or skip the terminal pass mid-run to save
 tokens; if the budget is unacceptable, stop and ask before starting. **Budget tripwire
 (mid-run):** before each spawn wave, check the cumulative agent count; crossing 2× the
-defect-dense figure (60 agents) — or a user-supplied `--max-agents N` — is a stop-and-ask,
+defect-dense figure (60 agents) — or an operator-supplied `--max-agents N` — is a stop-and-ask,
 never a silent trim.
 
-**Layman-terms rule (every user decision point):** whenever this review stops to put a decision
-in front of the user — the no-query prompt (§1.4), ambiguous-path and validation stops (§1),
+**Layman-terms rule (every operator decision point):** whenever this review stops to put a decision
+in front of the operator — the no-query prompt (§1.4), ambiguous-path and validation stops (§1),
 budget tripwires (cost profile / `--max-agents`), the Round 2 triage stop, escalation choices
 (§6), sign-off (§8A), the ambiguous-reply re-ask (§8A), and any reasoning-mode verdict that
-puts a choice to the user (§8B) — present that decision through the **`layman-terms` skill**:
+puts a choice to the operator (§8B) — present that decision through the **`layman-terms` skill**:
 invoke it (Skill tool) on the decision presentation before showing it; if the skill is
 unavailable, apply its standard directly. The standard: plain language understandable in a
 single read, every jargon term replaced or defined inline, and **no substance dropped** — this
 is a clarity rewrite, never a summary. Structured elements keep their exact machine-parseable
 form (the §8A reply-grammar line, tables, and fix CHANGE/TO text quoted verbatim); it is the
-surrounding explanation — what happened, what each option means, what happens if the user picks
+surrounding explanation — what happened, what each option means, what happens if the operator picks
 it — that must read in layman's terms.
 
 ---
@@ -66,11 +66,11 @@ query is reported like a dangling query.
 - **Document mode** — one or more file paths are given, or `--doc` is passed.
 - **Reasoning mode** — no file path is given, or `--reasoning` is passed. The target is the most
   substantive plan/decision/reasoning proposed in the conversation (prefer the most recent one
-  the user is actually deciding on over a trivial aside). **State explicitly which target you
+  the operator is actually deciding on over a trivial aside). **State explicitly which target you
   picked and why.**
 - **Ambiguity → stop and ask.** If a token looks like an intended path but does not resolve to a
   readable file (typo, wrong cwd, moved file), do **not** silently fall back to reasoning mode —
-  stop and ask whether the user meant a file (and which) or a conversational target. `--doc` with
+  stop and ask whether the operator meant a file (and which) or a conversational target. `--doc` with
   no readable path is always an error, not a downgrade.
 
 ### 1.2 Input validation (before any work or logging)
@@ -227,7 +227,7 @@ Each hat attacks the current working copy on its own terms. Tag every finding wi
 confidence, and record **hat**, **exact location** (section/rule/step/line) **with the verbatim
 text it turns on** — the quoted passage for a claim about what the target says, the missing term
 or topic for a claim about what it omits — and **concrete consequence** (the specific wrong
-outcome in the user's context).
+outcome in the operator's context).
 
 - **Parallel by default.** Unless the target is clearly trivial and reversible, run one Agent
   tool call per hat, in parallel, each given only the target text and its own hat's mandate (not
@@ -283,7 +283,7 @@ an absent topic, rule, or case?* Add anything real; don't pad.
 ### Round 3 — Fix proposals + verification (document mode only)
 For every surviving finding **at or above `--until`**, author full fix text and verify it.
 Below-threshold (deferred) findings get a **one-line fix sketch only** — full text is authored
-and verified on demand at sign-off if the user opts in. (A deferred fix is never applied to the
+and verified on demand at sign-off if the operator opts in. (A deferred fix is never applied to the
 working copy, so pre-authoring its full text buys verification of text that is unused in the
 common case.) For each above-threshold fix:
 - Write the **exact** text to add/change/remove. Keep it **surgical** — change only what the
@@ -383,7 +383,7 @@ re-ask; apply nothing until the reply is unambiguous.
 
 **Applying fixes to disk:**
 1. **Re-read the file** and confirm it is unchanged since the working-copy snapshot. If it changed
-   (the user edited it meanwhile), stop and report — re-anchor against the new content or abort;
+   (the operator edited it meanwhile), stop and report — re-anchor against the new content or abort;
    never blind-write over a changed file.
 2. Apply approved fixes **in ledger order**, one Edit per fix. If an approved fix depends on an
    unapproved one, or its anchor is now absent/non-unique because of another edit, **skip it and
@@ -427,7 +427,7 @@ proposed · approved · verdict (CLEAN / ESCALATED / PARTIAL / FAILED).
   separate file); only at sign-off / auto-apply.
 - **Validate before you log** — bad input stops the run before any file or log is created.
 - **Decisions arrive in plain language** — every stop-and-ask, escalation, sign-off, and
-  user-facing verdict goes through the layman-terms rule (see intro): the user decides in one
+  operator-facing verdict goes through the layman-terms rule (see intro): the operator decides in one
   read, without decoding jargon.
 - **Be terse** — bullets over prose; a round that finds nothing gets one line, not padding.
 - **Auditable, not vibes** — name which hats fired, why, and (for drops) why not; the run should

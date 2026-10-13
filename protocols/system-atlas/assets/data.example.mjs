@@ -55,7 +55,7 @@ export const NODES = [
 // Flows for the final "whole system" chapter. Hop = [from, to, label, payload, bend('xy'|'yx')]
 export const FLOWS = [
   { id: 'turn', name: 'One turn', hops: [
-    ['U', 'I', 'user message', { message: 'can you move my 3pm?' }, 'yx'],
+    ['U', 'I', 'operator message', { message: 'can you move my 3pm?' }, 'yx'],
     ['I', 'M', 'recall', { query: 'move my 3pm', k: 12 }, 'xy'],
     ['M', 'I', 'memories', { hits: 2 }, 'xy'],
     ['I', 'U', 'message.appended', { delta: 'Sure —' }, 'yx'],
@@ -68,11 +68,11 @@ export const CH = [
   { id: 'you', title: 'You and the agent', reveal: ['U', 'I'],
     lede: `Strip everything away and this is the system: you type, it answers.`,
     story: `<p>Two or three sentences. <mark>Highlight</mark> the one idea this chapter adds.</p>`,
-    flow: [['U', 'I', 'user message', { message: '…' }], ['I', 'U', 'reply', { delta: '…' }]] },
+    flow: [['U', 'I', 'operator message', { message: '…' }], ['I', 'U', 'reply', { delta: '…' }]] },
   { id: 'know', title: 'Knowing you', reveal: ['M'],
     lede: `Before answering, the agent recalls what it knows about you.`,
     story: `<p>…</p>`,
-    flow: [['U', 'I', 'user message', { message: '…' }], ['I', 'M', 'recall', { k: 12 }], ['M', 'I', 'memories', { hits: 2 }], ['I', 'U', 'reply', { delta: '…' }]] },
+    flow: [['U', 'I', 'operator message', { message: '…' }], ['I', 'M', 'recall', { k: 12 }], ['M', 'I', 'memories', { hits: 2 }], ['I', 'U', 'reply', { delta: '…' }]] },
   { id: 'later', title: 'Later', reveal: ['P'],
     lede: `Designed for, not switched on.`, story: `<p>…</p>`,
     flow: [['P', 'I', 'scheduled turn', { kind: 'morning_brief' }]] },

@@ -8,7 +8,7 @@
 
 ## 1. Purpose
 
-Every pass delivery is **HTML served locally from a tmp tree**. The server **must not run forever**. User or command can stop it; session teardown and TTL reap orphans. No LAN bind, no orphan listeners, no fixed-port collisions.
+Every pass delivery is **HTML served locally from a tmp tree**. The server **must not run forever**. The operator or a command can stop it; session teardown and TTL reap orphans. No LAN bind, no orphan listeners, no fixed-port collisions.
 
 ---
 
@@ -124,7 +124,7 @@ concept-viz-stop <run_id>
 concept-viz-stop all
 ```
 
-User may also say **“stop viz”** in chat; agent MUST map that to this script (all active runs, or the last run_id if unambiguous).
+The operator may also say **“stop viz”** in chat; agent MUST map that to this script (all active runs, or the last run_id if unambiguous).
 
 ### Stop algorithm
 
@@ -210,11 +210,11 @@ Reaped N stale concept-viz run(s).
 
 ---
 
-## 14. Cleanup when user done
+## 14. Cleanup when the operator is done
 
 Triggers (any one):
 
-1. User runs `concept-viz-stop` / says “stop viz”  
+1. The operator runs `concept-viz-stop` / says “stop viz”  
 2. TTL expires (self-exit + cleanup)  
 3. Session/agent teardown hook if available → stop all  
 4. Next serve reaps dead/expired  
@@ -237,11 +237,11 @@ Agent shell one-liners are acceptable only if they honor every row of this contr
 
 ## Amendment (N, 2026-09-03): artifact lifetime vs server TTL
 
-**Locked intent:** The served artifact is a **self-contained single-file HTML** (CSS/JS/SVG inlined). Once the browser has loaded the page, the **open tab keeps working** without needing the server — until the user **refreshes** (or opens a new tab to the URL).
+**Locked intent:** The served artifact is a **self-contained single-file HTML** (CSS/JS/SVG inlined). Once the browser has loaded the page, the **open tab keeps working** without needing the server — until the operator **refreshes** (or opens a new tab to the URL).
 
 Implications:
 - Prefer **stop-on-command** + orphan reap over aggressive mid-view kills.
 - Hard TTL is a **backstop for abandoned servers**, not “page expires in 30 minutes while you read.”
-- After `concept-viz-stop`, tell the user: current tab still works; **refresh will fail** unless they saved the HTML.
+- After `concept-viz-stop`, tell the operator: current tab still works; **refresh will fail** unless they saved the HTML.
 - Offer optional “Save / download HTML” so refresh isn’t needed after stop.
 - Bind remains `127.0.0.1` only — local web serve, **not** public internet.

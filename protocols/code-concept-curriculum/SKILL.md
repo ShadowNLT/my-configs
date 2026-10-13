@@ -14,7 +14,7 @@ description: >-
 
 Target: the code concept, or the code the concept lives in, inferred from the conversation. **State which you picked.** Ambiguity → ask. Do not guess the concept. Do not guess facts.
 
-Run this when the user wants one named code concept taught as a knowledge-graph curriculum: discover the facts the code forces, build the graph, converge, then teach by unlock.
+Run this when the operator wants one named code concept taught as a knowledge-graph curriculum: discover the facts the code forces, build the graph, converge, then teach by unlock.
 
 ## Hard non-goals
 
@@ -23,7 +23,7 @@ Run this when the user wants one named code concept taught as a knowledge-graph 
 - Not `/learn` (mid-work JIT unblock against a vault).
 - Not `/explain-first-principles` (that form may cite paths). Teaching prose here names no code file.
 - Do not invent a learner teach UI or a fork-pick surface. Fork behavior stays in the process text: graph order by default, the learner may ask to reorder, claim headlines only, order only (pick rule X). A later wireframe may add a surface; this protocol does not.
-- Do not edit the target code. Do not write this configs repo unless the user co-signs and orders the write.
+- Do not edit the target code. Do not write this configs repo unless the operator co-signs and orders the write.
 
 ## Cite and obey
 

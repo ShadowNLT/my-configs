@@ -30,7 +30,7 @@ is theater.
 That is the price of contested selection — do not silently drop a pair or skip the hater to save
 tokens. If the budget is unacceptable, stop and ask before starting.
 
-**Layman-terms rule (every user decision point):** stop-and-ask moments (missing problem, invalid
+**Layman-terms rule (every operator decision point):** stop-and-ask moments (missing problem, invalid
 parameters, budget refusal) go through the `layman-terms` skill when available; otherwise apply
 its standard: one-read plain language, jargon defined or replaced, no substance dropped.
 
@@ -47,8 +47,8 @@ There is no argument string to parse. Infer from the conversation:
 
 | Parameter | Default | Meaning |
 |---|---|---|
-| `pairs` (N) | `3` | Number of independent pairs. Protocol default; user may state an override. |
-| problem | required | The problem / fix target. Prefer the most recent substantive problem the user is deciding on. **State which you picked.** Ambiguity → ask, don't guess. |
+| `pairs` (N) | `3` | Number of independent pairs. Protocol default; the operator may state an override. |
+| problem | required | The problem / fix target. Prefer the most recent substantive problem the operator is deciding on. **State which you picked.** Ambiguity → ask, don't guess. |
 | `rounds` (R) | `2` | Max writer↔hater revise cycles per pair after the opening draft (integer ≥ 1). |
 | `solo` | off | Forbid real parallel sub-agents; run pairs sequentially in one mind and **log reduced independence**. |
 | `lenses` | `on` | Per-pair lens SKUs from `lens-catalog.md` via `lens-cast.md`. `off` = model-roster only. |
@@ -57,9 +57,9 @@ There is no argument string to parse. Infer from the conversation:
 | `secondary_mode` | `stakeholder` | Secondary axis {5}; `full` adds Axis 6. |
 | `deck` | `full` | `full` or `core` (24-id subset). |
 
-**Who decides N:** the protocol (`3`) or an explicit user override. The orchestrator never
+**Who decides N:** the protocol (`3`) or an explicit operator override. The orchestrator never
 chooses N from vibes, stakes, or "how hard this feels." Reject invalid N, R, or lens knobs
-rather than guessing/clamping. Cap N at 5; if the user wants more, ask them to confirm the spend.
+rather than guessing/clamping. Cap N at 5; if the operator wants more, ask them to confirm the spend.
 Full lens knob table and degrade matrix: `lens-cast.md`.
 
 ---
@@ -138,7 +138,7 @@ labels, models, drafts, or SKUs.
 
 ## 4. Run each duel (pairs sealed)
 
-Run all pairs **in parallel** unless the user asked for solo. Each pair receives **only**: the
+Run all pairs **in parallel** unless the operator asked for solo. Each pair receives **only**: the
 Problem Brief, the Judge Rubric, the revise-cycle limit, its role prompts, and (when lenses on)
 its Pair Lens block from `lens-cast.md` §4 (no SKU string in the prompt). No other pair's
 output. No judge hints.
@@ -222,7 +222,7 @@ resort under solo mode or tool failure — log `judge: orchestrator-fallback`.
 
 ## 6. Present the verdict
 
-Return to the user:
+Return to the operator:
 
 ```markdown
 ## Proof Duel — Verdict
@@ -243,14 +243,14 @@ Return to the user:
 - Candidate <k>: one-line summary + total score
 ```
 
-Do **not** implement the winning proposal unless the user explicitly asks after the verdict.
+Do **not** implement the winning proposal unless the operator explicitly asks after the verdict.
 The deliverable of this skill is the judged selection, not the patch.
 
 ---
 
 ## 7. Behaviour notes
 
-- **Protocol owns N** — default 3; user override only; never mid-run invention.
+- **Protocol owns N** — default 3; operator override only; never mid-run invention.
 - **Sealed pairs** — no cross-talk, no shared discoveries, identical brief.
 - **Hater does not write the fix** — attack only.
 - **Rubric before combat** — immutable for the run.

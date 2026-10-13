@@ -31,6 +31,10 @@ app user and a bad network, not a reviewer being polite**.
 
 ---
 
+## Start check
+
+Confirm that `/agent-browser-testing` and `/step-by-step` exist.
+
 ## 1. Parse arguments and infer the context
 
 `$ARGUMENTS` is a free-form string: `["<target>"] [flags]`. The target may be empty.
@@ -172,22 +176,50 @@ Surviving the kill pass is the bar for the list. Killing a plausible-looking can
 
 Only with `--prove`. Take the top findings (every P1, then P2s until the cost of proving outweighs the value, usually
 the top three to five) and attempt to make them actually happen, strongest evidence first:
-- **LIVE:** drive the app with the tools — submit the empty form, throttle the network, feed the
-  huge input — and capture the console error / failed request / broken screen as proof.
+
+### The call
+
+app-breaker calls `/agent-browser-testing` to prove its findings in the browser.
+
+### Facts
+
+app-breaker can send its facts along. `/agent-browser-testing` still runs its own discovery
+(`/code-discovery-machine`) and cross-checks those facts against that discovery before using
+them.
+
+### Result
+
+`/agent-browser-testing` returns proven, unproven, or browser unavailable, plus the evidence,
+to app-breaker.
+
+### One call per finding
+
+Each finding goes to `/agent-browser-testing` separately.
+
+### Only browser-visible findings
+
+Findings that only show up in the API or code are not sent to the browser test. They keep the
+evidence app-breaker already has. When proving one of them, trigger it directly:
 - **DIFF / DATA / GENERIC:** exercise the code path with the triggering input (a quick script, a
   test, a REPL) and capture the actual failure.
 - **CONFIG / CONTRACT:** construct the offending config/payload and show the concrete rejection
   or misbehavior.
 
+### No browser
+
+When there is no browser, app-breaker pauses and starts `/step-by-step`. The operator runs each
+step and reports what they saw. When the walkthrough ends, control returns to app-breaker,
+which marks those findings 'operator-reported' and then finishes the full report.
+
 Respect the environment and the safety rules. Safe, reversible test actions against a
 dev/preview/local target on test data (submitting a throwaway form, throttling the network,
-feeding a large input) are the intended prove path, so do them. Stop at the line the safety rules
+feeding a large input) are the intended prove path. Browser-visible findings go through
+`/agent-browser-testing`. Stop at the line the safety rules
 draw: never do anything destructive, and never perform an action that is prohibited or requires
 the operator's permission (a real send, purchase, deletion, submission of real app user data, or any
 irreversible control in a production or shared environment) just to prove a point. When proving a
 finding would cross that line, build a safe equivalent if you can; otherwise describe the repro
-precisely and mark it **unproven**. Report each top finding as **proven** (with the evidence) or
-**unproven** (with why).
+precisely and mark it **unproven**.
 
 ## 6. Severity scale
 
@@ -205,6 +237,10 @@ would triage it as. Never inflate to look thorough; never soften a real P1.
 
 ## 7. Output
 
+### Report
+
+The report shows each finding's result right next to its evidence.
+
 Lead with a one-line context call (§1) and a one-line verdict (e.g. "3 real breaks, 1 of them
 P1: the empty-cart checkout"). Then the ranked list, most severe first:
 
@@ -212,7 +248,7 @@ P1: the empty-cart checkout"). Then the ranked list, most severe first:
 ### P1 — <short name of the break>
 **Breaks:** <what goes wrong>
 **Trigger:** <the concrete condition; file:line or the exact app user action>
-**Proof:** <only with --prove: proven + evidence, or unproven + why>
+**Proof:** <proven, unproven, browser unavailable, or operator-reported> — <evidence>
 **Fix direction:** <one line, the smallest thing that closes it — not a full patch>
 ```
 

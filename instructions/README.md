@@ -18,6 +18,7 @@ protocols/     Agent-agnostic procedures (agent decides skill vs command on inst
                teaching-standard/ is the canonical Teaching Standard (harness sidecar)
 corporate/     Work agent seed: corporate-agent.md + work slash commands
 personal/      Personal agent seed: AGENT.md (no work commands)
+vault-template/ Knowledge-vault keep-layout seed (company, Agent, Parking-Lot, Ships)
 ```
 
 ## New machine bootstrap

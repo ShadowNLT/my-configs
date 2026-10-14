@@ -112,6 +112,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 `algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
 `agent-browser-testing`,
 `verifier`,
+`ship-goal`,
 `freeze-task-ship` (called only by `ship-goal`, not a standalone command),
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
 `proof-duel`, `code-concept-curriculum`, and `code-discovery-machine` are **not** markdown-only — use the sidecar install block below. `code-concept-curriculum` depends on `code-discovery-machine`. Install both, the same way the term check needs `layman-terms`.

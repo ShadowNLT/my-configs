@@ -7,7 +7,8 @@ Work profile only. The personal profile lives in `personal/`; never seed it from
 ## What lives here
 
 - `corporate-agent.md` — work-profile global rules. Seeded to a harness as `$CONFIG_DIR/AGENT.md`.
-- `commands/` — 5 work slash commands (`apply-writing-rule`, `check-writing-rule`, `update-writing-rule`, `dream`, `explain-first-principles`). Each file is a template with variables. Every other command comes from `protocols/`; install it per `protocols/README.md`.
+- `commands/` — 4 work slash commands (`apply-writing-rule`, `check-writing-rule`, `update-writing-rule`, `explain-first-principles`). Each file is a template with variables. Every other command comes from `protocols/`; install it per `protocols/README.md`.
+- `dream/` — the `dream` vault command: `command.md`, `install.sh`, `seed_state.py`. `install.sh` takes a seeded vault path, `CONFIG_DIR` and `COMMANDS_DIR`. It stops with one reason line and writes nothing unless the vault's `.seed-state` says `status: done`; then it fills `{{KNOWLEDGE_VAULT_ROOT}}` only in the installed copy. `seed_state.py` is the same file, byte for byte, as `protocols/vault-research/seed_state.py`.
 
 ## Machine-local secrets
 
@@ -111,6 +112,8 @@ cp protocols/code-discovery-machine/command.md "$COMMANDS_DIR/code-discovery-mac
 cp protocols/code-discovery-machine/code-discovery-machine.md \
   protocols/code-discovery-machine/code-discovery-machine-algo-sketch.md \
   "$CONFIG_DIR/code-discovery-machine/"
+# dream: stops with one reason line and writes nothing unless .seed-state says done.
+corporate/dream/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
 ```
 
 Repeat once per work harness the user named. Do not keep a per-product copy of

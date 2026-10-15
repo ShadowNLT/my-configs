@@ -1,12 +1,11 @@
 ---
 name: algo-sketch
-version: 6 — 2026-09-20 (bump on every edit; a mirror whose version differs from the repo copy is stale)
+version: 7 — 2026-10-15 (bump on every edit; a mirror whose version differs from the repo copy is stale)
 description: >
   Present logic as an Algo Sketch — Algorithm-101 pseudo-code with just-in-time
   records, soft invariants, and puzzle-piece composition across functions and
   modules. Human first, still code-shaped; hard-rejects real-language syntax.
-  Infers the target from conversation when none is named. Also the Teaching
-  Standard hybrid-P5 mechanism form when start-work (and later opt-ins) invoke it.
+  Infers the target from conversation when none is named.
   Trigger on: "/algo-sketch", "algo sketch", "sketch this algorithm",
   "pseudo-code this", "present as algorithm 101", "human code this".
 ---
@@ -26,10 +25,6 @@ present — do not invent a domain.
 If the operator pastes real code, **translate** into Algo Sketch (behavior +
 structure), do not line-preserve syntax. Strip language tokens per the dialect
 hard-reject rules below.
-
-When executed **inline from a teaching command** (e.g. `start-work` hybrid P5),
-do not re-ask for a target — sketch the mechanism/solution that command already
-named.
 
 ## Process
 
@@ -355,27 +350,11 @@ order. Seam rules:
 ## Scope
 
 **In scope:** presenting algorithms, designs, and mental models; rewriting dense
-code into Algo Sketch; multi-module flows with clear seams (when 2+ groupings);
-**Teaching Standard hybrid P5** — when a teaching command (today: `start-work`)
-opts in, Algo Sketch is the mechanism/solution delivery form (vocab nodes stay
-first-principles prose; no language snippets until that command’s post-gate
-edit phase).
+code into Algo Sketch; multi-module flows with clear seams (when 2+ groupings).
 
 **Out of scope** (unless the operator expands): compilable code generation;
 language-idiomatic translations; formal verification; UML / diagram rendering
 (point at `concept-viz` when animation helps more).
-
-### Teaching mode (when executed inline from `start-work`)
-
-- Prefer mechanism sketches the learner **uses**; the parent command gates the
-  **map + learner-produced claims**, not this artifact. Keep dialect frozen.
-- Emit the sketch in the **mandatory ```text fence** (Output envelope) — that is
-  rendering, not production code.
-- Path **pointers** OK; no **production-language** code fences or language tokens
-  (real JS/TS/Python/etc. snippets stay forbidden).
-- Do not ask the operator to “install” anything — the invoking command already
-  pointed here; just produce the artifact.
-- P6 layman-terms (if the parent runs it) must not rewrite this dialect.
 
 ---
 

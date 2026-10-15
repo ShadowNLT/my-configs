@@ -82,7 +82,6 @@ the sidecar. Do not also install the skill unless the operator asked for auto-di
 | `concept-viz` | `catalog.py`, `gate.py`, `render.py`, `retrieval.py`, `runstore.py`, `LICENSE`, `catalog/`, `eval/`, `schemas/`, `scripts/`, `seeds/`, `skeletons/`, `examples/`, `docs/concept-viz-hardened.md`, `docs/concept-viz-serve-stop.md`, `docs/coverage-scorecard.md`, `SKILL.md` (skill form), `SKILL.upstream.md` (raw upstream `SKILL.md` for the updater). Do not copy repo-root `README.md`, `.gitignore`, `decisions.tsv`, `tests/`, repo-root `evals/`, or the rest of `docs/`. |
 | `layman-terms` | `denylist.txt` |
 | `write-tests` | `references.md` |
-| `teaching-standard` | `Teaching-Standard.md` (harness-local; **not** a knowledge vault path — see that folder's README) |
 | `proof-duel` | `lens-catalog.md`, `lens-cast.md`, `cast-lenses.sh` |
 | `code-concept-curriculum` | `code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md` (README optional) |
 | `code-discovery-machine` | `code-discovery-machine.md`, `code-discovery-machine-algo-sketch.md` (README optional). Install this whenever you install `code-concept-curriculum` (CCC calls it for discovery), the same way the term check needs `layman-terms`. |
@@ -154,10 +153,6 @@ cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 cp protocols/write-tests/command.md "$COMMANDS_DIR/write-tests.md"
 mkdir -p "$CONFIG_DIR/write-tests"
 cp protocols/write-tests/references.md "$CONFIG_DIR/write-tests/"
-
-# teaching-standard (every harness that teaches — corporate or personal)
-mkdir -p "$CONFIG_DIR/teaching-standard"
-cp protocols/teaching-standard/Teaching-Standard.md "$CONFIG_DIR/teaching-standard/"
 
 # proof-duel (lenses + cast script)
 cp protocols/proof-duel/command.md "$COMMANDS_DIR/proof-duel.md"

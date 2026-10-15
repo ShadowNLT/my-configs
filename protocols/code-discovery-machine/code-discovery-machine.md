@@ -88,8 +88,6 @@ Proof backlog entries from the graph pass are part of this record (E5).
 - followers: nodes that may come after this node (empty only if this node is final)
 
 A node that is neither initial nor final may have predecessors and followers. An initial node has no predecessors. A final node has no followers.
-- kind: "fact" or "solution". The caller sets "solution" on a caller-made proposal node.
-- citesFactIds: list of fact ids. Required when kind is solution. The caller sets them.
 
 ### 3.3 Knowledge graph edge
 
@@ -150,8 +148,7 @@ Inputs:
 - concept statement (the caller names it)
 - target code
 - mode: full or delta
-- delta only: existing graph; region (node ids, or a missing fact); caller-made nodes; converge on or off
-- adversary-only flag. Accept it only when mode is delta and converge is off. Any other combination is an error. Do no work.
+- delta only: existing graph; region (node ids, or a missing fact); converge on or off
 
 full, with no saved graph: run Phases B, C, D, and the graph pass.
 full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first. If that result is escalated, return it and do not merge the seed. Otherwise run Phase C. The fresh read always wins: merge only the seed node ids the fresh rediscovery does not have, keeping their edges, then Phase D and the graph pass. Do not throw them away.
@@ -162,8 +159,6 @@ Phase D over a saved graph is two independent reads of the code that graph cover
 A delta call merges into the caller's graph. It never replaces that graph. A merge keeps every caller edge the new read does not mention, and replaces only the edges the new read covers. Every edge keeps its type. An edge is added only when both of its nodes exist in the merged graph; otherwise it is dropped and recorded in the proof backlog. A stale hold-target edge on a replaced node is removed and recorded in the proof backlog. Drop an incoming prerequisite edge only when the new read explicitly disagrees with it. That happens when the new read's edges give the same pair a different kind, or when keeping the edge would create a cycle. Drop one edge per cycle, choosing the incoming edge that comes from the caller's old data. Recheck before dropping another, and record every drop. A predecessor that simply isn't listed, or an empty list, drops nothing. An edge that is dropped is recorded in the proof backlog. A caller node never loses an edge silently. A delta path that runs Phase B runs it on the region only and merges the result into the input graph. An escalated Phase B still returns that merged record.
 
 delta, converge on: run Phase B on the region only as two independent reads inside Phase D, merge the result into the existing graph (Phase C on the merged nodes), then the graph pass over the region and the existing graph. Do not discover the whole concept.
-delta, converge off, adversary-only: merge the caller-made nodes and their edges into the existing graph, run Phase C on those nodes, then run the graph pass on that list only. Do not review the rest of the record. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
-delta, converge off, with caller-made nodes, not adversary-only: merge those nodes and their edges into the existing graph, then run Phase C and the graph pass on those nodes. Do not rebuild the graph from only those nodes. Do not run Phase D. That review does not mark DC6, adversary_status, or discovery_status clear for the whole graph.
 delta, converge off, region is node ids: run Phase C on those nodes inside the existing graph, including when the region is a list of node ids. Do not keep only the region's nodes. Do not skip a node id.
 delta, converge off, region is a missing fact: run Phase B on that fact only, merge the result into the existing graph, then Phase C on the merged graph. An escalated result returns that merged record.
 

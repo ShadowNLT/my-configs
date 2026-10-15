@@ -4,7 +4,7 @@ description: >-
   run it directly, and other protocols can call it too. The goal or question
   is required. The Ship folder is optional, only when a protocol hands one
   over.
-argument-hint: [the goal or question, required. Ship folder optional, only when a protocol hands one over.]
+argument-hint: [the goal or question, required. Optional line "Ship folder: <absolute path>", only when a protocol hands one over.]
 ---
 
 # vault-research
@@ -12,30 +12,55 @@ argument-hint: [the goal or question, required. Ship folder optional, only when 
 A standalone protocol. The operator can run it directly to find something
 in the vault, and other protocols can call it too.
 
+Knowledge vault root: `{{KNOWLEDGE_VAULT_ROOT}}`
+
+`seed_state.py` is in this folder. Resolve this folder per `protocols/README.md`:
+this folder in the repo, the skill folder after a skill install, or the
+command-form sidecar `$CONFIG_DIR/vault-research/` after a command install.
+The one-time install is `install.sh` in this same folder. It stops, and
+installs nothing for that harness, when the path it is given is not a seeded
+vault.
+
 ---
 
 ## 1. Parse arguments
 
 `$ARGUMENTS` is the goal or question. The goal or question is required. The
-Ship folder is optional, and only when a protocol hands one over.
+Ship folder is optional, and only when a protocol hands one over. If
+`$ARGUMENTS` has a line `Ship folder: <absolute path>`, that line is the Ship
+folder; the rest is the goal or question.
 
 | Token | Default | Meaning |
 |---|---|---|
 | goal or question | required | What to find in the vault. |
-| Ship folder | optional | Only when a protocol hands one over. |
+| Ship folder | optional | Only when a protocol hands one over, as one line `Ship folder: <absolute path>`. |
 
 ---
 
 ## 2. Start check
 
-At the start, confirm `.seed-state` says done. If it doesn't, stop and tell
-the operator to run the seed first.
+At the start, in this order:
+
+1. If the knowledge vault root above is still the unfilled placeholder
+   (double braces), stop: "Vault research stopped: install has not run for
+   this harness."
+2. Run `python3 seed_state.py "{{KNOWLEDGE_VAULT_ROOT}}"` from this folder.
+   This is the same check install runs. If it stops, show its one reason line
+   and tell the operator to run the seed first.
+3. If a Ship folder was handed over, it must be an absolute path to a folder
+   that exists directly under `{{KNOWLEDGE_VAULT_ROOT}}/Ships/` after symlinks
+   are resolved. If not, stop with one reason line, for example "Vault
+   research stopped: Ship folder is not an absolute path." or "Vault research
+   stopped: Ship folder does not exist." or "Vault research stopped: Ship
+   folder is not in this vault's Ships/."
+
+These checks run before any file is listed or read.
 
 ---
 
 ## 3. List
 
-It lists every file in the vault, including `legacy/`. It skips every
+It lists every file under `{{KNOWLEDGE_VAULT_ROOT}}`, including `legacy/`. It skips every
 dot-folder and dot-file. On a rerun it also skips this Ship's own earlier
 `findings.md`.
 
@@ -78,8 +103,9 @@ Any file the readers disagree on counts as related.
 
 ## 9. Write
 
-With a Ship folder, it writes `Ships/<ship>/findings.md`, and a rerun
-rewrites the whole file. Without a Ship folder, it writes nothing.
+With a Ship folder (checked in §2), it writes `<Ship folder>/findings.md`,
+which is `Ships/<ship>/findings.md` in the vault, and a rerun rewrites the
+whole file. Without a Ship folder, it writes nothing.
 
 ---
 
@@ -126,5 +152,8 @@ Not measured: on a big vault, a run could take minutes.
 
 - It writes only `findings.md` in a Ship folder it was given and never
   touches any other vault file.
+- It never hardcodes the operator or a vault path. The vault path is the
+  knowledge vault root filled in at install, and it runs only on a seeded
+  vault.
 - It never reads `.obsidian/` or any other place that can hold tokens.
 - No credentials or account details go into findings, logs or screenshots.

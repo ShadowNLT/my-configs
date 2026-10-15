@@ -111,7 +111,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 `algo-sketch`, `simplified-english`, `step-by-step`, `adversarial-review`, `app-breaker`,
 `agent-browser-testing`,
 `verifier`,
-`ship-goal`,
+`ship-goal` (needs a harness that can run background agents),
 `freeze-task-ship` (called only by `ship-goal`, not a standalone command),
 `review-goal` (the operator can run it directly, and other protocols can call it),
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.

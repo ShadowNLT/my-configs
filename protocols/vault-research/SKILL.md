@@ -142,7 +142,6 @@ Not measured: on a big vault, a run could take minutes.
 
 - start-task
 - resume-task's rerun
-- the ship-goal edit
 - memory-map
 
 ---

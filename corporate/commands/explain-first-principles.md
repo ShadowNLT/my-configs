@@ -9,7 +9,7 @@ Target: $ARGUMENTS — or, if empty, the most recent complex/technical thing dis
 
 Goal: make the target genuinely understood by someone with no prior background — not simplified to the point of being wrong, not jargon relabeled, and not longer than the actual dependency chain requires. Every new idea is built entirely out of ideas already established earlier in the explanation, or true common knowledge — never introduced by assuming familiarity.
 
-This command is the **command-form embodiment of Teaching Standard §Procedure P2+P5 (TS-1)** — see `{{TEACHING_STANDARD_PATH}}`. When the target is code, also cite it by `repo/path` (TS-2); keep the step-8 confirming question plain, never cryptic (TS-4). When run as load-bearing 0→100 (P5-mode), also satisfy the P5 completion test in that standard.
+It runs standalone: the operator runs it directly, or any protocol can call it. When the target is code, also cite it by `repo/path`. Keep the step-8 confirming question plain, never cryptic.
 
 ## Process (your reasoning steps — not a template to reproduce in the output)
 
@@ -19,14 +19,12 @@ This command is the **command-form embodiment of Teaching Standard §Procedure P
 4. **Build forward, one link at a time**, using only common knowledge or concepts already established earlier in this same response. Make the callback explicit ("Now that you know X, Y is just X but...").
 5. **Use analogies deliberately, not decoratively** — only when they clarify a real relationship, and flag where they break down.
 6. **Flag precision-critical targets.** If it's security, legal, financial, medical, or compliance-adjacent — anywhere a confidently-wrong simplification could be acted on — say so explicitly, note what's necessarily simplified or omitted, and point back to the authoritative source.
-7. **Self-check before delivering.** Re-scan once for any term used before it was defined; in P5-mode also run the Teaching Standard P5 completion test (reconcile line + every P2 node delivered in order).
+7. **Self-check before delivering.** Re-scan once for any term used before it was defined, and confirm every link of the prerequisite chain from step 2 was delivered in order.
 8. **Land it**, scaled the same way as step 3: a compact answer just ends — don't tack on a quiz question it doesn't need. A full build-up closes with "So [terminal concept] = [what was built]," plus one question the reader can answer to confirm it landed.
 
 ## Output
 
-**Standalone invocation:** deliver as natural prose (or natural code/comments, if the target is code) — the steps above are how you get there, not labels to show your work with, unless the user explicitly asks to see the breakdown.
-
-**P5-mode (load-bearing 0→100):** the delivered output must include the P3 reconcile line and the prerequisite chain visible in the forward build — not hidden scaffolding. This overrides the standalone hide-the-scaffolding default.
+Deliver as natural prose (or natural code/comments, if the target is code) — the steps above are how you get there, not labels to show your work with, unless the operator explicitly asks to see the breakdown.
 
 ## Constraints
 - No jargon without an immediate, built-from-scratch definition — including terms a domain expert would consider basic.

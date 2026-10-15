@@ -14,8 +14,7 @@ docs/          Cheat sheets (nvim-cheatsheet.md, tmux-cheatsheet.md) — source 
 local/         Machine-local config (machine.example.yaml committed; machine.yaml gitignored)
 instructions/  Shared agent instructions (all harness adapters point here)
 setup.sh       Full bootstrap script for a fresh Mac
-protocols/     Agent-agnostic procedures (agent decides skill vs command on install);
-               teaching-standard/ is the canonical Teaching Standard (harness sidecar)
+protocols/     Agent-agnostic procedures (agent decides skill vs command on install)
 corporate/     Work agent seed: corporate-agent.md + work slash commands
 personal/      Personal agent seed: AGENT.md (no work commands)
 vault-template/ Knowledge-vault keep-layout seed (company, Agent, Parking-Lot, Ships)

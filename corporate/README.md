@@ -7,7 +7,7 @@ Work profile only. The personal profile lives in `personal/`; never seed it from
 ## What lives here
 
 - `corporate-agent.md` — work-profile global rules. Seeded to a harness as `$CONFIG_DIR/AGENT.md`.
-- `commands/` — 20 work slash commands (excludes `adversarial-review`, which lives in `protocols/adversarial-review/` and is versioned separately). Each file is a template with variables.
+- `commands/` — 5 work slash commands (`apply-writing-rule`, `check-writing-rule`, `update-writing-rule`, `dream`, `explain-first-principles`). Each file is a template with variables. Every other command comes from `protocols/`; install it per `protocols/README.md`.
 
 ## Machine-local secrets
 
@@ -21,8 +21,6 @@ path if needed). Do not assume a product maps to one directory. Then substitute:
 
 - `{{KNOWLEDGE_VAULT_ROOT}}` -> the knowledge/work vault root the user named (corporate work data: sessions, curricula, Concepts/, Learning/, etc.)
 - `{{VAULT_AGENT_DIR}}` -> `$KNOWLEDGE_VAULT_ROOT/Agent`
-- `{{TEACHING_STANDARD_PATH}}` -> `$CONFIG_DIR/teaching-standard/Teaching-Standard.md`
-- `{{CODE_CONCEPT_CURRICULUM_DIR}}` -> `$CONFIG_DIR/code-concept-curriculum`
 - `{{AGENT_CONFIG_DIR}}` -> the `CONFIG_DIR` the user named for this harness
 - `{{AGENT_COMMANDS_DIR}}` -> the `COMMANDS_DIR` the user named for this harness
 - `{{AGENT_HARNESS_MEMORY}}` -> the harness memory path the user named (if any)
@@ -39,17 +37,13 @@ directory cannot hold those files.
 
 Required for corporate work harnesses:
 
-- `teaching-standard/Teaching-Standard.md` — canonical teaching doctrine (harness-local, **not** inside the knowledge vault). Substitute `{{AGENT_COMMANDS_DIR}}` at seed time.
-- `code-concept-curriculum/` — process twins for picture/code-fact discovery on work sessions (`code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md`). Also copy the protocol command to `$COMMANDS_DIR/code-concept-curriculum.md`. See `protocols/README.md`.
-- `code-discovery-machine/` — discovery process CCC calls (`code-discovery-machine.md`, `code-discovery-machine-algo-sketch.md`). Install it with CCC, the same way the term check needs layman-terms. Also copy the protocol command to `$COMMANDS_DIR/code-discovery-machine.md`.
+- `code-concept-curriculum/` — process twins for picture/code-fact discovery (`code-concept-curriculum.md`, `code-concept-curriculum-algo-sketch.md`). Also copy the protocol command to `$COMMANDS_DIR/code-concept-curriculum.md`. See `protocols/README.md`.
+- `code-discovery-machine/` — the discovery process code-concept-curriculum needs (`code-discovery-machine.md`, `code-discovery-machine-algo-sketch.md`). Install it with CCC, the same way the term check needs layman-terms. Also copy the protocol command to `$COMMANDS_DIR/code-discovery-machine.md`.
 - `layman-terms/denylist.txt`
 
 ```bash
-mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms" \
+mkdir -p "$CONFIG_DIR/layman-terms" \
   "$CONFIG_DIR/code-concept-curriculum" "$CONFIG_DIR/code-discovery-machine"
-sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
-  protocols/teaching-standard/Teaching-Standard.md \
-  > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curriculum.md"
 cp protocols/code-concept-curriculum/code-concept-curriculum.md \
@@ -88,16 +82,12 @@ src=corporate/commands
 dst="$COMMANDS_DIR"
 CONFIG_DIR="$CONFIG_DIR"   # harness config root — user-named
 KNOWLEDGE_VAULT_ROOT="$KNOWLEDGE_VAULT_ROOT"   # user-named
-TEACHING_STANDARD_PATH="$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
-CODE_CONCEPT_CURRICULUM_DIR="$CONFIG_DIR/code-concept-curriculum"
 AGENT_SOURCE_FILE="$(pwd)/corporate/corporate-agent.md"
 mkdir -p "$dst"
 for f in "$src"/*.md; do
   sed \
     "s|{{KNOWLEDGE_VAULT_ROOT}}|$KNOWLEDGE_VAULT_ROOT|g; \
      s|{{VAULT_AGENT_DIR}}|$KNOWLEDGE_VAULT_ROOT/Agent|g; \
-     s|{{TEACHING_STANDARD_PATH}}|$TEACHING_STANDARD_PATH|g; \
-     s|{{CODE_CONCEPT_CURRICULUM_DIR}}|$CODE_CONCEPT_CURRICULUM_DIR|g; \
      s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; \
      s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g; \
      s|{{AGENT_HARNESS_MEMORY}}|$AGENT_HARNESS_MEMORY|g; \
@@ -107,15 +97,11 @@ done
 sed \
   "s|{{KNOWLEDGE_VAULT_ROOT}}|$KNOWLEDGE_VAULT_ROOT|g; \
    s|{{VAULT_AGENT_DIR}}|$KNOWLEDGE_VAULT_ROOT/Agent|g; \
-   s|{{TEACHING_STANDARD_PATH}}|$TEACHING_STANDARD_PATH|g; \
    s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g; \
    s|{{AGENT_CONFIG_DIR}}|$CONFIG_DIR|g" \
   "$AGENT_SOURCE_FILE" > "$CONFIG_DIR/AGENT.md"
-mkdir -p "$CONFIG_DIR/teaching-standard" "$CONFIG_DIR/layman-terms" \
+mkdir -p "$CONFIG_DIR/layman-terms" \
   "$CONFIG_DIR/code-concept-curriculum" "$CONFIG_DIR/code-discovery-machine"
-sed "s|{{AGENT_COMMANDS_DIR}}|$COMMANDS_DIR|g" \
-  protocols/teaching-standard/Teaching-Standard.md \
-  > "$CONFIG_DIR/teaching-standard/Teaching-Standard.md"
 cp protocols/layman-terms/denylist.txt "$CONFIG_DIR/layman-terms/"
 cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curriculum.md"
 cp protocols/code-concept-curriculum/code-concept-curriculum.md \

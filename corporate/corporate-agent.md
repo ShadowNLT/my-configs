@@ -2,16 +2,12 @@
 
 These apply across every project, not just one repo.
 
-## Work session tracking
-
-Programming work in any repo under `~/Developer/` is tracked via four commands: `/start-work`, `/pause-work`, `/resume-work`, `/end-work`. They log to `~/Documents/DigitalBrain/Work/<repo-name>/` — see that folder's `00-How-Work-Tracking-Works.md` for the schema. Use these instead of ad hoc note-taking so the vault stays consistent. `/pause-work` is specifically for switching Agent sessions mid-task (e.g. approaching a context limit) without treating the work as finished; `/resume-work` picks that work back up in the fresh session.
-
 ## Two-tier memory
 
 *Reorganized 2026-07-24: Agent's own harness memory is demoted to a non-authoritative cache; durable knowledge now lives in the vault and this file.*
 
-- **The DigitalBrain vault (`~/Documents/DigitalBrain/`), this AGENT.md, and the `{{AGENT_COMMANDS_DIR}}/` files are the authoritative stores.** Repo-specific technical knowledge lives in `Agent/Patterns/<repo>/` (checked by `/start-work`, written by `/end-work` only when something genuinely durable surfaced; see `Agent/README.md`). Standing behavioral rules that fire on a specific action or context (git, PR, CI, web3, the vault) live in `Agent/Feedback.md` (read by `/start-work`). Rules that must fire on every response regardless of action live in this file: Writing style below, plus the "Scope of edits", "Consequential decisions", and "End-user reply and usable model" sections.
-- **Agent's own memory** (`~/.agent/projects/.../memory/`) — a non-authoritative cache of point-in-time observations. It stays where it is (the harness injects tracking metadata on write), but it is not a source of truth. **Trust order:** when a memory conflicts with, or simply isn't confirmed by, the live codebase, this AGENT.md, the `{{AGENT_COMMANDS_DIR}}/` files, or the vault, those win every time — **live code beats a contradictory vault note** (classify such notes as **Stale** in §Procedure P3 and queue correction at `/end-work`). Never assert a memory's claim as current fact without checking it against one of them; a memory that turns out stale or contradicted gets fixed or deleted, not worked around.
+- **The DigitalBrain vault (`~/Documents/DigitalBrain/`), this AGENT.md, and the `{{AGENT_COMMANDS_DIR}}/` files are the authoritative stores.** Repo-specific technical knowledge lives in `Agent/Patterns/<repo>/` (see `Agent/README.md`). Standing behavioral rules that fire on a specific action or context (git, PR, CI, web3, the vault) live in `Agent/Feedback.md`. Rules that must fire on every response regardless of action live in this file: Writing style below, plus the "Scope of edits", "Consequential decisions", and "End-user reply and usable model" sections.
+- **Agent's own memory** (`~/.agent/projects/.../memory/`) — a non-authoritative cache of point-in-time observations. It stays where it is (the harness injects tracking metadata on write), but it is not a source of truth. **Trust order:** when a memory conflicts with, or simply isn't confirmed by, the live codebase, this AGENT.md, the `{{AGENT_COMMANDS_DIR}}/` files, or the vault, those win every time — **live code beats a contradictory vault note** (flag such notes as stale). Never assert a memory's claim as current fact without checking it against one of them; a memory that turns out stale or contradicted gets fixed or deleted, not worked around.
 
 ## Writing style
 
@@ -49,12 +45,12 @@ In chat, compress the chain into connected prose as long as the source is still 
 
 *Good:* "In `@radix-ui/react-focus-scope`, the mount effect calls `.focus()` without reading `trapped` (`lib: …/focus-scope.tsx:…`). That can request focus on mount while `Content` is force-mounted but closed. I have not reproduced focus in the browser (`run:` missing), so I am not claiming where the ring goes. This file has no `triggerRef`; any return-focus fix needs wiring shown, not a bare `triggerRef`."
 
-Teaching moments still follow `{{TEACHING_STANDARD_PATH}}` TS-1 (derive for the learner); this rule governs whether a sentence may ship in any reply, including reviews.
+Teaching moments still derive for the learner (each step builds on what came before); this rule governs whether a sentence may ship in any reply, including reviews.
 
 **First-principles writing.** The claim-provenance rule above is the enforcement; these bullets are how to explain once a claim is allowed:
 - State the supporting fact before the conclusion. Test: if removing the fact wouldn't change whether the claim stands, the fact wasn't doing work — drop it.
 - Build ideas in order: don't reference a term before it's introduced or is common knowledge for the reader.
-- When the audience needs a plainer explanation, build one concept at a time (`/explain-first-principles` and `{{TEACHING_STANDARD_PATH}}` when available).
+- When the audience needs a plainer explanation, build one concept at a time (`/explain-first-principles` when available).
 
 **No em dashes.** Never use one, and don't substitute a spaced hyphen for the same purpose. Use commas, periods, colons, or a connecting word (and, but, since, which) instead.
 
@@ -194,7 +190,7 @@ set +a
 3. Test with `[ -z "${NAME:-}" ]` (or equivalent) and report only SET/UNSET. If the file is missing, say so once and stop; do not invent a value.
 4. A GUI-launched app does not load zsh startup files. A new chat is not a reload. If the process itself must see the var, fully quit and relaunch that app.
 
-This stays in this file, not `Agent/Feedback.md`, because home-directory and `/support` sessions never run `/start-work`.
+This stays in this file, not `Agent/Feedback.md`, because this file is loaded in every session, including home-directory and `/support` sessions.
 
 ## Git commit hygiene — hard rules, no exceptions
 
@@ -235,7 +231,7 @@ continue-turns and other agents' messages do not clear them.
 
 ## Context management
 
-Proactively flag when a conversation looks long enough that quality could start slipping (very long tool-output history, many turns, having already been auto-compacted once, or noticeably losing track of earlier detail) — don't wait for the user to notice. When that happens and there's work in progress in a repo, suggest `/pause-work` first, then a fresh session (which picks up via `/resume-work`). There's no exact token counter available here, so this is a judgment call based on proxies, not a precise measurement — say so if asked.
+Proactively flag when a conversation looks long enough that quality could start slipping (very long tool-output history, many turns, having already been auto-compacted once, or noticeably losing track of earlier detail) — don't wait for the user to notice. When that happens and there's work in progress in a repo, suggest a fresh session. There's no exact token counter available here, so this is a judgment call based on proxies, not a precise measurement — say so if asked.
 
 ## Repo boundaries
 

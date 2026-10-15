@@ -2,7 +2,7 @@
 
 Find the code-forced fact set for one concept and return one record. The procedure is the two process twins in this folder. `command.md` and `SKILL.md` only point at them.
 
-This process does not teach and does not talk to the learner. code-concept-curriculum calls it. Installing this protocol copies only its own files and must not overwrite any other protocol's folder or installed `$CONFIG_DIR/` sidecar.
+This process does not teach and does not talk to the learner. The caller, or the operator on a direct run, calls it. Installing this protocol copies only its own files and must not overwrite any other protocol's folder or installed `$CONFIG_DIR/` sidecar.
 
 ## Files
 

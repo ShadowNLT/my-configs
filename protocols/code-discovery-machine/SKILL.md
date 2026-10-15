@@ -12,7 +12,7 @@ description: >-
 
 Target: the code concept, or the code the concept lives in, inferred from the conversation. **State which you picked.** Ambiguity → ask. Do not guess the concept. Do not guess facts.
 
-Run this when the caller needs the facts the code forces: discover, build the graph, converge, and run the graph-level adversary. code-concept-curriculum calls this. Do not teach. Do not talk to the learner. An escalated result goes back to the caller.
+Run this when the caller, or the operator on a direct run, needs the facts the code forces: discover, build the graph, converge, and run the graph-level adversary. Do not teach. Do not talk to the learner. An escalated result goes back to the caller, or to the operator on a direct run.
 
 ## Hard non-goals
 

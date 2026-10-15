@@ -114,7 +114,7 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 `verifier`,
 `ship-goal`,
 `freeze-task-ship` (called only by `ship-goal`, not a standalone command),
-`review-goal` (`start-task` invokes it when the kind is code-review),
+`review-goal` (the operator can run it directly, and other protocols can call it),
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
 `proof-duel`, `code-concept-curriculum`, and `code-discovery-machine` are **not** markdown-only — use the sidecar install block below. `code-concept-curriculum` depends on `code-discovery-machine`. Install both, the same way the term check needs `layman-terms`.
 
@@ -166,7 +166,7 @@ cp protocols/proof-duel/lens-catalog.md protocols/proof-duel/lens-cast.md \
   protocols/proof-duel/cast-lenses.sh "$CONFIG_DIR/proof-duel/"
 chmod +x "$CONFIG_DIR/proof-duel/cast-lenses.sh"
 
-# code-concept-curriculum (process twins; Teaching Standard stays a separate sidecar)
+# code-concept-curriculum (process twins)
 # Also install code-discovery-machine. CCC calls it for discovery.
 cp protocols/code-concept-curriculum/command.md "$COMMANDS_DIR/code-concept-curriculum.md"
 mkdir -p "$CONFIG_DIR/code-concept-curriculum"
@@ -182,10 +182,9 @@ cp protocols/code-discovery-machine/code-discovery-machine.md \
   "$CONFIG_DIR/code-discovery-machine/"
 ```
 
-If `layman-terms` was already seeded from `corporate/commands/`
-(that copy carries `{{AGENT_*}}` variables), keep that command file and only
-copy the sidecar files from `protocols/` as above. Do not overwrite the corporate
-command with the protocol `command.md` unless you intend to drop the variables.
+If `$COMMANDS_DIR/layman-terms.md` already exists and differs from
+`protocols/layman-terms/command.md`, ask the operator before overwriting it.
+Always copy the sidecar files from `protocols/` as above.
 
 ## Vault commands
 

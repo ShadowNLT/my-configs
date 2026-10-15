@@ -1,27 +1,34 @@
 ---
 description: >-
-  Review one pull request when start-task's kind is code-review: read the
-  vault findings start-task wrote into the Ship's folder, do nothing until
-  the operator confirms, discover before teaching, teach with
-  code-concept-curriculum, run app-breaker, and reach a verdict of approve,
-  request changes, or comment with the operator. Same Ship notes as
-  ship-goal (work.md, learning.md), with a different run. The operator
-  runs it.
-argument-hint: [the review. start-task invokes this when the kind is code-review.]
+  Review one pull request: read any findings a calling protocol passes
+  in, do nothing until the operator confirms, discover before
+  teaching, teach with code-concept-curriculum, run app-breaker, and reach a
+  verdict of approve, request changes, or comment with the operator. Same
+  Ship notes as ship-goal (work.md, learning.md), with a different run. The
+  operator can run it directly, and other protocols can call it.
+argument-hint: [the pull request to review, required.]
 ---
 
 # review-goal
 
-Review: `$ARGUMENTS`. `start-task` invokes this when the kind is code-review.
+Review: `$ARGUMENTS`.
 
-The operator runs this.
+The operator can run this directly, and other protocols can call it.
 
 ---
 
 ## 1. Parse arguments
 
-`$ARGUMENTS` is the operator's review. `start-task` invokes this when the kind
-is code-review.
+`$ARGUMENTS` is the pull request to review, from the caller or the operator.
+The Ship folder and the findings are never read from `$ARGUMENTS`, and the
+operator is never asked for them. They come only in a calling protocol's
+hand-over.
+
+| Token | Default | Meaning |
+|---|---|---|
+| pull request | required | The PR to review (number or URL). If it is ambiguous, ask the operator. |
+| Ship folder | optional | Only a calling protocol passes it, in its hand-over. Never an operator input, and never asked for. Without one, the run has no Ship: §5 uses the no-Ship line. |
+| findings | optional | Only a calling protocol passes them, in its hand-over. Never an operator input. Without them, §3 is skipped. |
 
 It uses the same Ship notes (`work.md`, `learning.md`) as `ship-goal`, with a
 different run.
@@ -38,12 +45,14 @@ missing, stop and tell the operator which one.
 
 ## 3. Findings
 
-Read the vault findings that `start-task` wrote into the Ship's folder.
+If a calling protocol passed findings in, read them. Otherwise skip this
+step without saying anything.
 
 ---
 
 ## 4. Confirm
 
+The PR state check (§5) runs first, at the start and on every resume, before the operator confirms.
 Nothing is done until the operator confirms.
 
 ---
@@ -51,16 +60,20 @@ Nothing is done until the operator confirms.
 ## 5. The PR's state
 
 The agent checks the PR's state on every resume and at the start of every
-round. If the PR is closed, merged or deleted, it says "PR #<n> is <state>.
-End this Ship? (yes/no)" and no round starts. The Ship ends when the PR is
-closed, merged or deleted.
+round. If the PR is closed, merged or deleted, no round starts and the agent
+asks nothing. With a Ship folder handed over by a calling protocol, it says
+"PR #<n> is <state>." and hands control back to that caller with the PR's
+state; the caller decides what happens next. Without a Ship folder, it says
+"PR #<n> is <state>. Nothing to review." in the chat and stops.
 
 ---
 
 ## 6. Rounds
 
-Each round is one full pass in the same Ship, with full discovery. An earlier
-graph is reused only when both base and head are unchanged. The operator
+Each round is one full pass, with full discovery. With a Ship folder, every
+round runs in that same Ship, and an earlier graph is reused only when both
+base and head are unchanged. Without a Ship folder, the review still runs in
+full, and only this run's own earlier rounds are reused. The operator
 pauses between rounds and resumes when ready, and nothing watches the PR. A
 new round starts when the operator gives an instruction that either says the
 PR has updates or asks the agent to check, and the PR has in fact been
@@ -95,8 +108,10 @@ discovery. The teaching is `code-concept-curriculum` (CCC).
 
 The teaching (CCC) covers the current state, the problem, why the PR exists,
 what the solution would be, and whether the PR does that. There's one teaching
-per pass. A later pass builds on what `learning.md` records as taught and
-covers only what's new.
+per pass. With a Ship folder, a later pass builds on what `learning.md`
+records as taught and covers only what's new. Without a Ship folder, the
+teaching stays in the reply. A later pass builds only on what this run
+already taught, and `learning.md` is neither read nor written.
 
 The solution is taught before the diff.
 
@@ -132,15 +147,13 @@ The operator decides who posts the review: the agent or the operator.
 
 ## 14. Notes
 
-The Log in `work.md` gets one entry per pass (pinned commits, verdict, who
-posted), and `learning.md` gets the teaching.
+With a Ship folder, the Log in `work.md` gets one entry per pass (pinned
+commits, verdict, who posted), and `learning.md` gets the teaching.
 
 ---
 
 ## Out of scope
 
-- start-task's vault research and writing of findings
-- resume-task's rerun of the vault research
-- the ship-goal edit to read start-task's findings
+- producing the findings, and any vault check (a calling protocol that works with the vault does both and passes the findings in)
 - pause-task
 - end-task

@@ -32,7 +32,8 @@ State in one line: `goal=<one-line restatement>` then proceed.
 ## 2. Start check
 
 Confirm these protocols exist: `code-concept-curriculum` (CCC),
-`code-discovery-machine`, `freeze-task-ship` and `verifier`.
+`code-discovery-machine`, `freeze-task-ship` and `verifier`. If any is
+missing, stop and tell the operator which one.
 
 ---
 

@@ -14,7 +14,8 @@ If it is ambiguous which task that is, ask the operator.
 
 ## 1. Start check
 
-Confirm that `/code-discovery-machine` and `/step-by-step` exist.
+Confirm that `/code-discovery-machine` and `/step-by-step` exist. If any is
+missing, stop and tell the operator which one.
 
 ## 2. How it runs
 

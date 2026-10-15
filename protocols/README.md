@@ -202,6 +202,10 @@ This block is separate from the markdown-only list and the sidecar block above.
 | -------- | ---- |
 | `memory-map` | `install.sh` creates that virtual environment, installs the pinned requirements into it, and downloads the model and the English and German OCR files once, to local folders outside the repo. |
 | `vault-research` | `install.sh` runs the seed check and fills `{{KNOWLEDGE_VAULT_ROOT}}`. Standard library only: no virtual environment, no downloads. |
+| `start-task` | `install.sh` runs the seed check and fills `{{KNOWLEDGE_VAULT_ROOT}}`. Opens a Ship, runs `vault-research`, hands the Ship to `ship-goal` or `review-goal`. |
+| `pause-task` | Same install. Pauses this agent's Ship and writes the Handoff. |
+| `resume-task` | Same install. Lists in-progress and paused Ships, resumes the in-progress or paused one picked, reruns `vault-research`, continues the driver. |
+| `end-task` | Same install. Completes this agent's Ship. |
 
 ```bash
 # Ask the operator for the seeded vault path, CONFIG_DIR, and COMMANDS_DIR.
@@ -211,6 +215,10 @@ This block is separate from the markdown-only list and the sidecar block above.
 # memory-map: On macOS, hnswlib==0.8.0 builds from source and needs the Xcode command-line tools (xcode-select --install).
 protocols/memory-map/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
 protocols/vault-research/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+protocols/start-task/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+protocols/pause-task/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+protocols/resume-task/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+protocols/end-task/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
 ```
 
 Every protocol that works on the vault is seeded per harness with a seeded

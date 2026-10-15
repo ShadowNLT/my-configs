@@ -188,6 +188,34 @@ If `layman-terms` was already seeded from `corporate/commands/`
 copy the sidecar files from `protocols/` as above. Do not overwrite the corporate
 command with the protocol `command.md` unless you intend to drop the variables.
 
+## Vault commands
+
+Vault commands run against a seeded knowledge vault. Install asks for the path
+of a seeded vault, plus `CONFIG_DIR` and `COMMANDS_DIR`. If `.seed-state` in
+that vault does not say done, install stops with one reason line and writes
+nothing. If it does, install fills `{{KNOWLEDGE_VAULT_ROOT}}` and
+`{{MEMORY_MAP_PYTHON}}` only in the copy installed for that harness. The copies
+in this repo keep the placeholders. Install creates a virtual environment at
+`${XDG_DATA_HOME:-$HOME/.local/share}/memory-map/venv`, outside the repo,
+installs the pinned requirements there, and fills `{{MEMORY_MAP_PYTHON}}` with
+that environment's Python. The installed protocol runs `memory_map.py` with
+that Python. On macOS, `hnswlib==0.8.0` builds from source and needs the Xcode
+command-line tools (`xcode-select --install`).
+This block is separate from the markdown-only list and the sidecar block above.
+
+| Protocol | Line |
+| -------- | ---- |
+| `memory-map` | `install.sh` creates that virtual environment, installs the pinned requirements into it, and downloads the model and the English and German OCR files once, to local folders outside the repo. |
+
+```bash
+# Ask the operator for the seeded vault path, CONFIG_DIR, and COMMANDS_DIR.
+# Stop with one reason line unless `.seed-state` says done.
+# Fill {{KNOWLEDGE_VAULT_ROOT}} and {{MEMORY_MAP_PYTHON}} only in the installed copy.
+# The virtual environment is ${XDG_DATA_HOME:-$HOME/.local/share}/memory-map/venv.
+# On macOS, hnswlib==0.8.0 builds from source and needs the Xcode command-line tools (xcode-select --install).
+protocols/memory-map/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+```
+
 ## Writing protocols
 
 - One folder per procedure, named after what it does (no spaces), containing

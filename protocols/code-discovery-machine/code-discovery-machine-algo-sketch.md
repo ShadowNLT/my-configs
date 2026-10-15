@@ -24,8 +24,6 @@ record NamedHold
 record Node
     id             // string
     claim          // string; one logical fact
-    kind           // "fact" or "solution"; the caller sets "solution" on a proposal node
-    citesFactIds   // list of string; required when kind = "solution"
     definitions    // list of string
     synonyms       // list of string; each item marks an explicit synonym pair in words
     cases          // list of string; complete case set, or blank list if not applicable
@@ -342,7 +340,7 @@ module Graph
         return base, proofBacklog
 
     function mergeNodes(graph, nodes, proofBacklog, newReadEdges)   // → Graph, list of ProofEntry
-        // Caller-made nodes join the existing graph. Replace each node once, here. phaseCOnRegion does not replace it again.
+        // Replace each node once, here. phaseCOnRegion does not replace it again.
         // Edges stay (every type), then Phase C runs.
         if proofBacklog = null
             proofBacklog ← blank list
@@ -644,15 +642,11 @@ function run(concept, targetCode, mode, delta, maxRetries)
     // targetCode is the code the concept is about.
     if maxRetries = null
         maxRetries ← 3
-    adversaryOnly ← false
     convergeFlag ← "on"
     if delta ≠ null
-        adversaryOnly ← delta.adversaryOnly
         convergeFlag ← delta.converge
         if delta.regionNodes = null and delta.region ≠ null and not delta.regionIsMissingFact
             delta.regionNodes ← delta.region
-    if adversaryOnly and not (mode = "delta" and convergeFlag = "off")
-        error "adversary-only flag rejected; do no work"
     if mode = "full"
         // full, seeded with a saved graph whose discovery checklist is satisfied: run Phase D over that saved graph, then the graph pass over the whole graph. Do not discover the concept from scratch. If the discovery checklist is not satisfied, run Phase B on the whole concept first. If that result is escalated, return it and do not merge the seed. Otherwise run Phase C. The fresh read always wins: merge only the seed node ids the fresh rediscovery does not have, keeping their edges, then Phase D and the graph pass. Do not throw them away.
         // On a seed resume, the first read is a single discoverFacts, and convergeSaved then does the two reads.
@@ -710,8 +704,7 @@ function run(concept, targetCode, mode, delta, maxRetries)
         return curriculum
     // mode = delta. Merge into the caller's graph. Never replace it.
     // A path that runs Phase B runs it on the region only, then merges.
-    // Converge on, and a missing fact, run Phase B. Adversary-only, caller-made nodes,
-    // and a region of node ids do not: those paths are Phase C or a scoped graph pass.
+    // Converge on, and a missing fact, run Phase B.
     if delta = null or delta.existing = null
         error "delta requires the caller's graph"
     if convergeFlag = "on"
@@ -726,33 +719,6 @@ function run(concept, targetCode, mode, delta, maxRetries)
         if prior = null
             prior ← blank list
         base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, null)
-        base ← addProof(base, proof)
-        return base
-    if adversaryOnly
-        // Adversary-only. Merge the caller-made nodes into the existing graph, then review that list only.
-        base ← delta.existing
-        if delta.callerNodes = null or length(delta.callerNodes) = 0
-            error "adversary-only requires caller-made nodes; do no work"
-        proof ← base.proofEntries
-        base.graph, proof ← Graph.mergeNodes(base.graph, delta.callerNodes, proof, blank list)
-        base.proofEntries ← proof
-        prior ← base.proofEntries
-        if prior = null
-            prior ← blank list
-        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, delta.callerNodes)
-        base ← addProof(base, proof)
-        return base
-    if delta.callerNodes ≠ null
-        // Caller-made nodes, not adversary-only. Merge them into the existing graph. Phase C and the graph pass on those nodes.
-        // Do not rebuild the graph from only those nodes. Do not run Phase D.
-        base ← delta.existing
-        proof ← base.proofEntries
-        base.graph, proof ← Graph.mergeNodes(base.graph, delta.callerNodes, proof, blank list)
-        base.proofEntries ← proof
-        prior ← base.proofEntries
-        if prior = null
-            prior ← blank list
-        base, proof ← Validation.adversaryClear(base, prior, 0, maxRetries, delta.callerNodes)
         base ← addProof(base, proof)
         return base
     if delta.regionIsMissingFact

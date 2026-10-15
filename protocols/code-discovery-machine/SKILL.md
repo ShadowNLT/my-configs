@@ -18,7 +18,6 @@ Run this when the caller, or the operator on a direct run, needs the facts the c
 
 - Does not teach, chunk, or run the use-check.
 - Does not talk to the learner.
-- Does not own session pairing, the edit walkthrough, `/learn`, or `/new-session`.
 - Does not edit the target code. Do not write this configs repo unless the operator co-signs and orders the write.
 
 ## Cite and obey

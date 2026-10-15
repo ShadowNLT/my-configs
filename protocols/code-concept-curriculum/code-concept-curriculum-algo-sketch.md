@@ -6,23 +6,11 @@
 // seam map
 //   [name concept] → [code-discovery-machine full] → [chunk] → [teach]
 //   → [chunk] → [teach] → [stuck revisit or close]
-//   → (work sessions) [solution extension] → [chunk] → [teach] → [close]
 //
-// Work sessions: /start-work and /resume-work run Phases A–I for the picture,
-// then the solution extension (piece 7, Phase S) for the solution delta.
-// Gate 1 = close on the picture chunks; Gate 2 = close on the solution chunks.
 // Phases B–D and the graph half of the adversary are code-discovery-machine.
 // This sketch calls that process. It does not copy those rules.
 // targetCode is the code the concept is about. Every code-discovery-machine call takes it.
 // currentPinnedCommit is the commit the caller pinned for this run of the target code.
-// This process does not own session pairing, the edit walkthrough, /learn, or /new-session.
-// The edit walkthrough is /start-work Phase 4: per step the learner chooses who types the change
-// (learner or agent, switchable any step). An agent-typed change is replayed against the agreed
-// solution (per step: one plain sentence naming the lesson it applies + 2-3 key lines with location;
-// supporting edits as one line; full diff only on request). The replay ends the turn with
-// "Does this match what we agreed?" and waits; only after the learner's answer (yes, or corrections
-// applied and re-replayed) do tests run, then "Done" only after they pass. "just fix it" skips the
-// replay and the wait, not the tests. Replay text goes through termCheck.
 
 
 // --- piece 1: shapes ---
@@ -55,7 +43,7 @@ record Chunk
     sanityByPred   // map predChunkId → string; required key for every predChunkId
     correctivePrompt // string; UC5 — on fail, still demands use; plain hint, never the answer (G4)
     stuckAdded     // true/false; true when stuckRevisit added this chunk (H6b)
-    side           // "picture" or "solution"; a stuck-added chunk takes the side of the run that added it (H8)
+    side           // "picture" or "solution"
     headline       // string; short plain headline; the only way learner-facing text names a passed chunk (§2e)
 
 record LessonEntry   // G5b — one record per pass; work sessions append it to the note's Lessons
@@ -81,7 +69,7 @@ constant INTERNAL_WORDS ← map
     "phase"     → "stage" / what happens now
     "use-check" → "question"
     "ready set" → "what comes next"
-    <chunk or fact id, e.g. P1, S3, F2, N2b, G1> → the plain headline of what that part taught
+    <chunk or fact id, e.g. P1, F2, N2b, G1> → the plain headline of what that part taught
 // Exception: the code's own subject may use one of these words in its own meaning (e.g. a "hold" on an
 // account); it stays, defined like any term, and never names a part of this process.
 // Code words (test, loop, catch, function, request, server-side, scaffolding, ...) are NOT everyday
@@ -349,7 +337,7 @@ module Teaching
     function termCheck(text, chunk, passedIds, curriculum)   // → "ok" or blocked term   (G2f)
         // Applies to: chunk prose, use-check question, corrective prompt / hint, recap (G0),
         // a pause line after a code-discovery-machine delta or escalated result,
-        // stuck-added chunks, solution chunks. In a work session also: restated goal and the
+        // stuck-added chunks. In a work session also: restated goal and the
         // teach-first line, pre-flight and confirm lines, resume recap and plain "what's next" line,
         // the code walkthrough (each step's reason and instructions, each replay of an agent-typed
         // change, each "Done" line), the end-of-session message.
@@ -441,10 +429,9 @@ module Teaching
         return true
 
     function teach(curriculum, passedIds, lessonLog, entry, proofBacklog)   // → "complete" or "stuck"
-        // entry: "fresh" | "resume" | "solution"
+        // entry: "fresh" | "resume"
         //   fresh    — new run (passedIds blank), or the same run continuing after stuckRevisit (no recap)
         //   resume   — G0: saved passed_chunks from a pause; the discovery call, then the recap
-        //   solution — Phase S: picture passes kept in passedIds as the floor; NOT a resume, no recap (S3)
         if passedIds = null
             passedIds ← blank list
         if entry = "resume"
@@ -511,36 +498,17 @@ module Teaching
             error "stuck after revisit budget; escalate to user"
         // Stuck = missing or wrong prerequisite (H1). Never re-serve the same chunk reworded.
         // Gate G10. Stuck reopens discovery by a code-discovery-machine call.
-        if side = "solution"
-            // H8. Stays under the solution close (Gate 2); never reopens Gate 1; picture passes stay.
-            if gap is a missing code fact or not clearly a reasoning step   // incl. a bare "I don't know" (fail closed)
-                // S4. code-discovery-machine delta, region = the missing fact, converge off.
-                // Phase B on that fact only, then merge into the existing graph.
-                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=missingFact, converge="off", regionIsMissingFact=true)
-            else   // reasoning step (H2 exception): no new code fact
-                // Caller-made node: kind ← "solution", citesFactIds ← facts + ticket text (S2).
-                // code-discovery-machine delta, adversary only, converge off.
-                record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=[reasoningNode], converge="off", adversaryOnly=true)
-            proofBacklog ← addProof(proofBacklog, record)
-            showPauseLine(record, curriculum, passedIds)
-            if record.result = "escalated"
-                error "escalated; present the record to the learner; do not teach"
-            apply record onto curriculum
-            // H4. Rebuild affected chunks (Phase F).
-            curriculum ← Teaching.chunkGraph(curriculum)
-            // New chunk: stuckAdded ← true, side ← "solution"; its pass counts toward the solution close.
-        else
-            // H2 and H3 are one call: delta, region = the stuck region, converge on.
-            // That call runs over the region and the existing graph.
-            record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=stuckRegion, converge="on")
-            proofBacklog ← addProof(proofBacklog, record)
-            showPauseLine(record, curriculum, passedIds)
-            if record.result = "escalated"
-                error "escalated; present the record to the learner; do not teach"
-            apply record onto curriculum
-            // H4. Rebuild affected chunks (Phase F).
-            curriculum ← Teaching.chunkGraph(curriculum)
-            // New chunk: stuckAdded ← true, side ← "picture".
+        // H2 and H3 are one call: delta, region = the stuck region, converge on.
+        // That call runs over the region and the existing graph.
+        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=stuckRegion, converge="on")
+        proofBacklog ← addProof(proofBacklog, record)
+        showPauseLine(record, curriculum, passedIds)
+        if record.result = "escalated"
+            error "escalated; present the record to the learner; do not teach"
+        apply record onto curriculum
+        // H4. Rebuild affected chunks (Phase F).
+        curriculum ← Teaching.chunkGraph(curriculum)
+        // New chunk: stuckAdded ← true, side ← "picture".
         // The new prerequisite chunk passes termCheck like any chunk (H6b).
         // Drop passes that depended on changed chunks (H5); their re-pass is a new taughtAgain LessonEntry.
         // H6. Do not invent a bridge outside the graph.
@@ -549,39 +517,6 @@ module Teaching
         // not the prose; its wrongAfterHint count does not reset.
         stuckRevisits[side] ← stuckRevisits[side] + 1   // persisted by the caller (stuck_revisits)
         return curriculum, stuckRevisits
-
-
-// --- piece 7: solution extension (work sessions only, Phase S) ---
-
-module Solution
-    function extend(curriculum, solutionNodes, ticketText, proofBacklog)   // → Curriculum
-        // S1: runs only after the picture chunks close (Phase I)
-        // S2. Caller-made solution nodes. Gate G2 still binds every fact a solution node cites.
-        for each node in solutionNodes
-            if node.kind ≠ "solution" or node.citesFactIds = blank list
-                error "solution node must cite fact ids (S2)"
-            for each factId in node.citesFactIds
-                if factId not in curriculum facts
-                    // S4. code-discovery-machine delta, region = the missing fact, converge off.
-                    // Phase B on that fact only, then merge into the existing graph.
-                    record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, region=factId, converge="off", regionIsMissingFact=true)
-                    proofBacklog ← addProof(proofBacklog, record)
-                    showPauseLine(record, curriculum, passedIds)
-                    if record.result = "escalated"
-                        error "escalated; present the record to the learner; do not teach"
-                    apply record onto curriculum
-        // S3. code-discovery-machine delta, caller-made nodes, converge off.
-        //     Merge those nodes into the existing graph, then Phase C and the graph adversary on those nodes. No Phase D.
-        record ← callCodeDiscoveryMachine(curriculum.concept, targetCode, "delta", existing=curriculum, callerNodes=solutionNodes, converge="off")
-        proofBacklog ← addProof(proofBacklog, record)
-        showPauseLine(record, curriculum, passedIds)
-        if record.result = "escalated"
-            error "escalated; present the record to the learner; do not teach"
-        apply record onto curriculum
-        curriculum ← Teaching.chunkGraph(curriculum)
-        // Then teach. Picture passes stay the floor. Entry "solution" gives no recap (not a resume).
-        // A separate teach run: its own stuck budget (H7); stuck → Teaching.stuckRevisit(..., "solution") (H8).
-        return curriculum
 
 
 // --- piece 6: top-level run ---
@@ -616,7 +551,7 @@ function showPauseLine(record, curriculum, passedIds)
 function callCodeDiscoveryMachine(concept, targetCode, mode, delta)
     // One call. The saved record is code-discovery-machine's. This function does not restate its rules.
     // Resolve it as protocols/code-discovery-machine/, or $CONFIG_DIR/code-discovery-machine/ after a command install.
-    // mode "full" or "delta". See that process for seed, region, caller-made nodes, converge, adversary-only.
+    // mode "full" or "delta". See that process for seed, region, converge.
     // targetCode is the code the concept is about.
     // clear: the caller continues. escalated: do not teach.
     // Discovery budget spent: failing checklist rows, open questions, uncovered branches.

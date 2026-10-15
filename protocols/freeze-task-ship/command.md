@@ -35,7 +35,8 @@ State in one line: `task=<one-line restatement>` then proceed.
 ## 2. Start check
 
 Confirm that `write-tests`, `ponytail`, `converge`, `code-pi`,
-`code-discovery-machine`, and `verifier` all exist.
+`code-discovery-machine`, and `verifier` all exist. If any is missing, stop
+and tell the operator which one.
 
 ---
 

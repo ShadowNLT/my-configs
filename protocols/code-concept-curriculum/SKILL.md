@@ -16,6 +16,12 @@ Target: the code concept, or the code the concept lives in, inferred from the co
 
 Run this when the operator wants one named code concept taught as a knowledge-graph curriculum: discover the facts the code forces, build the graph, converge, then teach by unlock.
 
+## Start check
+
+At the start, confirm that `code-discovery-machine` and the `layman-terms`
+denylist (`denylist.txt`) exist. If any is missing, stop and tell the
+operator which one.
+
 ## Hard non-goals
 
 - Needs `protocols/code-discovery-machine/` installed too. Its only other outside input is the layman-terms denylist used by the term check (G2f).

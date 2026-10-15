@@ -33,7 +33,8 @@ app user and a bad network, not a reviewer being polite**.
 
 ## Start check
 
-Confirm that `/agent-browser-testing` and `/step-by-step` exist.
+Confirm that `/agent-browser-testing` and `/step-by-step` exist. If any is
+missing, stop and tell the operator which one.
 
 ## --user[=role]
 

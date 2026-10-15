@@ -11,6 +11,9 @@ description: >-
 
 # freeze-task-ship
 
+If no frozen task was handed over by `ship-goal`, stop immediately and tell
+the operator to run `ship-goal` instead.
+
 Only `ship-goal` calls this. It isn't a standalone command, because `ship-goal`
 handles the brainstorm with the operator, splits the goal into atomic vertical
 slices that each run end to end, and freezes each task with the operator.
@@ -35,7 +38,8 @@ State in one line: `task=<one-line restatement>` then proceed.
 ## 2. Start check
 
 Confirm that `write-tests`, `ponytail`, `converge`, `code-pi`,
-`code-discovery-machine`, and `verifier` all exist.
+`code-discovery-machine`, and `verifier` all exist. If any is missing, stop
+and tell the operator which one.
 
 ---
 

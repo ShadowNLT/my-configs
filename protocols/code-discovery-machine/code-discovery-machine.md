@@ -4,7 +4,7 @@ Audience: a technical operator who runs this process.
 Mode: Simplified Technical English (pragmatic). This text is not ASD dictionary-certified.
 
 This process discovers. It does not teach. It does not talk to the learner.
-code-concept-curriculum calls it and presents any escalated result.
+The caller, or the operator on a direct run, calls it. An escalated result goes back to the caller, or to the operator on a direct run.
 
 ## 0. Terms (define once)
 

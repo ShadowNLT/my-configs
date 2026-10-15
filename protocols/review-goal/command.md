@@ -3,8 +3,8 @@ description: >-
   Review one pull request: read any findings a calling protocol passes
   in, do nothing until the operator confirms, discover before
   teaching, teach with code-concept-curriculum, run app-breaker, and reach a
-  verdict of approve, request changes, or comment with the operator. Same
-  Ship notes as ship-goal (work.md, learning.md), with a different run. The
+  verdict of approve, request changes, or comment with the operator. With a
+  Ship folder it writes `work.md` and `learning.md` there. The
   operator can run it directly, and other protocols can call it.
 argument-hint: [the pull request to review, required.]
 ---
@@ -30,8 +30,7 @@ hand-over.
 | Ship folder | optional | Only a calling protocol passes it, in its hand-over. Never an operator input, and never asked for. Without one, the run has no Ship: §5 uses the no-Ship line. |
 | findings | optional | Only a calling protocol passes them, in its hand-over. Never an operator input. Without them, §3 is skipped. |
 
-It uses the same Ship notes (`work.md`, `learning.md`) as `ship-goal`, with a
-different run.
+With a Ship folder it writes `work.md` and `learning.md` there.
 
 ---
 

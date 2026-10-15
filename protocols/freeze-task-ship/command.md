@@ -26,7 +26,7 @@ slices that each run end to end, and freezes each task with the operator.
 
 | Token | Default | Meaning |
 |---|---|---|
-| task text | required | The goal sentence, the numbered true/false criteria, and the out-of-scope list. **State which you picked.** |
+| task text | required | The goal sentence, the numbered true/false criteria, the out-of-scope list, and a start commit when one is handed. **State which you picked.** |
 
 State in one line: `task=<one-line restatement>` then proceed.
 
@@ -43,8 +43,9 @@ and tell the operator which one.
 ## 3. Take in the frozen task
 
 Take in the frozen task: the goal sentence, the numbered true/false criteria,
-and the out-of-scope list. Pin the commit. If the task is unfrozen, it goes
-back to `ship-goal`.
+and the out-of-scope list. Pin the handed start commit when one is handed;
+otherwise pin the commit. If the task is unfrozen, it goes back to
+`ship-goal`.
 
 ---
 
@@ -54,7 +55,8 @@ Map each criterion to an area of code, and have `code-discovery-machine`
 collect the facts for that area. Every fact cites a file and line at the
 pinned commit, or the output of running the code. Discovery has a time budget.
 A fact that can't be settled is marked open, and it goes to the operator if
-the plan depends on it. If `main` moves, discovery runs again.
+the plan depends on it. If `main` moves, discovery runs again. When a start
+commit is handed, pin that start commit.
 
 ---
 
@@ -126,7 +128,9 @@ touches, and security holes get fixed.
 against the implementer's own account. It reports to the operator, as its
 point 13 says. Whatever it couldn't prove goes back to `ship-goal` as a new
 goal, which is the old goal minus what was proven, with a new brainstorm and
-a new freeze.
+a new freeze. It hands back to `ship-goal`: the commit it pinned in §3, the
+verifier's result for each frozen criterion, and the commit of the verified
+code.
 
 ---
 

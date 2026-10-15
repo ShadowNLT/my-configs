@@ -115,7 +115,6 @@ Every other protocol in this folder is markdown-only: copy `command.md` and stop
 `ship-goal`,
 `freeze-task-ship` (called only by `ship-goal`, not a standalone command),
 `review-goal` (`start-task` invokes it when the kind is code-review),
-`vault-research` (the operator can run it directly, and other protocols can call it),
 `code-pi`, `converge`, `delegate`, `ponytail`, and similar markdown-only protocols.
 `proof-duel`, `code-concept-curriculum`, and `code-discovery-machine` are **not** markdown-only — use the sidecar install block below. `code-concept-curriculum` depends on `code-discovery-machine`. Install both, the same way the term check needs `layman-terms`.
 
@@ -193,28 +192,36 @@ command with the protocol `command.md` unless you intend to drop the variables.
 Vault commands run against a seeded knowledge vault. Install asks for the path
 of a seeded vault, plus `CONFIG_DIR` and `COMMANDS_DIR`. If `.seed-state` in
 that vault does not say done, install stops with one reason line and writes
-nothing. If it does, install fills `{{KNOWLEDGE_VAULT_ROOT}}` and
-`{{MEMORY_MAP_PYTHON}}` only in the copy installed for that harness. The copies
-in this repo keep the placeholders. Install creates a virtual environment at
+nothing. If it does, install fills `{{KNOWLEDGE_VAULT_ROOT}}` only in the
+copy installed for that harness. The copies in this repo keep the
+placeholders. Every vault command ships the same `seed_state.py`, byte for
+byte. For memory-map, install creates a virtual environment at
 `${XDG_DATA_HOME:-$HOME/.local/share}/memory-map/venv`, outside the repo,
-installs the pinned requirements there, and fills `{{MEMORY_MAP_PYTHON}}` with
-that environment's Python. The installed protocol runs `memory_map.py` with
-that Python. On macOS, `hnswlib==0.8.0` builds from source and needs the Xcode
-command-line tools (`xcode-select --install`).
+installs the pinned requirements there, and fills `{{MEMORY_MAP_PYTHON}}`
+with that environment's Python. The installed memory-map runs
+`memory_map.py` with that Python. On macOS, memory-map's `hnswlib==0.8.0`
+builds from source and needs the Xcode command-line tools
+(`xcode-select --install`).
 This block is separate from the markdown-only list and the sidecar block above.
 
 | Protocol | Line |
 | -------- | ---- |
 | `memory-map` | `install.sh` creates that virtual environment, installs the pinned requirements into it, and downloads the model and the English and German OCR files once, to local folders outside the repo. |
+| `vault-research` | `install.sh` runs the seed check and fills `{{KNOWLEDGE_VAULT_ROOT}}`. Standard library only: no virtual environment, no downloads. |
 
 ```bash
 # Ask the operator for the seeded vault path, CONFIG_DIR, and COMMANDS_DIR.
 # Stop with one reason line unless `.seed-state` says done.
-# Fill {{KNOWLEDGE_VAULT_ROOT}} and {{MEMORY_MAP_PYTHON}} only in the installed copy.
-# The virtual environment is ${XDG_DATA_HOME:-$HOME/.local/share}/memory-map/venv.
-# On macOS, hnswlib==0.8.0 builds from source and needs the Xcode command-line tools (xcode-select --install).
+# memory-map: Fill {{KNOWLEDGE_VAULT_ROOT}} and {{MEMORY_MAP_PYTHON}} only in the installed copy.
+# memory-map: The virtual environment is ${XDG_DATA_HOME:-$HOME/.local/share}/memory-map/venv.
+# memory-map: On macOS, hnswlib==0.8.0 builds from source and needs the Xcode command-line tools (xcode-select --install).
 protocols/memory-map/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
+protocols/vault-research/install.sh "$KNOWLEDGE_VAULT_ROOT" "$CONFIG_DIR" "$COMMANDS_DIR"
 ```
+
+Every protocol that works on the vault is seeded per harness with a seeded
+vault path. If that path is not a seeded vault, seeding that protocol fails
+for that harness.
 
 ## Writing protocols
 

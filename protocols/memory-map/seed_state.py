@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Read a vault .seed-state file. Standard library only.
 
-Install runs this before the virtual environment and the pinned libraries
-exist. memory_map.py imports the same check.
+The same file ships, byte for byte, in every protocol folder that works on the
+vault (memory-map, vault-research). Install runs it before anything is written.
+The stop label comes from the folder name, so the copies never differ.
 """
 
 from __future__ import annotations
@@ -10,9 +11,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+LABEL = Path(__file__).resolve().parent.name.replace("-", " ").capitalize()
+
 
 def stop(reason: str) -> None:
-    print(f"Memory map stopped: {reason}")
+    print(f"{LABEL} stopped: {reason}")
     raise SystemExit(1)
 
 
